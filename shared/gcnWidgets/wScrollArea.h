@@ -385,7 +385,9 @@ namespace SHR {
          */
         bool mOpaque;
 
-        float fTimerV, fTimerH;
+        float fTimerV, fTimerH, fTimerD;
+        bool isScrollingTo = false;
+        bool isScrollingToNext;
     };
 }
 

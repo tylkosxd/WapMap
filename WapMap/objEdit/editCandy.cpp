@@ -10,8 +10,6 @@
 #include <SFML/Graphics.hpp>
 #include <set>
 
-extern HGE *hge;
-
 #define IMAGE_TILE_WIDTH 64
 #define IMAGE_TILE_HEIGHT 64
 #define IMAGE_TILES_PER_ROW 5
@@ -20,7 +18,7 @@ extern HGE *hge;
 #define CONTAINER_Y 25
 #define CONTAINER_WIDTH IMAGE_TILE_WIDTH * IMAGE_TILES_PER_ROW + 4
 #define CONTAINER_HEIGHT 320
-#define WINDOW_WIDTH_WITH_SCROLL CONTAINER_WIDTH + 12
+#define WINDOW_WIDTH_WITH_SCROLL CONTAINER_WIDTH + 15
 #define WINDOW_HEIGHT CONTAINER_HEIGHT + 24 + 240
 
 namespace ObjEdit {
@@ -43,27 +41,49 @@ namespace ObjEdit {
 	cEditObjCandy::cEditObjCandy(WWD::Object *obj, State::EditingWW *st) : cObjEdit(obj, st) {
         iType = ObjEdit::enCandy;
 
+        int tabWithCurrentSelection = 0, j = 0, tabItemsCount[TABS_COUNT] = {0, 0, 0};
+        const char* imageSet = obj->GetImageSet();
+        bool found = imageSet[0] == 0;
+        std::vector<cSprBankAsset*>* currentBank;
 		for (size_t i = 0; i < GV->editState->SprBank->GetAssetsCount(); i++) {
 			cSprBankAsset* imgSet = GV->editState->SprBank->GetAssetByIterator(i);
 			std::string name(imgSet->GetID());
 			if (name.starts_with("LEVEL_") && GV->vstrStandardImagesets.contains(name)) {
 				standardImgs.push_back(imgSet);
+                currentBank = &standardImgs;
+                j = TAB_STANDARD;
 			}
 			else if (name.starts_with("CUSTOM_")) {
 				customImgs.push_back(imgSet);
+                currentBank = &customImgs;
+                j = TAB_CUSTOM;
 			} else {
 				otherImgs.push_back(imgSet);
+                currentBank = &otherImgs;
+                j = TAB_OTHER;
 			}
 
-			if (name == obj->GetImageSet()) {
-                asImageSetPick = imgSet;
-                int i = obj->GetI();
-                if (i == -1) {
-					asFramePick = imgSet->GetIMGByIterator(0);
-                } else {
-                    asFramePick = imgSet->GetIMGByID(i);
+            if (!found) {
+                if (name == imageSet) {
+                    found = true;
+                    tabWithCurrentSelection = j;
+                    asImageSetPick = imgSet;
+
+                    int i = obj->GetI();
+                    if (i == -1) {
+                        asFramePick = imgSet->GetIMGByIterator(0);
+                    } else {
+                        asFramePick = imgSet->GetIMGByID(i);
+                    }
+
+                    int n = tabItemsCount[j];
+                    if (asFramePick) n += imgSet->GetIndexOf(asFramePick);
+                    tabScrollPositions[j] = (n / IMAGE_TILES_PER_ROW - 2) * IMAGE_TILE_HEIGHT;
+                    continue;
                 }
-			}
+
+                tabItemsCount[j] += GV->vstrNANIImagesets.contains(name) ? imgSet->GetSpritesCount() : 1;
+            }
 		}
 		int height = ceil(standardImgs.size() / (float)IMAGE_TILES_PER_ROW) * IMAGE_TILE_HEIGHT;
 
@@ -91,6 +111,7 @@ namespace ObjEdit {
 			int spritesCount = CountActualImagesToDisplay(CurrentlyDisplayedImgSet());
 			int height = ceil(spritesCount / (float)IMAGE_TILES_PER_ROW) * IMAGE_TILE_HEIGHT;
 			imgsCon->setDimension(gcn::Rectangle(0, 0, WINDOW_WIDTH_WITH_SCROLL, height));
+            saImgPick->setVerticalScrollAmount(tabScrollPositions[tabs->getSelectedTabIndex()]);
 			tabs->setWidth(height <= CONTAINER_HEIGHT ? CONTAINER_WIDTH : WINDOW_WIDTH_WITH_SCROLL);
 
 			const gcn::Rectangle& dimension = win->getDimension();
@@ -103,6 +124,8 @@ namespace ObjEdit {
 		tabs->addTab(GETL2S("EditObj_Candy", "Tab_Standard"));
 		tabs->addTab(GETL2S("EditObj_Candy", "Tab_Custom"));
 		tabs->addTab(GETL2S("EditObj_Candy", "Tab_Other"));
+        tabs->setSelectedTab(tabWithCurrentSelection);
+        tabs->addActionListener(hAL);
 		win->add(tabs, 0, 8);
 
 		highDetail = new SHR::CBox(GV->hGfxInterface, GETL2S("EditObj_Candy", "HighDetail"));
@@ -110,7 +133,7 @@ namespace ObjEdit {
 		highDetail->addActionListener(hAL);
 		win->add(highDetail, 8, CONTAINER_HEIGHT + 42);
 
-		labZPos = new SHR::Lab(GETL2S("EditObj_Candy", "ZCoord"));
+		labZPos = new SHR::Lab(GETL2S("Z_Coord", "Label"));
 		labZPos->adjustSize();
 		win->add(labZPos, 8, CONTAINER_HEIGHT + 67);
 
@@ -128,27 +151,27 @@ namespace ObjEdit {
 			}
 		}
 
-#define EOC_GROUP_Y CONTAINER_HEIGHT + 90
+#define EOC_GROUP_Y (CONTAINER_HEIGHT + 90)
 		std::string group = std::to_string((int)this);
-        rbType[0] = new SHR::RadBut(GV->hGfxInterface, GETL2S("EditObj_Candy", "Z_Behind"), group, z == 990);
+        rbType[0] = new SHR::RadBut(GV->hGfxInterface, GETL2S("Z_Coord", "Behind"), group, z == 990);
         rbType[0]->adjustSize();
         rbType[0]->addActionListener(hAL);
         win->add(rbType[0], 8, EOC_GROUP_Y);
 
-        rbType[1] = new SHR::RadBut(GV->hGfxInterface, GETL2S("EditObj_Candy", "Z_Front"), group, z == 5100);
+        rbType[1] = new SHR::RadBut(GV->hGfxInterface, GETL2S("Z_Coord", "Front"), group, z == 5100);
         rbType[1]->adjustSize();
         rbType[1]->addActionListener(hAL);
 		win->add(rbType[1], 8, EOC_GROUP_Y + 22);
 
 		bool customZ = z != 990 && z != 5100;
-		rbType[2] = new SHR::RadBut(GV->hGfxInterface, GETL2S("EditObj_Candy", "Z_Custom"), group, customZ);
+		rbType[2] = new SHR::RadBut(GV->hGfxInterface, GETL2S("Z_Coord", "Custom"), group, customZ);
 		rbType[2]->adjustSize();
 		rbType[2]->addActionListener(hAL);
 		win->add(rbType[2], 8, EOC_GROUP_Y + 44);
 
         zCoord = new SHR::TextField(customZ ? std::to_string(z) : "1000");
 		zCoord->SetNumerical(1);
-		zCoord->setDimension(gcn::Rectangle(0, 0, 80, 20));
+		zCoord->setDimension(gcn::Rectangle(0, 0, 50, 20));
 		zCoord->setEnabled(customZ);
 		zCoord->addActionListener(hAL);
 		win->add(zCoord, 12 + rbType[2]->getWidth(), EOC_GROUP_Y + 42);
@@ -190,8 +213,9 @@ namespace ObjEdit {
 
     void cEditObjCandy::Action(const gcn::ActionEvent &actionEvent) {
         if (actionEvent.getSource() == win) {
-            bKill = 1;
-            return;
+            bKill = true;
+		} else if (actionEvent.getSource() == tabs) {
+            tabScrollPositions[tabs->getSelectedTabIndex()] = saImgPick->getVerticalScrollAmount();
 		} else if (actionEvent.getSource() == animation) {
 			const std::string& anim = animation->getText();
 			hTempObj->SetAnim(anim.c_str());
@@ -280,6 +304,7 @@ namespace ObjEdit {
 				i_off += add;
 			}
 
+            GV->sprCheckboard->SetColor(0xFFFFFFFF);
 			do {
 				int gridX = ((i + i_off - add) % IMAGE_TILES_PER_ROW),
 					gridY = ((i + i_off - add) / IMAGE_TILES_PER_ROW);
@@ -289,11 +314,12 @@ namespace ObjEdit {
 				int it = nani ? i_off - i_off_sub - add : frame % imgSet->GetSpritesCount();
 				cSprBankAssetIMG* frame = imgSet->GetIMGByIterator(it);
 				hgeSprite *spr = frame->GetSprite();
+				if (!spr) spr = GV->sprSmiley;
 				spr->SetFlip(false, false, true);
 
 				DWORD colBorder = GV->colLineDark;
 
-				if (mx > drawX && my > drawY && mx < drawX + IMAGE_TILE_WIDTH && my < drawY + IMAGE_TILE_HEIGHT) {
+				if (mx > drawX && my > drawY && mx < drawX + IMAGE_TILE_WIDTH && my < drawY + IMAGE_TILE_HEIGHT && my > dy) {
 					if (my < dy + CONTAINER_HEIGHT) {
 						asImageSetHover = imgSet;
 						asFrameHover = nani ? frame : NULL;

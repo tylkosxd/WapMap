@@ -142,6 +142,8 @@ namespace State {
                                                              int((m_hOwn->iisPickIT) * 138 - 395 + 64))));
             m_hOwn->sliisFrame->setValue(std::max(0, std::min(int(m_hOwn->sliisFrame->getScaleEnd()),
                                                               int((m_hOwn->iisFrameIT) * 138 - 395 + 64))));
+            m_hOwn->sliisPick->adjustMarkerLength();
+            m_hOwn->sliisFrame->adjustMarkerLength();
         } else if (actionEvent.getSource() == m_hOwn->winisPick) {
             m_hOwn->window->setVisible(true);
             m_hOwn->winisPick->setVisible(false);
@@ -300,6 +302,7 @@ namespace State {
 
             dy += 7;
 
+            GV->sprCheckboard->SetColor(0xFFFFFFFF);
             for (int z = 0; z < 2; z++) {
                 int move = (z ? m_hOwn->sliisFrame->getValue() : m_hOwn->sliisPick->getValue());
                 int istart = move / 138.0f;
@@ -349,6 +352,7 @@ namespace State {
                                 int scaleend = std::max(0, m_hOwn->asImageSetPick->GetSpritesCount() * 138 - 790);
                                 m_hOwn->sliisFrame->setScale(0, scaleend);
                                 m_hOwn->sliisFrame->setEnabled(scaleend != 0);
+                                m_hOwn->sliisFrame->adjustMarkerLength();
                             }
                         }
                     }
@@ -360,7 +364,7 @@ namespace State {
                         hge->Gfx_RenderLine(x, y, x, y + 128, (bMouseOver ? 0xFFFFFF00 : 0xFF00FF00));
                         hge->Gfx_RenderLine(x + 128, y, x + 128, y + 128, (bMouseOver ? 0xFFFFFF00 : 0xFF00FF00));
                     }
-                    GV->fntMyriad16->SetColor(bMouseOver ? 0xFFFFFF00 : (condition ? 0xFF00FF00 : 0xFF000000));
+                    GV->fntMyriad16->SetColor(bMouseOver ? 0xFFFFFF00 : (condition ? 0xFF00FF00 : 0xFFFFFFFF));
                     std::string text = z ? m_hOwn->asImageSetPick->GetIMGByIterator(i)->GetName()
                                          : GV->editState->SprBank->GetAssetByIterator(i)->GetID();
                     while (GV->fntMyriad16->GetStringWidth(text.c_str()) > 135) {
@@ -707,10 +711,11 @@ namespace State {
         rbLogicStandard->addActionListener(hAL);
         rbLogicStandard->setSelected(strcmp(obj->GetLogic(), "CustomLogic") != 0);
         window->add(rbLogicStandard, xOffset + 85, yOffset);
+        bool isCustomLogic = strcmp(obj->GetLogic(), "CustomLogic") == 0;
         rbLogicCustom = new SHR::RadBut(GV->hGfxInterface, GETL2S("ObjectProperties", "LogicCustom"), "logicType");
         rbLogicCustom->adjustSize();
         rbLogicCustom->addActionListener(hAL);
-        rbLogicCustom->setSelected(strcmp(obj->GetLogic(), "CustomLogic") == 0);
+        rbLogicCustom->setSelected(isCustomLogic);
         window->add(rbLogicCustom, xOffset + 240, yOffset);
 
         yOffset += 30;
@@ -720,20 +725,17 @@ namespace State {
         labadvLogic->adjustSize();
         window->add(labadvLogic, xOffset, yOffset + 1);
 
-        tddadvLogic = new SHR::TextDropDown("", this);
+        tddadvLogic = new SHR::TextDropDown(obj->GetLogic(), this);
         tddadvLogic->setDimension(gcn::Rectangle(0, 0, 230, 20));
         tddadvLogic->SetGfx(&GV->gcnParts);
         tddadvLogic->addActionListener(hAL);
-        tddadvLogic->setText(obj->GetLogic());
         window->add(tddadvLogic, xOffset + 85, yOffset);
         tddadvLogic->setVisible(rbLogicStandard->isSelected());
 
-        tddadvCustomLogic = new SHR::TextDropDown("", GV->editState->hCustomLogics);
+        tddadvCustomLogic = new SHR::TextDropDown(isCustomLogic ? obj->GetName() : "", GV->editState->hCustomLogics);
         tddadvCustomLogic->setDimension(gcn::Rectangle(0, 0, 230, 20));
         tddadvCustomLogic->SetGfx(&GV->gcnParts);
         tddadvCustomLogic->addActionListener(hAL);
-        tddadvCustomLogic->setText(rbLogicCustom->isSelected() ? obj->GetName()
-                                                               : "");
         window->add(tddadvCustomLogic, xOffset + 85, yOffset);
         tddadvCustomLogic->setVisible(rbLogicCustom->isSelected());
 
@@ -764,11 +766,10 @@ namespace State {
         labadvImageSet->adjustSize();
         window->add(labadvImageSet, xOffset, yOffset + 2);
 
-        tddadvImageSet = new SHR::TextDropDown("", hState->SprBank);
+        tddadvImageSet = new SHR::TextDropDown(obj->GetImageSet(), hState->SprBank);
         tddadvImageSet->setDimension(gcn::Rectangle(0, 0, 260, 20));
         tddadvImageSet->SetGfx(&GV->gcnParts);
         tddadvImageSet->addActionListener(hAL);
-        tddadvImageSet->setText(obj->GetImageSet());
         window->add(tddadvImageSet, xOffset + 85, yOffset);
 
         yOffset += 25;
@@ -785,11 +786,10 @@ namespace State {
         labadvAnim->adjustSize();
         window->add(labadvAnim, xOffset, yOffset + 2);
 
-        tddadvAnim = new SHR::TextDropDown("", hState->hAniBank);
+        tddadvAnim = new SHR::TextDropDown(obj->GetAnim(), hState->hAniBank);
         tddadvAnim->setDimension(gcn::Rectangle(0, 0, 260, 20));
         tddadvAnim->SetGfx(&GV->gcnParts);
         tddadvAnim->addActionListener(hAL);
-        tddadvAnim->setText(obj->GetAnim());
         window->add(tddadvAnim, xOffset + 85, yOffset);
 
 
@@ -1404,7 +1404,7 @@ namespace State {
         sliisPick = new SHR::Slider(0, GV->editState->SprBank->GetAssetsCount() * 138 - 790);
         sliisPick->setDimension(gcn::Rectangle(0, 0, 793, 16));
         sliisPick->setOrientation(SHR::Slider::HORIZONTAL);
-        sliisPick->setMarkerLength(40);
+        sliisPick->setStepLength(138 * 2);
         winisPick->add(sliisPick, 2, 197);
 
         labisImageSet = new SHR::Lab(GETL2S("WinObjectProperties", "PickIS_ImageSet"));
@@ -1418,7 +1418,7 @@ namespace State {
         sliisFrame = new SHR::Slider(0, 100);
         sliisFrame->setDimension(gcn::Rectangle(0, 0, 793, 16));
         sliisFrame->setOrientation(SHR::Slider::HORIZONTAL);
-        sliisFrame->setMarkerLength(40);
+        sliisFrame->setStepLength(138);
         winisPick->add(sliisFrame, 2, 405);
 
         butisOK = new SHR::But(GV->hGfxInterface, GETL(Lang_OK));

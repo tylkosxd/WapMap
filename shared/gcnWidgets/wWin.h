@@ -76,6 +76,8 @@ namespace SHR {
             _getFocusHandler()->setDraggedWidget(NULL);
 		}
 
+        void move(int newX, int newY);
+
     protected:
         guiParts *hGfx;
         std::string mCaption;
@@ -91,6 +93,7 @@ namespace SHR {
         bool bClose;
         bool bDrawShadow;
         float fCloseTimer;
+        bool _isAppMaximized;
     };
 }
 

@@ -11,7 +11,7 @@ namespace ObjEdit {
 
     class cEditObjCrate : public cObjEdit {
     private:
-        SHR::RadBut *rbType[2];
+        SHR::RadBut *rbType[3];
         cInvPickbox *hInventory;
         lmEditObjStatueDurability *lmDurability;
         SHR::DropDown *ddDurability;
@@ -20,17 +20,18 @@ namespace ObjEdit {
         SHR::But *butRandomize;
         SHR::CBox *cbIncludeSpecials, *cbRandomCount;
 
-        SHR::TextField *tfWarpX, *tfWarpY;
+        SHR::TextField *tfCustomZ, *tfWarpX, *tfWarpY;
         SHR::Lab *labWarpDest;
         SHR::But *butWarpPick;
-        bool bStackable, bAlign;
+        bool bStackable;
         bool bPick;
         bool bShowWarpOptions;
         int iCratesCount;
+        int alignment;
 
         void RebuildWindow();
 
-        void SetLogic(bool bStacked, bool bf);
+        void SetLogic(bool bStacked);
 
         void ApplyInventoryToObject();
 

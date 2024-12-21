@@ -347,7 +347,8 @@ namespace SHR {
             Widget *widget = mTabContainer->getWidgetAt(mouseEvent.getX(), mouseEvent.getY());
             Tab *tab = dynamic_cast<Tab *>(widget);
 
-            if (tab != NULL) {
+            if (tab != NULL && tab != mSelectedTab) {
+                distributeActionEvent();
                 setSelectedTab(tab);
             }
         }

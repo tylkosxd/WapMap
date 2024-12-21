@@ -82,11 +82,12 @@ namespace SHR {
             }
         }
 
-        unsigned alpha = getAlpha();
+        float alpha = getAlphaModifier() * 255.0f;
+        DWORD col = SETA(0xFFFFFF, alpha);
         if (isFocused() && mKeyboardFocus) {
-            But::drawButton(hGfx, 3, x, y,getWidth(), getHeight(), SETA(0xFFFFFF, alpha));
+            But::drawButton(hGfx, 3, x, y,getWidth(), getHeight(), col);
         }
-        But::drawButton(hGfx, 2, x + 1, y + 1, getWidth() - 2, getHeight() - 2, SETA(0xFFFFFF, alpha));
+        But::drawButton(hGfx, 2, x + 1, y + 1, getWidth() - 2, getHeight() - 2, col);
 
         int lx = x + 6;
         for (int i = 0; i < vEntries.size(); i++) {
@@ -119,6 +120,7 @@ namespace SHR {
 
             if (vEntries[i].sprIcon != 0) {
                 int addOX = (i > 0 ? 1 : 0);
+                vEntries[i].sprIcon->SetColor(col);
                 vEntries[i].sprIcon->Render(lx + addOX, y + (getHeight() - vEntries[i].sprIcon->GetHeight()) / 2 - 1);
                 lx += 17 + addOX;
             } else if (i > 0) {
@@ -127,7 +129,7 @@ namespace SHR {
                 lx += 1;
             }
 
-            GV->fntMyriad16->SetColor(SETA(0xe1e1e1, isEnabled() ? 0xFF : 0x77));
+            GV->fntMyriad16->SetColor(SETA(0xe1e1e1, (isEnabled() ? 1 : 0.46) * alpha));
             GV->fntMyriad16->Render(lx, y + getHeight() / 2 - 2, HGETEXT_LEFT | HGETEXT_MIDDLE, vEntries[i].strCaption.c_str(), 0);
             lx += GV->fntMyriad16->GetStringWidth(vEntries[i].strCaption.c_str());
 

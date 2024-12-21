@@ -17,8 +17,7 @@
 #include "../../databanks/anims.h"
 #include "../../databanks/tiles.h"
 #include "../../cBrush.h"
-
-extern HGE *hge;
+#include "../../cInventoryController.h"
 
 bool State::ObjSortCoordX(WWD::Object *a, WWD::Object *b) {
     if (GetUserDataFromObj(a)->GetX() == GetUserDataFromObj(b)->GetX())
@@ -260,6 +259,7 @@ void State::EditingWW::DrawDB() {
 
             int vpx = dx + 320, vpy = dy + 302;
             hge->Gfx_SetClipping(vpx, vpy, 465, 282);
+            GV->sprCheckboard->SetColor(0xFFFFFFFF);
             for (int y = 0; y < 3; y++)
                 for (int x = 0; x < 4; x++) {
                     GV->sprCheckboard->Render(vpx + 120 * x, vpy + 120 * y);
@@ -784,6 +784,7 @@ void State::EditingWW::RenderToViewportBuffer() {
         return;
     }
 
+    GV->sprCheckboard->SetColor(0xFFFFFFFF);
     for (int y = 0; y <= vPort->GetHeight() / 120; y++)
         for (int x = 0; x <= vPort->GetWidth() / 120; x++) {
             GV->sprCheckboard->Render(x * 120, y * 120);
@@ -956,6 +957,7 @@ void State::EditingWW::DrawViewport() {
             WWD::Object *obj = vObjectsPicked[i];
 
             hgeSprite *spr = SprBank->GetObjectSprite(obj);
+            if (!spr) spr = GV->sprSmiley;
             float hsx, hsy;
             spr->GetHotSpot(&hsx, &hsy);
             float sprW = spr->GetWidth() / 2, sprH = spr->GetHeight() / 2;
@@ -1656,7 +1658,10 @@ void State::EditingWW::DrawViewport() {
                         if (outX && outY) {
                             int wOutX = Wrd2ScrX(GetActivePlane(), outX),
                                 wOutY = Wrd2ScrY(GetActivePlane(), outY);
-                            hgeSprite *spr2 = SprBank->GetAssetByID("LEVEL_GEM")->GetIMGByIterator(0)->GetSprite();
+                            auto bank = GV->editState->SprBank->GetAssetByID(
+                                    GetInventoryItemImageSet(GV->editState->hInvCtrl->GetItemByIt(EndOfLevelPowerupIt)));
+                            auto image = bank ? bank->GetIMGByIterator(0) : nullptr;
+                            hgeSprite *spr2 = image ? image->GetSprite() : GV->sprSmiley;
                             spr2->SetColor(0xBBFFFFFF);
                             spr2->RenderEx(wOutX, wOutY, 0, fZoom);
 
@@ -1673,15 +1678,15 @@ void State::EditingWW::DrawViewport() {
                            iActiveTool == EWW_TOOL_EDITOBJ &&
                            (hEditObj->iType == ObjEdit::enWarp && ((ObjEdit::cEditObjWarp *) hEditObj)->bPick ||
                             hEditObj->iType == ObjEdit::enCrate &&
-                            ((ObjEdit::cEditObjCrate *) hEditObj)->PreviewWarp() ||
+                            ((ObjEdit::cEditObjCrate *) hEditObj)->PreviewWarp()/* ||
                             hEditObj->iType == ObjEdit::enStatue &&
-                            ((ObjEdit::cEditObjStatue *) hEditObj)->PreviewWarp())) {
+                            ((ObjEdit::cEditObjStatue *) hEditObj)->PreviewWarp()*/)) {
                     int outX, outY;
                     bool bdr = 0;
                     if (iActiveTool == EWW_TOOL_EDITOBJ && conMain->getWidgetAt(mx, my) == vPort->GetWidget() &&
                         (hEditObj->iType == ObjEdit::enWarp && ((ObjEdit::cEditObjWarp *) hEditObj)->bPick ||
-                         hEditObj->iType == ObjEdit::enCrate && ((ObjEdit::cEditObjCrate *) hEditObj)->Picking() ||
-                         hEditObj->iType == ObjEdit::enStatue && ((ObjEdit::cEditObjStatue *) hEditObj)->Picking())) {
+                         hEditObj->iType == ObjEdit::enCrate && ((ObjEdit::cEditObjCrate *) hEditObj)->Picking()/* ||
+                         hEditObj->iType == ObjEdit::enStatue && ((ObjEdit::cEditObjStatue *) hEditObj)->Picking()*/)) {
                         outX = mx;
                         outY = my;
                         bdr = 1;
@@ -1863,8 +1868,8 @@ void State::EditingWW::DrawViewport() {
                         int crabsNum = crabNest ? (obj->GetUserValue(0) ? obj->GetUserValue(0) : 3) : 0;
                         bool singlecrate = logicInfo.IsSingleCrate();
                         cInventoryItem items[10];
-                        for (int i = 0; i < 10; i++)
-                            items[i] = cInventoryItem("", -1);
+                        for (auto & item : items)
+                            item = cInventoryItem("", -1);
                         int itemoff = 0;
                         if (logicInfo.IsBoss()) {
                             items[0] = hInvCtrl->GetItemByID(31); //end of level powerup
@@ -1930,9 +1935,7 @@ void State::EditingWW::DrawViewport() {
                                     if (i < crabsNum) continue;
                                     break;
                                 }
-                                if (GetInventoryItemID(items[i]) == 32) {
-                                    containsWarp = true;
-                                }
+
                                 cSprBankAsset *asset = GV->editState->SprBank->GetAssetByID(
                                         GetInventoryItemImageSet(items[i]));
                                 hgeSprite* treasureSpr = GV->sprSmiley;
@@ -1940,8 +1943,15 @@ void State::EditingWW::DrawViewport() {
                                     int iframe = GV->editState->hInvCtrl->GetAnimFrame() % asset->GetSpritesCount();
                                     treasureSpr = asset->GetIMGByIterator(iframe)->GetSprite();
                                 }
-                                treasureSpr->SetColor(0xBBFFFFFF);
-                                treasureSpr->SetFlip(0, 0, true);
+                                treasureSpr->SetFlip(false, false, true);
+
+                                if (GetInventoryItemID(items[i]) == 32) {
+                                    containsWarp = !logicInfo.IsSingleCrate() && !logicInfo.IsStatue();
+                                    treasureSpr->SetColor(!containsWarp ? 0xBBFF5555 : 0xBBFFFFFF);
+                                } else {
+                                    treasureSpr->SetColor(0xBBFFFFFF);
+                                }
+
                                 int grdim = treasureSpr->GetWidth();
                                 if (treasureSpr->GetHeight() > grdim) grdim = treasureSpr->GetHeight();
                                 float fScale = 1.0f;
@@ -1966,7 +1976,9 @@ void State::EditingWW::DrawViewport() {
                                     spr2->RenderEx(wOutX, wOutY, 0, fZoom);
 
                                     if (logicInfo.IsBoss()) { // make sure gem is on top and move second text
-                                        spr2 = SprBank->GetAssetByID("LEVEL_GEM")->GetIMGByIterator(0)->GetSprite();
+                                        auto bank = GV->editState->SprBank->GetAssetByID(GetInventoryItemImageSet(GV->editState->hInvCtrl->GetItemByIt(EndOfLevelPowerupIt)));
+                                        auto image = bank ? bank->GetIMGByIterator(0) : nullptr;
+                                        spr2 = image ? image->GetSprite() : GV->sprSmiley;
                                         spr2->SetColor(0xBBFFFFFF);
                                         spr2->RenderEx(wOutX, wOutY, 0, fZoom);
 
@@ -2594,6 +2606,7 @@ void State::EditingWW::DrawObjSearch() {
 
     fy += 5;
 
+    GV->sprCheckboard->SetColor(0xFFFFFFFF);
     for (int i = startindex; i < startindex + 4; i++) {
         if (i < 0) continue;
         if (i >= vObjSearchResults.size()) break;
@@ -2672,13 +2685,15 @@ void State::EditingWW::DrawObjSearch() {
 }
 
 int State::EditingWW::RenderObject(WWD::Object *hObj, int x, int y, DWORD col) {
+    bool isFlippedX = hObj->GetFlipX();
     hgeSprite *spr = SprBank->GetObjectSprite(hObj);
+    if (!spr) spr = GV->sprSmiley;
     spr->SetColor(col);
-    spr->SetFlip(hObj->GetFlipX(), hObj->GetFlipY(), true);
+    spr->SetFlip(isFlippedX, hObj->GetFlipY(), true);
 
     float hx, hy;
     spr->GetHotSpot(&hx, &hy);
-    if (hObj->GetFlipX()) {
+    if (isFlippedX) {
         hx -= spr->GetWidth() / 2;
         hx *= fZoom * 2;
         x += hx;
@@ -2698,10 +2713,10 @@ int State::EditingWW::RenderObject(WWD::Object *hObj, int x, int y, DWORD col) {
         if (cannon) {
             hgeSprite* cannonspr = cannon->GetIMGByIterator(0)->GetSprite();
             cannonspr->SetColor(col);
-            cannonspr->SetFlip(GetUserDataFromObj(hObj)->GetFlipX(), false);
-            cannonspr->RenderEx(x + (5 * GetUserDataFromObj(hObj)->GetFlipX() - 3) * fZoom, y - hy + 15 * fZoom, 0, fZoom);
+            cannonspr->SetFlip(isFlippedX, false, true);
+            cannonspr->RenderEx(x + (5 * isFlippedX - 3) * fZoom, y - hy + 15 * fZoom, 0, fZoom);
         }
-        spr->RenderEx(x - GetUserDataFromObj(hObj)->GetFlipX() * hx * 12, y, 0, fZoom);
+        spr->RenderEx(x - isFlippedX * hx * 12, y, 0, fZoom);
     }
     else {
         spr->RenderEx(x, y, 0, fZoom);
@@ -3168,6 +3183,7 @@ void State::EditingWW::DrawCrashRetrieve() {
     for (int i = 0; i < 10; i++) {
         if (szCrashRetrieve[i] == NULL) break;
         if (iCrashRetrieveIcon[i] < 50) {
+            GV->sprGamesSmall[iCrashRetrieveIcon[i]]->SetColor(0xFFffffff);
             GV->sprGamesSmall[iCrashRetrieveIcon[i]]->Render(dx, dy + 30 + 25 * i);
         } else {
             int game = 0, ic = iCrashRetrieveIcon[i] - 50;
@@ -3175,6 +3191,7 @@ void State::EditingWW::DrawCrashRetrieve() {
                 ++game;
                 ic -= 50;
             }
+            GV->sprLevelsMicro16[game][ic - 1]->SetColor(0xFFffffff);
             GV->sprLevelsMicro16[game][ic - 1]->Render(dx, dy + 30 + 25 * i);
         }
         GV->fntMyriad16->Render(dx + 22, dy + 30 + 25 * i, HGETEXT_LEFT, szCrashRetrieve[i], 0);

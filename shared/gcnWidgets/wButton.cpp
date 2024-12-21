@@ -179,14 +179,14 @@ namespace SHR {
                     throw GCN_EXCEPTION("Unknown alignment.");
             }
 
+            float a = 255.0f * getAlphaModifier();
             if (sprIcon != 0) {
                 int iconY = floor((getHeight() - sprIcon->GetHeight()) / 2) - 1;
-                sprIcon->SetColor((!isEnabled() && !bRenderBG) ? 0x55FFFFFF : SETA(colIcon, getAlpha()));
+                sprIcon->SetColor(SETA(colIcon, ((!isEnabled() && !bRenderBG) ? 0.33 : 1) * a));
                 sprIcon->Render(x + iconX, y + iconY);
                 if (fTimer > 0.0f && isEnabled()) {
                     sprIcon->SetBlendMode(BLEND_COLORMUL | BLEND_ALPHAADD | BLEND_NOZWRITE);
-                    unsigned char a = fTimer * 5.0f * 255.0f * getAlphaModifier();
-                    sprIcon->SetColor(SETA(0xFFFFFF, a));
+                    sprIcon->SetColor(SETA(0xFFFFFF, fTimer * 5.0f * a));
                     sprIcon->Render(x + iconX, y + iconY);
                     sprIcon->SetBlendMode(BLEND_DEFAULT);
                 }
@@ -194,17 +194,17 @@ namespace SHR {
             }
 
             graphics->setFont(getFont());
-            graphics->setColor(gcn::Color(0xe1e1e1, isEnabled() ? 0xFF : 0x77));
+            graphics->setColor(gcn::Color(0xe1e1e1, (isEnabled() ? 1 : 0.46) * a));
             graphics->drawText(getCaption(), textX, textY, getAlignment());
         } else if (sprIcon != 0) {
+            float a = 255.0f * getAlphaModifier();
             int iconX = (getWidth() - sprIcon->GetWidth()) / 2;
             int iconY = floor((getHeight() - sprIcon->GetHeight()) / 2) - 1;
-            sprIcon->SetColor((!isEnabled() && !bRenderBG) ? 0x55FFFFFF : SETA(colIcon, getAlpha()));
+            sprIcon->SetColor(SETA(colIcon, ((!isEnabled() && !bRenderBG) ? 0.33 : 1) * a));
             sprIcon->Render(x + iconX, y + iconY);
             if (fTimer > 0.0f && isEnabled()) {
                 sprIcon->SetBlendMode(BLEND_COLORMUL | BLEND_ALPHAADD | BLEND_NOZWRITE);
-                unsigned char a = fTimer * 5.0f * 255.0f * getAlphaModifier();
-                sprIcon->SetColor(SETA(0xFFFFFF, a));
+                sprIcon->SetColor(SETA(0xFFFFFF, fTimer * 5.0f * a));
                 sprIcon->Render(x + iconX, y + iconY);
                 sprIcon->SetBlendMode(BLEND_DEFAULT);
             }

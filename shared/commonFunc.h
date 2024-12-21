@@ -20,6 +20,8 @@ typedef unsigned short WORD;
 typedef unsigned char BYTE;
 #endif
 
+#include <filesystem>
+
 namespace SHR {
     struct DisplayMode {
         int iWidth, iHeight, iDepth, iFrequency;
@@ -70,7 +72,7 @@ namespace SHR {
 
     void CopyDirR(const char *szSource, const char *szDest);
 
-    int RemoveDirR(const char *dirPath);
+    void RemoveDirR(const std::filesystem::path& path);
 };
 
 #endif

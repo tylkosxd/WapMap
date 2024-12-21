@@ -9,6 +9,7 @@ typedef std::pair<std::string, int> cInventoryItem;
 #define GetInventoryItemImageSet(x) (x.first.c_str())
 #define GetInventoryItemID(x)   (x.second)
 
+#define EndOfLevelPowerupIt 3
 #define InventoryItemsCount 58
 
 class cInventoryController {

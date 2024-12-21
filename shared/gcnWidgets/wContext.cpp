@@ -4,9 +4,7 @@
 #include "../commonFunc.h"
 #include "../../WapMap/globals.h"
 #include "../../WapMap/cInterfaceSheet.h"
-
-extern HGE *hge;
-extern cInterfaceSheet *_ghGfxInterface;
+#include "../../WapMap/states/editing_ww.h"
 
 namespace SHR {
     ContextEl::ContextEl(int id, const char *cap, hgeSprite *spr) {
@@ -27,6 +25,7 @@ namespace SHR {
             : mHasMouse(false),
               mKeyPressed(false),
               mMousePressed(false) {
+//        setFocusable(false);
         setFocusable(true);
         adjustSize();
         setFrameSize(0);
@@ -352,7 +351,7 @@ namespace SHR {
 
     void ContextEl::SetCascade(Context *con) {
         if (hCascade != NULL) {
-            hCascade->setVisible(0);
+            hCascade->setVisible(false);
         }
         hCascade = con;
         SetFocused(bFocused, false);
@@ -457,4 +456,10 @@ namespace SHR {
         vSeparators.push_back(vElements.size());
     }
 
+    void Context::_setParent(Widget *parent) {
+        Widget::_setParent(parent);
+        if (parent == GV->editState->conMain) {
+            mInternalFocusHandler = new FocusHandler();
+        }
+    }
 }

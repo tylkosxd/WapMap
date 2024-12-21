@@ -1,5 +1,4 @@
 #include "editCrabNest.h"
-#include "../globals.h"
 #include "../langID.h"
 #include "../states/editing_ww.h"
 

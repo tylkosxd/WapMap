@@ -12,8 +12,10 @@ namespace ObjEdit {
         SHR::Win *win;
         SHR::Slider *sli;
         WIDG::Viewport *vp;
+
+        bool isWarpNotFunctional;
     public:
-        cInvPickbox();
+        cInvPickbox(bool isWarpNotFunctional = false);
 
         ~cInvPickbox();
 

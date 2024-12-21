@@ -128,6 +128,10 @@ namespace ObjEdit {
         winSeries->add(_butAddNext, 55, 50);
         st->conMain->add(winSeries, st->vPort->GetX() + win->getWidth(),
                          st->vPort->GetY() + st->vPort->GetHeight() - winSeries->getHeight());
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 2000);
+        }
     }
 
     cEditObjTogglePeg::~cEditObjTogglePeg() {

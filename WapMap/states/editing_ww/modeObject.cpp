@@ -658,7 +658,8 @@ bool State::EditingWW::AreObjectSpecificOptionsAvailable(WWD::Object *obj, SHR::
             *conMod = advcon_Warp;
         return true;
     } else if (!strcmp(obj->GetLogic(), "FrontCrate") || !strcmp(obj->GetLogic(), "FrontStackedCrates") ||
-               !strcmp(obj->GetLogic(), "BehindCrate") || !strcmp(obj->GetLogic(), "BackStackedCrates")) {
+               !strcmp(obj->GetLogic(), "BehindCrate") || !strcmp(obj->GetLogic(), "BackStackedCrates") ||
+               !strcmp(obj->GetLogic(), "BehindStatue") || !strcmp(obj->GetLogic(), "FrontStatue")) {
         if (conMod != 0)
             *conMod = advcon_Container;
         return true;
@@ -703,6 +704,7 @@ void State::EditingWW::UpdateSearchResults() {
     sliSearchObj->setVisible(normalHeight > 550);
     sliSearchObj->setScaleEnd(vObjSearchResults.size() * 140 - sliSearchObj->getHeight() + 3);
     sliSearchObj->setValue(0);
+    sliSearchObj->adjustMarkerLength();
     int winHeight = std::min(normalHeight, 550);
     winSearchObj->setHeight(winHeight);
     if (vObjSearchResults.empty()) {

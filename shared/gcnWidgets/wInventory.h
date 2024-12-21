@@ -25,7 +25,7 @@ namespace SHR {
         //public cTooltip
     {
     public:
-        InvTab(guiParts *Parts);
+        InvTab(guiParts *Parts, bool isWarpNotFunctional = false);
 
         void adjustSize();
 
@@ -57,6 +57,7 @@ namespace SHR {
         bool mMousePressed;
         cInventoryItem mItem;
         bool hasCrab;
+        bool isWarpNotFunctional;
     };
 }
 

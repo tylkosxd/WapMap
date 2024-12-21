@@ -2,6 +2,7 @@
 #include "guichan/exception.hpp"
 #include "../../WapMap/globals.h"
 #include "../../WapMap/cInterfaceSheet.h"
+#include "../../WapMap/states/editing_ww.h"
 
 using namespace gcn;
 
@@ -25,25 +26,12 @@ namespace SHR {
         mMouseOver = 0;
         bHide = 0;
         mAlphaMod = 1.0f;
+        _isAppMaximized = GV->editState->bMaximized;
     }
 
     Win::Win(guiParts *Parts, const std::string &caption)
-            : mMoved(false) {
+            : Win(Parts) {
         setCaption(caption);
-        setFrameSize(0);
-        setPadding(2);
-        setTitleBarHeight(16);
-        setAlignment(Graphics::CENTER);
-        addMouseListener(this);
-        setMovable(true);
-        setOpaque(0);
-        hGfx = Parts;
-        bClose = 0;
-        bDrawShadow = 1;
-        fCloseTimer = 0;
-        mMouseOver = 0;
-        bHide = 0;
-        mAlphaMod = 1.0f;
     }
 
     Win::~Win() {
@@ -82,7 +70,10 @@ namespace SHR {
     }
 
     void Win::draw(Graphics *graphics) {
-        gcn::Rectangle d = getChildrenArea();
+        if (_isAppMaximized != GV->editState->bMaximized) {
+            _isAppMaximized = GV->editState->bMaximized;
+            move(getX(), getY());
+        }
 
         if (!bHide && mAlphaMod < 1.0f) {
             mAlphaMod += hge->Timer_GetDelta() * 5.0f;
@@ -181,7 +172,7 @@ namespace SHR {
                 throw GCN_EXCEPTION("Unknown alignment.");
         }
 
-        graphics->setColor(0xFFFFFF);
+        graphics->setColor(gcn::Color(0xFFFFFF, alpha));
         graphics->setFont(getFont());
         //graphics->pushClipArea(gcn::Rectangle(0, 0, getWidth(), getTitleBarHeight() - 1));
         graphics->drawText(getCaption(), textX, textY, getAlignment());
@@ -245,20 +236,10 @@ namespace SHR {
         }
 
         if (isMovable() && mMoved) {
-            int parentX;
-            int parentY;
-
-            getParent()->getAbsolutePosition(parentX, parentY);
-
-            int newX = mouseEvent.getX() - mDragOffsetX + getX();
-            int newY = mouseEvent.getY() - mDragOffsetY + getY();
-
-            if (parentX + newX < 0) newX = -parentX;
-            if (parentY + newY < 0) newY = -parentY;
-            if (parentX + newX + mDimension.width > GV->iScreenW) newX = GV->iScreenW - parentX - mDimension.width;
-            if (parentY + newY + mDimension.height > GV->iScreenH) newY = GV->iScreenH - parentY - mDimension.height;
-
-            setPosition(newX, newY);
+            move(
+                mouseEvent.getX() - mDragOffsetX + getX(),
+                mouseEvent.getY() - mDragOffsetY + getY()
+            );
         }
 
         mouseEvent.consume();
@@ -302,5 +283,22 @@ namespace SHR {
         }
 
         setSize(w + 2 * getPadding(), h + getPadding() + getTitleBarHeight());
+    }
+
+    void Win::move(int newX, int newY) {
+        int parentX;
+        int parentY;
+
+        getParent()->getAbsolutePosition(parentX, parentY);
+
+        int screenW = GV->editState->bMaximized ? hge->System_GetState(HGE_SCREENWIDTH) : GV->iScreenW;
+        int screenH = GV->editState->bMaximized ? hge->System_GetState(HGE_SCREENHEIGHT) : GV->iScreenH;
+
+        if (parentX + newX < 0) newX = -parentX;
+        if (parentY + newY < 0) newY = -parentY;
+        if (parentX + newX + mDimension.width > screenW) newX = screenW - parentX - mDimension.width;
+        if (parentY + newY + mDimension.height > screenH) newY = screenH - parentY - mDimension.height;
+
+        setPosition(newX, newY);
     }
 }

@@ -24,7 +24,7 @@ namespace SHR {
     void Tree::draw(Graphics *graphics) {
         int x, y;
         getAbsolutePosition(x, y);
-        Render(x, y);
+        Render(x, y, getAlpha());
     }
 
     void TreeFolder::mousePressed(MouseEvent &mouseEvent) {
@@ -157,53 +157,55 @@ namespace SHR {
         m_iFocus = -1;
     }
 
-    int Tree::Render(int x, int y) {
+    int Tree::Render(int x, int y, int a) {
         int oldY = y;
         x += 24;
         y += 2;
         for (auto & m_vElement : m_vElements) {
-            y += m_vElement->Render(x, y);
+            y += m_vElement->Render(x, y, a);
         }
         return y - oldY;
     }
 
-    int TreeElement::Render(int x, int y) {
+    int TreeElement::Render(int x, int y, int a) {
         if (m_bSelected) {
-            SHR::SetQuad(&q, GV->colActive, x - 2, y, x + m_iW, y + m_iH);
+            SHR::SetQuad(&q, SETA(GV->colActive, a), x - 2, y, x + m_iW, y + m_iH);
             hge->Gfx_RenderQuad(&q);
         } else if (m_bFocused) {
-            SHR::SetQuad(&q, 0x22FFFFFF, x - 2, y, x + m_iW, y + m_iH);
+            SHR::SetQuad(&q, SETA(0xFFFFFFFF, a * 0.133), x - 2, y, x + m_iW, y + m_iH);
             hge->Gfx_RenderQuad(&q);
         }
         if (sprIcon != NULL) {
-            sprIcon->SetColor(0xFFFFFFFF);
+            sprIcon->SetColor(SETA(0xFFFFFFFF, a));
             sprIcon->Render(x, y + 2);
         }
+        GV->fntMyriad16->SetColor(SETA(0xFFFFFFFF, a));
         GV->fntMyriad16->Render(x + 20, y + 3, HGETEXT_LEFT, szName, 0);
         return m_iH;
     }
 
-    int TreeFolder::Render(int x, int y) {
+    int TreeFolder::Render(int x, int y, int a) {
+        DWORD col = SETA(GV->colFontWhite, a);
         int oldY = y;
-        TreeElement::Render(x, y);
+        TreeElement::Render(x, y, a);
 
         int quarter = m_iH / 4;
-        SHR::SetQuad(&q, GV->colFontWhite, x - 12 - quarter, y + quarter, x - 12 + quarter, y + quarter * 3);
+        SHR::SetQuad(&q, col, x - 12 - quarter, y + quarter, x - 12 + quarter, y + quarter * 3);
         hge->Gfx_RenderQuad(&q, false);
-        hge->Gfx_RenderLine(x - 12 - quarter + 1, y + quarter * 2, x - 12 + quarter - 2, y + quarter * 2, GV->colFontWhite);
+        hge->Gfx_RenderLine(x - 12 - quarter + 1, y + quarter * 2, x - 12 + quarter - 2, y + quarter * 2, col);
         if (m_bOpened) {
-            hge->Gfx_RenderLine(x - 12, y + quarter * 3, x - 12, y + m_iH, GV->colFontWhite);
+            hge->Gfx_RenderLine(x - 12, y + quarter * 3, x - 12, y + m_iH, col);
         } else {
-            hge->Gfx_RenderLine(x - 12, y + quarter + 1, x - 12, y + quarter * 3 - 2, GV->colFontWhite);
+            hge->Gfx_RenderLine(x - 12, y + quarter + 1, x - 12, y + quarter * 3 - 2, col);
         }
 
         y += m_iH;
         if (m_bOpened && !m_vElements.empty()) {
-            hge->Gfx_RenderLine(x - 12, y, x - 12, y + m_iH * (m_vElements.size() - 0.5f), GV->colFontWhite);
+            hge->Gfx_RenderLine(x - 12, y, x - 12, y + m_iH * (m_vElements.size() - 0.5f), col);
             x += 20;
             for (auto & m_vElement : m_vElements) {
-                hge->Gfx_RenderLine(x - 32, y + m_iH / 2, x - 4, y + m_iH / 2, GV->colFontWhite);
-                y += m_vElement->Render(x, y);
+                hge->Gfx_RenderLine(x - 32, y + m_iH / 2, x - 4, y + m_iH / 2, col);
+                y += m_vElement->Render(x, y, a);
             }
         }
         return y - oldY;

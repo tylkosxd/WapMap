@@ -49,6 +49,8 @@ namespace SHR {
 
         void keyPressed(KeyEvent &keyEvent) override;
 
+        void keyReleased(KeyEvent &keyEvent) override;
+
         bool IsNumericalOnly() { return bNumerical; };
 
         void SetNumerical(bool b, bool n = 1) {

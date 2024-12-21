@@ -16,7 +16,6 @@ namespace SHR {
         mHasMouse = 0;
         fFocusTimer = 0;
         fButtonTimer = 0;
-        mText = defText;
         mScrollDisabled = 0;
         setWidth(100);
         setFocusable(true);
@@ -26,8 +25,6 @@ namespace SHR {
         mCaretPosition = 0;
         mXScroll = 0;
         bMarkedInvalid = 0;
-
-        setInternalFocusHandler(&mInternalFocusHandler);
 
         mInternalScrollArea = (scrollArea == NULL);
         mInternalListBox = (listBox == NULL);
@@ -51,6 +48,7 @@ namespace SHR {
         mListBox->addSelectionListener(this);
 
         setListModel(listModel);
+        mText = defText;
 
         if (mListBox->getSelected() < 0) {
             mListBox->setSelected(0);
@@ -61,6 +59,8 @@ namespace SHR {
         addFocusListener(this);
 
         adjustHeight();
+
+        setInternalFocusHandler(&mInternalFocusHandler);
     }
 
     TextDropDown::~TextDropDown() {
@@ -159,6 +159,20 @@ namespace SHR {
         }
     }
 
+    void TextDropDown::logic() {
+        logicChildren();
+
+        if (mIsDragged) {
+            int x, y;
+            float mx, my;
+            getAbsolutePosition(x, y);
+            hge->Input_GetMousePos(&mx, &my);
+
+            if (mx - x < 0 && mXScroll > 0) mXScroll--;
+            else if (mx - x > getWidth() && mXScroll < getFont()->getWidth(mText) - getWidth() + 29) mXScroll++;
+        }
+    }
+
     void TextDropDown::setSelected(int selected) {
         if (selected >= 0) {
             mListBox->setSelected(selected);
@@ -173,6 +187,7 @@ namespace SHR {
             return;
         }
 
+        bool shouldFixScroll = true;
         if (key.getValue() == Key::DOWN) {
             dropDown();
             keyEvent.consume();
@@ -229,6 +244,9 @@ namespace SHR {
                 mCaretPosition = 0;
                 mSelectionPosition = -1;
             }
+
+            mXScroll = 0;
+            shouldFixScroll = false;
         } else if (key.getValue() == Key::END) {
             if (keyEvent.isShiftPressed()) {
                 mSelectionPosition = mText.size();
@@ -236,6 +254,9 @@ namespace SHR {
                 mCaretPosition = mText.size();
                 mSelectionPosition = -1;
             }
+
+            mXScroll = std::max(0, getFont()->getWidth(mText) - getWidth() + 29);
+            shouldFixScroll = false;
         } else if (key.getValue() == 'v' && keyEvent.isControlPressed()) { //paste
             if (bSelection) deleteSelection();
             int pastepos = mCaretPosition;
@@ -289,11 +310,13 @@ namespace SHR {
             keyEvent.consume();
         }
 
-        fixScroll();
+        if (shouldFixScroll) {
+            fixScroll();
+        }
     }
 
     void TextDropDown::mouseMoved(MouseEvent &mouseEvent) {
-        if (isEnabled() && mouseEvent.getX() < getWidth() - 22) {
+        if (isEnabled() && mouseEvent.getX() < getWidth() - 22 && mouseEvent.getY() < mFoldedUpHeight) {
             GV->SetCursor(TEXT);
         }
     }
@@ -303,7 +326,6 @@ namespace SHR {
             y = mouseEvent.getY();
 
         if (mouseEvent.getSource() == this) {
-
             // If we have a mouse press on the widget.
             if (y >= 0
                 && y < getHeight()
@@ -311,7 +333,7 @@ namespace SHR {
                 && x < getWidth()
                 && mouseEvent.getButton() == MouseEvent::LEFT
                 && !mDroppedDown) {
-                if (x < getWidth() - 22) {
+                if (x < getWidth() - 22 && mouseEvent.getY() < mFoldedUpHeight) {
                     mCaretPosition = getFont()->getStringIndexAt(mText, x + mXScroll);
                     fixScroll();
                     bTextFocused = true;
@@ -333,7 +355,7 @@ namespace SHR {
                 && x < getWidth()
                 && mouseEvent.getButton() == MouseEvent::LEFT
                 && mDroppedDown) {
-                if (x < getWidth() - 22) {
+                if (x < getWidth() - 22 && mouseEvent.getY() < mFoldedUpHeight) {
                     bTextFocused = true;
                     GV->SetCursor(TEXT);
                 }
@@ -375,7 +397,7 @@ namespace SHR {
 
         mIsDragged = false;
 
-        if (isEnabled() && mouseEvent.getX() < getWidth() - 22) {
+        if (isEnabled() && mouseEvent.getX() < getWidth() - 22 && mouseEvent.getY() < mFoldedUpHeight) {
             GV->SetCursor(TEXT);
         }
     }
@@ -384,15 +406,12 @@ namespace SHR {
         mIsDragged = true;
         if (mText.length() != 0) {
             mSelectionPosition = getFont()->getStringIndexAt(mText, mouseEvent.getX() + mXScroll);
-            fixScroll();
         }
 
-        int h = (mDroppedDown ? mFoldedUpHeight : getHeight());
         int x, y;
         getAbsolutePosition(x, y);
 
-        if (isEnabled() && mHasMouse && !(mouseEvent.getX() > x + getWidth() - 20
-                && mouseEvent.getX() < x + getWidth() && mouseEvent.getY() > y && mouseEvent.getY() < y + h)) {
+        if (isEnabled() && mHasMouse && mouseEvent.getX() < x + getWidth() - 20 && mouseEvent.getY() < mFoldedUpHeight) {
             GV->SetCursor(TEXT);
         }
 

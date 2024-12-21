@@ -141,6 +141,7 @@ namespace State {
                 scrolly = saPreview->getVerticalScrollAmount();
 
         hge->Gfx_SetClipping(drx, dry, drw, drh);
+        GV->sprCheckboard->SetColor(0xFFFFFFFF);
         for (int y = 0; y < drh / 100 + 1; y++)
             for (int x = 0; x < drw / 100 + 1; x++)
                 GV->sprCheckboard->Render(drx + x * 100, dry + y * 100);

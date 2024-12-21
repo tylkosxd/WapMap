@@ -16,19 +16,18 @@ namespace ObjEdit {
 
     class cEditObjStatue : public cObjEdit {
     private:
-        SHR::RadBut *rbType[2];
+        SHR::RadBut *rbType[3];
         cInvPickbox *hInventory;
         lmEditObjStatueDurability *lmDurability;
         SHR::DropDown *ddDurability;
         SHR::Lab *labDurability, *labAlign, *labTreasures;
         SHR::InvTab *invTabs[9];
+        SHR::But *butRandomize;
+        SHR::CBox *cbIncludeSpecials, *cbRandomCount;
 
-        SHR::TextField *tfWarpX, *tfWarpY;
-        SHR::Lab *labWarpDest;
-        SHR::But *butWarpPick;
+        SHR::TextField *tfCustomZ;
 
-        bool bPick;
-        bool bShowWarpOptions;
+        int alignment;
 
         void RebuildWindow();
 
@@ -44,10 +43,6 @@ namespace ObjEdit {
         virtual void Action(const gcn::ActionEvent &actionEvent);
 
         virtual void Draw();
-
-        bool PreviewWarp() { return bShowWarpOptions; };
-
-        bool Picking() { return bPick; };
     };
 
 }

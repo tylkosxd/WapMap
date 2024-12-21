@@ -75,10 +75,14 @@ public:
         return !strcmp(logic, "FrontCrate") || !strcmp(logic, "BehindCrate");
     }
 
+    bool IsStatue() {
+        return !strcmp(logic, "BehindStatue") || !strcmp(logic, "FrontStatue");
+    }
+
     bool CanDropTreasure() {
-        return IsHumanEnemy() || !strcmp(logic, "Chameleon") || !strcmp(logic, "Seagull") || !strcmp(logic, "HermitCrab")
-        || IsSingleCrate() || !strcmp(logic, "BackStackedCrates") || !strcmp(logic, "FrontStackedCrates")
-        || !strcmp(logic, "Statue") || !strcmp(logic, "CrabNest") ;
+        return IsHumanEnemy() || !strcmp(logic, "Chameleon") || !strcmp(logic, "Seagull")
+        || !strcmp(logic, "HermitCrab") || !strcmp(logic, "CrabNest")
+        || IsSingleCrate() || IsStatue() || !strcmp(logic, "BackStackedCrates") || !strcmp(logic, "FrontStackedCrates");
     }
 
     bool IsEnemy() {
@@ -164,5 +168,12 @@ public:
             vstrpTypes.push_back(DEFAULT_ENEMY("TigerGuard", "LEVEL_TIGERWHITE"));
             vstrpTypes.push_back(DEFAULT_ENEMY("Omar", "LEVEL_OMAR"));
         }
+    }
+
+    static int GetContainerDefaultZ(const char *logic) {
+        if (logic[0] == 'F' && logic[9] != 'u') return 5000; // FrontCrate, FrontStackedCrates
+        if ((logic[0] == 'F' || logic[1] == 'e')) return 1100; // FrontStatue, BehindStatue, BehindCrate
+
+        return 1000; // BackStackedCrates
     }
 };

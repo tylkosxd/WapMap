@@ -331,6 +331,7 @@ bool cDataController::IsLoadableImage(cFile hFile, cImageInfo *inf, cImageInfo::
     } else if (strExt.compare(".bmp") == 0) {
         unsigned int l;
         unsigned char *buf = hFile.hFeed->GetFileContent(hFile.strPath.c_str(), l, 0, 34);
+        if (!buf) return 0;
         int headerlen = *(int *) (buf + 14);
         short colordepth = (headerlen == 12 ? *(short *) (buf + 24)
                                             : *(short *) (buf + 28));
@@ -787,7 +788,7 @@ void cDataController::Think() {
                         strMntPntToUpdate[bankid].push_back(mntpnt);
                     }
                 } else if (f == 2) {
-                    if (vMountEntries[mntid].hAsset->GetFile().hFeed == vFiles[f].at(i).hFeed &&
+                    if (mntid != -1 && vMountEntries[mntid].hAsset->GetFile().hFeed == vFiles[f].at(i).hFeed &&
                         vMountEntries[mntid].hAsset->GetFile().strPath == vFiles[f].at(i).strPath &&
                         vMountEntries[mntid].vFiles.size() > 1) {
                         strMntPntToUpdate[bankid].push_back(mntpnt);

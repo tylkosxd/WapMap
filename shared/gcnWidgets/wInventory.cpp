@@ -5,11 +5,12 @@
 #include "../../WapMap/databanks/imageSets.h"
 
 namespace SHR {
-    InvTab::InvTab(guiParts *Parts)
+    InvTab::InvTab(guiParts *Parts, bool isWarpNotFunctional)
             : mHasMouse(false),
               mKeyPressed(false),
               mMousePressed(false),
-              hasCrab(false) {
+              hasCrab(false),
+              isWarpNotFunctional(isWarpNotFunctional) {
         setFocusable(true);
         adjustSize();
         setFrameSize(0);
@@ -74,7 +75,7 @@ namespace SHR {
                 spr = asset->GetIMGByIterator(iframe)->GetSprite();
             }
             if (isEnabled())
-                spr->SetColor(0xFFFFFFFF);
+                spr->SetColor(isWarpNotFunctional && mItem.second == 32 ? 0xFFFF5555 : 0xFFFFFFFF);
             else
                 spr->SetColor(0x77FFFFFF);
             int grdim = spr->GetWidth();

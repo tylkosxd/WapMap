@@ -21,7 +21,7 @@ namespace SHR {
         mHScroll = 0;
         mHPolicy = hPolicy;
         mVPolicy = vPolicy;
-        mScrollbarWidth = 12;
+        mScrollbarWidth = 15;
         mUpButtonPressed = false;
         mDownButtonPressed = false;
         mLeftButtonPressed = false;
@@ -36,6 +36,7 @@ namespace SHR {
         mBackgroundColor = 0x131313;
 
         fTimerV = fTimerH = 0;
+        mFocusable = true;
 
         if (content) {
             setContent(content);
@@ -188,30 +189,25 @@ namespace SHR {
 
             mVerticalMarkerDragOffset = y - getVerticalMarkerDimension().y;
         } else if (getVerticalBarDimension().isPointInRect(x, y)) {
-            if (y < getVerticalMarkerDimension().y) {
-                setVerticalScrollAmount(getVerticalScrollAmount()
-                                        - (int) (getChildrenArea().height * 0.95));
-            } else {
-                setVerticalScrollAmount(getVerticalScrollAmount()
-                                        + (int) (getChildrenArea().height * 0.95));
-            }
+            isScrollingTo = true;
+            isScrollingToNext = y > getVerticalMarkerDimension().y;
+            fTimerD = 0.4f;
+            setVerticalScrollAmount(getVerticalScrollAmount() + (int)(getChildrenArea().height * (isScrollingToNext ? 0.95 : -0.95)));
         } else if (getHorizontalMarkerDimension().isPointInRect(x, y)) {
             mIsHorizontalMarkerDragged = true;
             mIsVerticalMarkerDragged = false;
 
             mHorizontalMarkerDragOffset = x - getHorizontalMarkerDimension().x;
         } else if (getHorizontalBarDimension().isPointInRect(x, y)) {
-            if (x < getHorizontalMarkerDimension().x) {
-                setHorizontalScrollAmount(getHorizontalScrollAmount()
-                                          - (int) (getChildrenArea().width * 0.95));
-            } else {
-                setHorizontalScrollAmount(getHorizontalScrollAmount()
-                                          + (int) (getChildrenArea().width * 0.95));
-            }
+            isScrollingTo = true;
+            isScrollingToNext = x > getHorizontalMarkerDimension().x;
+            fTimerD = 0.4f;
+            setHorizontalScrollAmount(getHorizontalScrollAmount() + (int)(getChildrenArea().width * (isScrollingToNext ? 0.95 : -0.95)));
         }
     }
 
     void ScrollArea::mouseReleased(MouseEvent &mouseEvent) {
+        isScrollingTo = false;
         mUpButtonPressed = false;
         mDownButtonPressed = false;
         mLeftButtonPressed = false;
@@ -280,8 +276,10 @@ namespace SHR {
 
         drawChildren(graphics);
 
+        unsigned char alpha = getAlpha();
+        DWORD col = SETA(0xFFFFFFFF, alpha);
         if (mVBarVisible) {
-            GV->SliderDrawBar(dx + getWidth() - 16, dy - 1, true, getHeight() + 2, 0, 0xFFFFFFFF);
+            GV->SliderDrawBar(dx + getWidth() - 17, dy - 1, true, getHeight() + 2, 0, col);
 
             gcn::Rectangle markDim = getVerticalMarkerDimension();
             markDim.y -= 1;
@@ -302,15 +300,15 @@ namespace SHR {
                 if (fTimerV < 0.0f) fTimerV = 0.0f;
             }
 
-            GV->SliderDrawBar(dx + getWidth() - 16, dy + markDim.y, true, markDim.height, 1, 0xFFFFFFFF);
+            GV->SliderDrawBar(dx + getWidth() - 17, dy + markDim.y, true, markDim.height, 1, col);
             if (fTimerV > 0.0f) {
-                GV->SliderDrawBar(dx + getWidth() - 16, dy + markDim.y, true, markDim.height, 2,
-                        SETA(0xFFFFFF, (unsigned char) (fTimerV * 2.5f * 255.0f)));
+                GV->SliderDrawBar(dx + getWidth() - 17, dy + markDim.y, true, markDim.height, 2,
+                        SETA(0xFFFFFF, (unsigned char) (fTimerV * 2.5f * alpha)));
             }
         }
 
         if (mHBarVisible) {
-            GV->SliderDrawBar(dx - 1, dy + getHeight() - 16, false, getWidth() + 2, 0, 0xFFFFFFFF);
+            GV->SliderDrawBar(dx - 1, dy + getHeight() - 17, false, getWidth() + 2, 0, col);
 
             gcn::Rectangle markDim = getHorizontalMarkerDimension();
             markDim.x -= 1;
@@ -331,10 +329,10 @@ namespace SHR {
                 if (fTimerH < 0.0f) fTimerH = 0.0f;
             }
 
-            GV->SliderDrawBar(dx + markDim.x, dy + getHeight() - 16, false, markDim.width, 1, 0xFFFFFFFF);
+            GV->SliderDrawBar(dx + markDim.x, dy + getHeight() - 17, false, markDim.width, 1, col);
             if (fTimerH > 0.0f) {
-                GV->SliderDrawBar(dx + markDim.x, dy + getHeight() - 16, false, markDim.width, 2,
-                        SETA(0xFFFFFF, (unsigned char) (fTimerH * 2.5f * 255.0f)));
+                GV->SliderDrawBar(dx + markDim.x, dy + getHeight() - 17, false, markDim.width, 2,
+                        SETA(0xFFFFFF, (unsigned char) (fTimerH * 2.5f * alpha)));
             }
         }
     }
@@ -351,8 +349,32 @@ namespace SHR {
     void ScrollArea::logic() {
         checkPolicies();
 
-        setVerticalScrollAmount(getVerticalScrollAmount());
-        setHorizontalScrollAmount(getHorizontalScrollAmount());
+        if (isScrollingTo) {
+            if (fTimerD > 0) {
+                fTimerD -= hge->Timer_GetDelta();
+            } else {
+                int dx, dy;
+                float x, y;
+                hge->Input_GetMousePos(&x, &y);
+                getAbsolutePosition(dx, dy);
+
+                if (mVBarVisible && !mIsVerticalMarkerDragged && fTimerV > 0) {
+                    auto dimensions = getVerticalMarkerDimension();
+                    if ((y - dy > dimensions.y + dimensions.height * 0.5f) == isScrollingToNext) {
+                        setVerticalScrollAmount(getVerticalScrollAmount() +
+                                                (int) (getChildrenArea().height * (isScrollingToNext ? 0.3 : -0.3)));
+                    }
+                } else if (mHBarVisible && !mIsHorizontalMarkerDragged && fTimerH > 0) {
+                    auto dimensions = getHorizontalMarkerDimension();
+                    if ((x - dx > dimensions.x + dimensions.width * 0.5f) == isScrollingToNext) {
+                        setHorizontalScrollAmount(getHorizontalScrollAmount() +
+                                                  (int) (getChildrenArea().width * (isScrollingToNext ? 0.3 : -0.3)));
+                    }
+                }
+
+                fTimerD += 0.025;
+            }
+        }
 
         if (getContent() != NULL) {
             getContent()->setPosition(-mHScroll + getContent()->getFrameSize(),
@@ -494,8 +516,8 @@ namespace SHR {
             length = barDim.height;
         }
 
-        if (length < mScrollbarWidth) {
-            length = mScrollbarWidth;
+        if (length < 40) {
+            length = 40;
         }
 
         if (length > barDim.height) {

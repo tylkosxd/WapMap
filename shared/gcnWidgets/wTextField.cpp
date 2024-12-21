@@ -280,6 +280,10 @@ namespace SHR {
         fixScroll();
     }
 
+    void TextField::keyReleased(KeyEvent &keyEvent) {
+        keyEvent.consume();
+    }
+
     void TextField::adjustSize() {
         setWidth(getFont()->getWidth(mText) + 7);
         adjustHeight();

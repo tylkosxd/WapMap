@@ -5,7 +5,6 @@
 #include "../databanks/imageSets.h"
 
 
-
 extern HGE *hge;
 
 namespace ObjEdit {
@@ -39,10 +38,17 @@ namespace ObjEdit {
             }
 
             auto typeRB = new SHR::RadBut(GV->hGfxInterface, GETL2S("EditObj_Enemy", tmp2), tmp,
-                    !strcmp(hTempObj->GetLogic(), vstrpTypes[i].first.c_str()) && (!diff ||
-                            (hTempObj->GetUserValue(0) && !strcmp(hTempObj->GetLogic(), "HermitCrab"))
-                            || (hTempObj->GetParam(WWD::Param_Smarts) && !strcmp(hTempObj->GetLogic(), "TigerGuard"))
-                    ));
+                                          !strcmp(hTempObj->GetLogic(), vstrpTypes[i].first.c_str()) && (!diff ||
+                                                                                                         (hTempObj->GetUserValue(
+                                                                                                                 0) &&
+                                                                                                          !strcmp(hTempObj->GetLogic(),
+                                                                                                                  "HermitCrab"))
+                                                                                                         ||
+                                                                                                         (hTempObj->GetParam(
+                                                                                                                 WWD::Param_Smarts) &&
+                                                                                                          !strcmp(hTempObj->GetLogic(),
+                                                                                                                  "TigerGuard"))
+                                          ));
             typeRB->adjustSize();
             typeRB->addActionListener(hAL);
             rbType.push_back(typeRB);
@@ -198,7 +204,7 @@ namespace ObjEdit {
         delete labBehaviour;
         for (int i = 0; i < 4; i++)
             delete rbFlags[i];
-        for (auto& t : rbType)
+        for (auto &t: rbType)
             delete t;
         delete labType;
         delete win;
@@ -224,18 +230,37 @@ namespace ObjEdit {
     }
 
     void cEditObjEnemy::RebuildWindow() {
-        bool bHaveTreasures = 1;
-        if (!strcmp(hTempObj->GetLogic(), "Fish") || !strcmp(hTempObj->GetLogic(), "Gabriel") ||
-            !strcmp(hTempObj->GetLogic(), "Aquatis") || !strcmp(hTempObj->GetLogic(), "RedTail") ||
-            !strcmp(hTempObj->GetLogic(), "Omar") || !strcmp(hTempObj->GetLogic(), "Rat") ||
-            !strcmp(hTempObj->GetLogic(), "PunkRat"))
-            bHaveTreasures = 0;
+        bool bHaveTreasures = true;
+        if (!strcmp(hTempObj->GetLogic(), "PunkRat")) {
+            bHaveTreasures = false;
+            hTempObj->SetParam(WWD::Param_LocationZ, 3800);
+        } else if (!strcmp(hTempObj->GetLogic(), "Fish")) {
+            bHaveTreasures = false;
+            hTempObj->SetParam(WWD::Param_LocationZ, 3899);
+        } else if (!strcmp(hTempObj->GetLogic(), "Aquatis") || !strcmp(hTempObj->GetLogic(), "RedTail")) {
+            bHaveTreasures = false;
+            hTempObj->SetParam(WWD::Param_LocationZ, 3909);
+        } else if (!strcmp(hTempObj->GetLogic(), "Omar")) {
+            bHaveTreasures = false;
+            hTempObj->SetParam(WWD::Param_LocationZ, 4001);
+        } else if (!strcmp(hTempObj->GetLogic(), "Rat")) {
+            bHaveTreasures = false;
+            hTempObj->SetParam(WWD::Param_LocationZ, 4005);
+        } else if (!strcmp(hTempObj->GetLogic(), "Seagull")) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 8500);
+        } else {
+            hTempObj->SetParam(WWD::Param_LocationZ, 4010);
+
+            if (!strcmp(hTempObj->GetLogic(), "Gabriel"))
+                bHaveTreasures = false;
+        }
 
         hInventory->SetVisible(bHaveTreasures);
 
         int addheight = 170;
         if (bHaveTreasures) {
             if (!strcmp(hTempObj->GetLogic(), "HermitCrab")) {
+                hTempObj->SetParam(WWD::Param_LocationZ, 3914);
                 labTreasures->setVisible(1);
                 invTabs[0]->setVisible(1);
                 invTabs[0]->setPosition(190, 30 + vstrpTypes.size() * 20 + 40 + 135 + 40);
@@ -281,10 +306,13 @@ namespace ObjEdit {
                        !strcmp(hTempObj->GetLogic(), "Katherine") ||
                        !strcmp(hTempObj->GetLogic(), "Wolvington") ||
                        !strcmp(hTempObj->GetLogic(), "Gabriel") ||
-                       !strcmp(hTempObj->GetLogic(), "Marrow") ||
                        !strcmp(hTempObj->GetLogic(), "Aquatis") ||
                        !strcmp(hTempObj->GetLogic(), "Omar") ||
                        !strcmp(hTempObj->GetLogic(), "RedTail"));
+        if (!strcmp(hTempObj->GetLogic(), "Marrow")) {
+            gemvis = true;
+            hTempObj->SetParam(WWD::Param_LocationZ, 3909);
+        }
         bPickGem = gemvis;
         labWarpDest->setVisible(warpvis || gemvis);
         tfSpeedX->setVisible(warpvis || gemvis);
@@ -307,7 +335,7 @@ namespace ObjEdit {
         _butSave->setEnabled(!hRectPick->IsPicking() && !bPickSpeedXY &&
                              !tfSpeedX->isMarkedInvalid() && !tfSpeedY->isMarkedInvalid());
 
-        for (auto& t : rbType)
+        for (auto &t: rbType)
             t->setEnabled(!hRectPick->IsPicking() && !bPickSpeedXY);
         for (int i = 0; i < 4; i++)
             rbFlags[i]->setEnabled(!hRectPick->IsPicking() && !bPickSpeedXY);
@@ -315,7 +343,8 @@ namespace ObjEdit {
         if (hRectPick->IsPicking() || bPickSpeedXY) {
             cbPatrol->setEnabled(0);
         } else {
-            if (!strcmp(hTempObj->GetLogic(), "Seagull") || !strcmp(hTempObj->GetLogic(), "Fish") || !strcmp(hTempObj->GetLogic(), "HermitCrab")) {
+            if (!strcmp(hTempObj->GetLogic(), "Seagull") || !strcmp(hTempObj->GetLogic(), "Fish") ||
+                !strcmp(hTempObj->GetLogic(), "HermitCrab")) {
                 cbPatrol->setSelected(1);
                 cbPatrol->setEnabled(0);
             } else {
@@ -416,7 +445,7 @@ namespace ObjEdit {
                 RebuildWindow();
                 return;
             }
-        for (auto & invTab : invTabs)
+        for (auto &invTab: invTabs)
             if (actionEvent.getSource() == invTab) {
                 RebuildWindow();
             }
@@ -467,12 +496,18 @@ namespace ObjEdit {
             my < GV->editState->vPort->GetY() + GV->editState->vPort->GetHeight() &&
             GV->editState->conMain->getWidgetAt(mx, my) == GV->editState->vPort->GetWidget()) {
             int wmx = GV->editState->Scr2WrdX(GV->editState->GetActivePlane(), mx),
-                wmy = GV->editState->Scr2WrdY(GV->editState->GetActivePlane(), my);
-            hgeSprite *spr;
-            if (bPickGem)
-                spr = GV->editState->SprBank->GetAssetByID("LEVEL_GEM")->GetIMGByIterator(0)->GetSprite();
-            else
-                spr = GV->editState->SprBank->GetAssetByID("CLAW")->GetIMGByID(401)->GetSprite();
+                    wmy = GV->editState->Scr2WrdY(GV->editState->GetActivePlane(), my);
+            hgeSprite *spr = GV->sprSmiley;
+            if (bPickGem) {
+                auto bank = GV->editState->SprBank->GetAssetByID(
+                        GetInventoryItemImageSet(GV->editState->hInvCtrl->GetItemByIt(EndOfLevelPowerupIt)));
+                auto image = bank ? bank->GetIMGByIterator(0) : nullptr;
+                spr = image ? image->GetSprite() : spr;
+            } else {
+                auto bank = GV->editState->SprBank->GetAssetByID("CLAW");
+                auto image = bank ? bank->GetIMGByID(401) : nullptr;
+                spr = image ? image->GetSprite() : spr;
+            }
             spr->SetColor(0xBBFFFFFF);
             spr->RenderEx(mx, my, 0, GV->editState->fZoom);
             mx += (spr->GetWidth() / 2 + 15) * GV->editState->fZoom;
@@ -526,7 +561,7 @@ namespace ObjEdit {
         }
     }
 
-    void cEditObjEnemy::UpdateEnemyObject(WWD::Object *obj, const std::pair<std::string, std::string>& dataPair) {
+    void cEditObjEnemy::UpdateEnemyObject(WWD::Object *obj, const std::pair<std::string, std::string> &dataPair) {
         if (dataPair.second == "LEVEL_TIGERWHITE") {
             obj->SetParam(WWD::Param_Smarts, 1);
         } else {

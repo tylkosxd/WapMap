@@ -2,17 +2,16 @@
 #include <algorithm>
 #include <sys\stat.h>
 #include "../globals.h"
-#include "../globlua.h"
 #include "../langID.h"
 #include "../../shared/commonFunc.h"
 #include "../cParallelLoop.h"
 #include "../../shared/cProgressInfo.h"
 #include "../../shared/HashLib/hashlibpp.h"
-#include "../../shared/cWWD.h"
 #include "../cBrush.h"
 #include "../states/editing_ww.h"
 #include "../states/dialog.h"
 #include "../version.h"
+#include "../windows/tileBrowser.h"
 
 extern structProgressInfo _ghProgressInfo;
 extern HGE *hge;
@@ -165,8 +164,11 @@ void cBankTile::DeleteAsset(cAsset *hAsset) {
             if (m_vhSets[i] == set) {
                 delete set;
                 m_vhSets.erase(m_vhSets.begin() + i);
-                return;
+                break;
             }
+    }
+    if (GV->editState->hwinTileBrowser->GetWindow()->isVisible()) {
+        GV->editState->hwinTileBrowser->Synchronize();
     }
 }
 

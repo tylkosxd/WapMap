@@ -86,6 +86,11 @@ public:
 
     int GetSize() { return m_iSize; };
 
+    int GetIndexOf(cSprBankAssetIMG* img) {
+        for (int i = 0; i < m_vSprites.size(); i++) { if (img == m_vSprites[i]) return i; }
+        return -1;
+    };
+
     std::string GetHash() { return strHash; };
 
     void SortAndFixIterators();
@@ -97,7 +102,6 @@ class cBankImageSet : public gcn::ListModel, public cAssetBank {
 private:
     cTextureAtlaser *myAtlaser;
     std::vector<cSprBankAsset *> m_vAssets;
-    int m_iAssetsSize;
 
 public:
     cBankImageSet(WWD::Parser *hParser);
@@ -111,8 +115,6 @@ public:
     cSprBankAsset *GetAssetByIterator(int iIT) { return m_vAssets[iIT]; }
 
     int GetAssetsCount() { return m_vAssets.size(); };
-
-    int GetAssetsSize() { return m_iAssetsSize; };
 
     void SortAssets();
 

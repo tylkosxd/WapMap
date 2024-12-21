@@ -10,7 +10,7 @@ namespace ObjEdit {
     class cEditObjEnemy : public cObjEdit {
     private:
         SHR::RadBut *rbFlags[4];
-        SHR::Lab *labType, *labType2, *labBehaviour, *labDamage, *labWarpDest;
+        SHR::Lab *labType, *labBehaviour, *labDamage, *labWarpDest;
         SHR::CBox *cbPatrol;
         SHR::Lab *labTreasures, *labMoveArea;
         SHR::InvTab *invTabs[9];

@@ -48,6 +48,7 @@ namespace SHR {
         void removeSelectionListener(SelectionListener *selectionListener);
 
         virtual void draw(Graphics *graphics);
+        virtual void logic();
 
         void setBaseColor(const Color &color);
 

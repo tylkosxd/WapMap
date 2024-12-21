@@ -21,7 +21,7 @@ namespace SHR {
         setOrientation(HORIZONTAL);
         setValue(0);
         setStepLength(scaleEnd / 10);
-        setMarkerLength(10);
+        adjustMarkerLength();
 
         addMouseListener(this);
         addKeyListener(this);
@@ -42,7 +42,7 @@ namespace SHR {
         setOrientation(HORIZONTAL);
         setValue(scaleStart);
         setStepLength((scaleEnd - scaleStart) / 10);
-        setMarkerLength(10);
+        adjustMarkerLength();
 
         addMouseListener(this);
         addKeyListener(this);
@@ -80,15 +80,16 @@ namespace SHR {
         float mx, my;
         hge->Input_GetMousePos(&mx, &my);
 
+        DWORD col = SETA(0xFFFFFFFF, getAlpha());
         if (mStyle == DEFAULT) {
             bool orient = (mOrientation == VERTICAL);
-            GV->SliderDrawBar(dx, dy, orient, (orient ? getHeight() : getWidth()), 0, 0xFFFFFFFF);
+            GV->SliderDrawBar(dx, dy, orient, (orient ? getHeight() : getWidth()), 0, col);
             if (orient)
                 dy += getMarkerPosition();
             else
                 dx += getMarkerPosition();
             if (isEnabled())
-                GV->SliderDrawBar(dx, dy, orient, getMarkerLength(), 1, 0xFFFFFFFF);
+                GV->SliderDrawBar(dx, dy, orient, getMarkerLength(), 1, col);
             int markDimX = (orient ? 16 : getMarkerLength()),
                 markDimY = (orient ? getMarkerLength() : 16);
             bool markerFocus = (mHasMouse && mx > dx && my > dy && mx < dx + markDimX && my < dy + markDimY);
@@ -108,7 +109,7 @@ namespace SHR {
             }
             if (isEnabled())
                 GV->SliderDrawBar(dx, dy, orient, getMarkerLength(), 2,
-                                  SETA(0xFFFFFF, (unsigned char) (fTimer * 2.5f * 255.0f)));
+                                  SETA(0xFFFFFF, (unsigned char) (fTimer * 2.5f * getAlphaModifier())));
         } else {
             int markSpr = (mStyle == POINTER);
             if (mOrientation == HORIZONTAL) {
@@ -119,7 +120,7 @@ namespace SHR {
                 for (double vKey : vKeys) {
                     int off = valueToMarkerPosition(vKey) + 7;
                     //off += getStepLength()
-                    hge->Gfx_RenderLine(dx + off, dy + 11, dx + off, dy + 16, 0xFF606162);
+                    hge->Gfx_RenderLine(dx + off, dy + 11, dx + off, dy + 16, SETA(0xFF606162, getAlpha()));
                 }
 
                 int v = getMarkerPosition();
@@ -144,7 +145,7 @@ namespace SHR {
                 _ghGfxInterface->sprSlider[markSpr][0]->Render(dx + v, dy);
                 if (fTimer > 0.0f) {
                     _ghGfxInterface->sprSlider[markSpr][1]->SetColor(
-                            SETA(0xFFFFFF, (unsigned char) (fTimer * 2.5f * 255.0f)));
+                            SETA(0xFFFFFF, (unsigned char) (fTimer * 2.5f * getAlphaModifier())));
                     _ghGfxInterface->sprSlider[markSpr][1]->Render(dx + v, dy);
                 }
             } else if (mOrientation == VERTICAL) {
@@ -217,14 +218,39 @@ namespace SHR {
             && mouseEvent.getX() <= getWidth()
             && mouseEvent.getY() >= 0
             && mouseEvent.getY() <= getHeight()) {
+            isScrollingTo = true;
             if (getOrientation() == HORIZONTAL) {
-                setValue(markerPositionToValue(mouseEvent.getX() - getMarkerLength() / 2));
+                if (mouseEvent.getX() < getMarkerPosition()) {
+                    isScrollingToNext = false;
+                } else if (mouseEvent.getX() > getMarkerPosition() + getMarkerLength()) {
+                    isScrollingToNext = true;
+                } else {
+                    mDragged = true;
+                    isScrollingTo = false;
+                }
             } else {
-                setValue(markerPositionToValue(mouseEvent.getY() - getMarkerLength() / 2));
+                if (mouseEvent.getY() < getMarkerPosition()) {
+                    isScrollingToNext = false;
+                } else if (mouseEvent.getY() > getMarkerPosition() + getMarkerLength()) {
+                    isScrollingToNext = true;
+                } else {
+                    mDragged = true;
+                    isScrollingTo = false;
+                }
+            }
+
+            if (isScrollingTo) {
+                setValue(mValue + getStepLength() * (isScrollingToNext ? 1 : -1));
+                fTimerD = 0.4f;
             }
 
             distributeActionEvent();
         }
+    }
+
+    void Slider::mouseReleased(gcn::MouseEvent &mouseEvent) {
+        mDragged = false;
+        isScrollingTo = false;
     }
 
     void Slider::setForceKeyValue(bool b) {
@@ -236,6 +262,8 @@ namespace SHR {
     }
 
     void Slider::mouseDragged(DragEvent &mouseEvent) {
+        if (!mDragged) return;
+
         int npos = (getOrientation() == HORIZONTAL ? mouseEvent.getX() : mouseEvent.getY()) - getMarkerLength() / 2;
         for (size_t i = 0; i < vKeys.size(); i++) {
             int kpos = valueToMarkerPosition(vKeys[i]);
@@ -283,7 +311,7 @@ namespace SHR {
 
     void Slider::adjustMarkerLength() {
         double len = mScaleEnd - mScaleStart;
-        double scrollsize = (getOrientation() == HORIZONTAL ? getWidth() : getHeight()) - 5;
+        double scrollsize = (getOrientation() == HORIZONTAL ? getWidth() : getHeight()) - 40;
         double ratio = (len == 0 ? 1 : scrollsize / len);
         if (ratio > 1.0f) ratio = 1.0f;
         mMarkerLength = ratio * scrollsize;
@@ -398,5 +426,28 @@ namespace SHR {
         distributeActionEvent();
 
         mouseEvent.consume();
+    }
+
+    void Slider::logic() {
+        if (isScrollingTo) {
+            if (fTimerD > 0) {
+                fTimerD -= hge->Timer_GetDelta();
+            } else {
+                int dx, dy;
+                float x, y;
+                hge->Input_GetMousePos(&x, &y);
+                getAbsolutePosition(dx, dy);
+
+                double stepLength = getStepLength() * (isScrollingToNext ? 1 : -1);
+                double targetValue = mValue + stepLength;
+                double mouseValue = markerPositionToValue(getOrientation() == HORIZONTAL ? x - dx : y - dy);
+
+                if (isScrollingToNext ? mouseValue < targetValue + stepLength : mouseValue > targetValue) return;
+
+                setValue(targetValue);
+                fTimerD += 0.05;
+                distributeActionEvent();
+            }
+        }
     }
 }

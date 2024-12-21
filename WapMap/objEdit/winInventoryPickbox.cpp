@@ -4,12 +4,10 @@
 #include "../states/editing_ww.h"
 #include "../databanks/imageSets.h"
 
-extern HGE *hge;
-
 namespace ObjEdit {
-    cInvPickbox::cInvPickbox() {
+    cInvPickbox::cInvPickbox(bool isWarpNotFunctional): isWarpNotFunctional(isWarpNotFunctional) {
         win = new SHR::Win(&GV->gcnParts, GETL2S("EditObj_Inventory", "WinCaption"));
-        win->setDimension(gcn::Rectangle(0, 0, 256, 346));
+        win->setDimension(gcn::Rectangle(0, 0, 254, 346));
         //win->setClose(1);
         win->addActionListener(this);
         //win->add(vpAdv);
@@ -40,7 +38,7 @@ namespace ObjEdit {
         hge->Input_GetMousePos(&mx, &my);
 
         int pickedid = -1;
-        if (GV->editState->conMain->getWidgetAt(mx, my) == win && mx > dx + 4 && my > dy + 28 && mx < dx + 4 + 252 &&
+        if (GV->editState->conMain->getWidgetAt(mx, my) == win && mx > dx + 4 && my > dy + 28 && mx < dx + 4 + 240 &&
             my < dy + 28 + 267) {
             sli->setValue(sli->getValue() - hge->Input_GetMouseWheel() * 30);
             mx -= dx + 4;
@@ -92,14 +90,14 @@ namespace ObjEdit {
             for (int x = 0; x < 4; x++) {
                 int id = y * 4 + x;
                 if (id < InventoryItemsCount) {
-                    cSprBankAsset *asset = GV->editState->SprBank->GetAssetByID(
-                            GV->editState->hInvCtrl->GetItemByIt(id).first.c_str());
+                    auto item = GV->editState->hInvCtrl->GetItemByIt(id);
+                    cSprBankAsset *asset = GV->editState->SprBank->GetAssetByID(item.first.c_str());
                     hgeSprite* spr = GV->sprSmiley;
                     if (asset) {
                         int iframe = GV->editState->hInvCtrl->GetAnimFrame() % asset->GetSpritesCount();
                         spr = asset->GetIMGByIterator(iframe)->GetSprite();
                     }
-                    spr->SetColor(0xFFFFFFFF);
+                    spr->SetColor(isWarpNotFunctional && item.second == 32 ? 0xFFFF5555 : 0xFFFFFFFF);
                     spr->SetFlip(0, 0, 1);
                     int grdim = spr->GetWidth();
                     if (spr->GetHeight() > grdim) grdim = spr->GetHeight();
@@ -112,7 +110,7 @@ namespace ObjEdit {
         int pickedid = -1;
         float mx, my;
         hge->Input_GetMousePos(&mx, &my);
-        if (GV->editState->conMain->getWidgetAt(mx, my) == win && mx > dx + 4 && mx > dy + 28 && mx < dx + 4 + 252 &&
+        if (GV->editState->conMain->getWidgetAt(mx, my) == win && mx > dx + 4 && mx > dy + 28 && mx < dx + 4 + 240 &&
             my < dy + 28 + 267) {
             mx -= dx + 4;
             my -= dy + 28;
@@ -135,6 +133,10 @@ namespace ObjEdit {
                                     pickedid);
             char tmp[32];
             sprintf(tmp, "E_%d", pickedid);
+            if (pickedid == 32 && isWarpNotFunctional) {
+                tmp[4] = 'B';
+                tmp[5] = 0;
+            }
             GV->fntMyriad16->printf(dx + 5, dy + 28 + 267 + 7 + 15, HGETEXT_LEFT,
                                     "~y~%s~w~", 0,
                                     GETL2S("EditObj_Inventory", tmp));

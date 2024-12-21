@@ -50,14 +50,15 @@ namespace SHR {
 
         graphics->popClipArea();
 
-        DWORD defcol = SETA(0xFFFFFF, getAlpha());
+        float a = 255.0f * getAlphaModifier();
+        DWORD defcol = SETA(0xFFFFFF, a);
 
         if (isEnabled()) {
             hGfx->sprControl[1][2]->SetColor(defcol);
             hGfx->sprControl[1][2]->Render(x, buttonY);
             if (fTimer > 0.0f) {
                 hGfx->sprControl[1][3]->SetColor(
-                        SETA(0xFFFFFF, (unsigned char) (fTimer * 10.0f * 255.0f * getAlphaModifier())));
+                        SETA(0xFFFFFF, (unsigned char) (fTimer * 10.0f * a)));
                 hGfx->sprControl[1][3]->Render(x, buttonY);
             }
 
@@ -74,7 +75,7 @@ namespace SHR {
         }
 
         graphics->setFont(getFont());
-        graphics->setColor(gcn::Color(0xe1e1e1, isEnabled() ? 0xFF : 0x77));
+        graphics->setColor(gcn::Color(0xe1e1e1, (isEnabled() ? 1 : 0.46) * a));
 
         graphics->pushClipArea(getDimension());
         graphics->drawText(getCaption(), 20, 0);

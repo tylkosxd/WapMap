@@ -6,6 +6,7 @@
 #include "../../shared/HashLib/hashlibpp.h"
 #include "../cTextureAtlas.h"
 #include "../cParallelLoop.h"
+#include "../windows/imgsetBrowser.h"
 
 extern structProgressInfo _ghProgressInfo;
 extern HGE *hge;
@@ -19,7 +20,6 @@ bool cSprBank_SortAssetImages(cSprBankAssetIMG *a, cSprBankAssetIMG *b) {
 }
 
 cBankImageSet::cBankImageSet(WWD::Parser *hParser) : cAssetBank(hParser) {
-    m_iAssetsSize = 0;
     myAtlaser = new cTextureAtlaser();
 }
 
@@ -60,6 +60,9 @@ void cSprBankAssetIMG::Load() {
         SetFile(entry->vFiles[0]);
     }
 
+    size_t lp = GetFile().strPath.find_last_of('/');
+    _strName = GetFile().strPath.substr((lp == std::string::npos ? 0 : lp + 1));
+
     if (!hParent->GetParent()->IsLoadableImage(GetFile(), &imgInfo, cImageInfo::Full))
         return;
     imgSprite = new hgeSprite(0, 0, 0, imgInfo.iWidth, imgInfo.iHeight);
@@ -83,9 +86,6 @@ void cSprBankAssetIMG::Load() {
     float x, y, w, h;
     imgSprite->GetTextureRect(&x, &y, &w, &h);
     hParent->GetParent()->RenderImage(GetFile(), imgSprite->GetTexture(), x, y, 2048);
-
-    size_t lp = GetFile().strPath.find_last_of('/');
-    _strName = GetFile().strPath.substr((lp == std::string::npos ? 0 : lp + 1));
 
     _bLoaded = true;
 }
@@ -143,7 +143,8 @@ void cSprBankAsset::AddIMG(cSprBankAssetIMG *img) {
 
 void cSprBankAsset::DeleteIMG(cSprBankAssetIMG *img) {
 	bool checkMaxSize = false;
-	if (img->GetSprite()->GetWidth() == m_iMaxWidth || img->GetSprite()->GetHeight() == m_iMaxHeight) {
+    auto spr = img->GetSprite();
+	if (spr && (spr->GetWidth() == m_iMaxWidth || spr->GetHeight() == m_iMaxHeight)) {
 		m_iMaxWidth = 0;
 		m_iMaxHeight = 0;
 		checkMaxSize = true;
@@ -156,12 +157,12 @@ void cSprBankAsset::DeleteIMG(cSprBankAssetIMG *img) {
 			if (!checkMaxSize) break;
 		}
 		else if (checkMaxSize) {
-			if (img->GetSprite()->GetWidth() > m_iMaxWidth) {
-				m_iMaxWidth = img->GetSprite()->GetWidth();
+			if (spr->GetWidth() > m_iMaxWidth) {
+				m_iMaxWidth = spr->GetWidth();
 			}
 
-			if (img->GetSprite()->GetHeight() > m_iMaxHeight) {
-				m_iMaxHeight = img->GetSprite()->GetHeight();
+			if (spr->GetHeight() > m_iMaxHeight) {
+				m_iMaxHeight = spr->GetHeight();
 			}
 		}
     }
@@ -267,7 +268,7 @@ WWD::Rect cBankImageSet::GetSpriteRenderRect(hgeSprite *spr) {
 WWD::Rect cBankImageSet::GetObjectRenderRect(WWD::Object *obj) {
     hgeSprite *spr = GetObjectSprite(obj);
     WWD::Rect ret;
-    if (!spr) return ret;
+    if (!spr) spr = GV->sprSmiley;
     float hsx, hsy;
     spr->GetHotSpot(&hsx, &hsy);
     ret.x2 = spr->GetWidth();
@@ -437,8 +438,11 @@ void cBankImageSet::DeleteAsset(cAsset *hAsset) {
             if (m_vAssets[i] == set) {
                 delete m_vAssets[i];
                 m_vAssets.erase(m_vAssets.begin() + i);
-                return;
+                break;
             }
+    }
+    if (GV->editState->hwinImageSetBrowser->GetWindow()->isVisible()) {
+        GV->editState->hwinImageSetBrowser->Synchronize();
     }
 }
 

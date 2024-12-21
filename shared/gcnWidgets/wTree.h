@@ -32,7 +32,7 @@ namespace SHR {
 
         hgeSprite *GetIcon() { return sprIcon; };
 
-        virtual int Render(int x, int y);
+        virtual int Render(int x, int y, int a);
 
         virtual int GetWidth() const;
 
@@ -64,7 +64,7 @@ namespace SHR {
         bool m_bOpened;
         int m_iWex, m_iHex;
     public:
-        int Render(int x, int y) override;
+        int Render(int x, int y, int a) override;
 
         TreeFolder(const char *pszName, hgeSprite *psprIcon);
 
@@ -132,7 +132,7 @@ namespace SHR {
 
         int GetHeight() const override;
 
-        int Render(int x, int y) override;
+        int Render(int x, int y, int a) override;
 
         void adjustSize();
 

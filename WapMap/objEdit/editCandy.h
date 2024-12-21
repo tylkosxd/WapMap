@@ -29,7 +29,8 @@ namespace ObjEdit {
 		cSprBankAssetIMG *asFramePick = NULL, *asFrameHover = NULL;
 
 		std::vector<cSprBankAsset*> standardImgs, customImgs, otherImgs;
-		enum TAB { TAB_STANDARD = 0, TAB_CUSTOM, TAB_OTHER };
+		enum TAB { TAB_STANDARD = 0, TAB_CUSTOM, TAB_OTHER, TABS_COUNT };
+        int tabScrollPositions[TABS_COUNT] = { 0, 0, 0 };
 
 		static std::vector<std::string> AnimationsList;
 

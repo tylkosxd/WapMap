@@ -5,13 +5,11 @@
 #include "../shared/gcnWidgets/wInventory.h"
 #include "databanks/imageSets.h"
 
-extern HGE *hge;
-
 cInventoryController::cInventoryController() {
     hElements[0] = std::pair<std::string, int>("GAME_TREASURE_COINS", 33);
     hElements[1] = std::pair<std::string, int>("GAME_TREASURE_GOLDBARS", 1);
     hElements[2] = std::pair<std::string, int>("GAME_TREASURE_NECKLACE", 6);
-    hElements[3] = std::pair<std::string, int>("GAME_MAPPIECE", 31);
+    // hElements[3] = std::pair<std::string, int>("GAME_MAPPIECE", 31);
 
     hElements[4] = std::pair<std::string, int>("GAME_TREASURE_RINGS_RED", 2);
     hElements[5] = std::pair<std::string, int>("GAME_TREASURE_RINGS_GREEN", 3);
@@ -95,9 +93,9 @@ cInventoryItem cInventoryController::GetItemByIt(int i) {
 }
 
 cInventoryItem cInventoryController::GetItemByID(int id) {
-    for (int i = 0; i < InventoryItemsCount; i++)
-        if (GetInventoryItemID(hElements[i]) == id)
-            return hElements[i];
+    for (auto & hElement : hElements)
+        if (GetInventoryItemID(hElement) == id)
+            return hElement;
     if (id == 61)
         return hElements[40]; //hack for LEVEL_HEALTH both under 24 and 61
     return cInventoryItem("", -1);
@@ -119,15 +117,15 @@ void cInventoryController::SetClipboardEmpty() {
 
 bool cInventoryController::IsClipboardEmpty() {
     if (GetInventoryItemID(hClipboard) == -1)
-        return 1;
-    return 0;
+        return true;
+    return false;
 }
 
 void cInventoryController::MapSwitch() {
     if (GV->editState->hParser->GetBaseLevel() % 2 == 1 && GV->editState->hParser->GetBaseLevel() != 13)
-        hElements[3] = std::pair<std::string, int>("GAME_MAPPIECE", 31);
+        hElements[EndOfLevelPowerupIt] = std::pair<std::string, int>("GAME_MAPPIECE", 31);
     else
-        hElements[3] = std::pair<std::string, int>("LEVEL_GEM", 31);
+        hElements[EndOfLevelPowerupIt] = std::pair<std::string, int>("LEVEL_GEM", 31);
 }
 
 void cInventoryController::DrawDraggedObject() {

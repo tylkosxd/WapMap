@@ -161,7 +161,7 @@ void State::EditingWW::Init() {
     mainListener = new EditingWWMainListener(this);
     vp = new EditingWWvpCallback(this);
 
-    gui->addGlobalKeyListener(mainListener);
+    conMain->addKeyListener(mainListener);
     conMain->addMouseListener(mainListener);
 
     MDI = new cMDI();
@@ -207,6 +207,7 @@ void State::EditingWW::Init() {
     sliVer->setScaleStart(0);
     sliVer->addActionListener(mainListener);
     sliVer->setMarkerLength(40);
+    sliVer->setStepLength(64);
     conMain->add(sliVer, 0, 0);
 
     sliHor = new SHR::Slider(100);
@@ -214,6 +215,7 @@ void State::EditingWW::Init() {
     sliHor->setScaleStart(0);
     sliHor->addActionListener(mainListener);
     sliHor->setMarkerLength(40);
+    sliHor->setStepLength(64);
     conMain->add(sliHor, 0, 0);
 
     butMicroTileCB = new SHR::But(GV->hGfxInterface, GV->sprIcons16[Icon16_ModeTile]);
@@ -503,7 +505,6 @@ void State::EditingWW::Init() {
     sliSearchObj->setOrientation(SHR::Slider::VERTICAL);
     sliSearchObj->setDimension(gcn::Rectangle(0, 0, 11, 423));
     sliSearchObj->setVisible(0);
-    sliSearchObj->setMarkerLength(20);
     winSearchObj->add(sliSearchObj, 430, 105);
 
     winTileProp = new SHR::Win(&GV->gcnParts, GETL(Lang_TileProperties));
@@ -1852,7 +1853,7 @@ void State::EditingWW::Init() {
     conMain->add(advcon_Warp, 400, 400);
 
     advcon_Container = new SHR::Context(&GV->gcnParts, GV->fntMyriad16);
-    advcon_Container->AddElement(OBJMENU_ADV_CONTAINER_RAND, GETL2S("EditObj_Statue", "Context_Randomize"),
+    advcon_Container->AddElement(OBJMENU_ADV_CONTAINER_RAND, GETL2S("EditObj_Container", "Context_Randomize"),
                                  GV->sprIcons16[Icon16_Treasure]);
     advcon_Container->adjustSize();
     advcon_Container->hide();

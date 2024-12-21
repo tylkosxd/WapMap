@@ -164,6 +164,8 @@ namespace SHR {
 
         virtual void widgetHidden(const Event &event);
 
+        virtual void _setParent(Widget* parent);
+
         void hide();
 
         void addSelectionListener(gcn::SelectionListener *selectionListener);

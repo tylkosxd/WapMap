@@ -439,6 +439,7 @@ namespace State {
                 int scroll = saFileList->getVerticalScrollAmount();
                 int first = scroll / iListElementHeight,
                         amount = saFileList->getHeight() / iListElementHeight + 2;
+                GV->sprCheckboard->SetColor(0xFFFFFFFF);
                 for (size_t i = first; i < vImages.size() && i < (first + amount); i++) {
                     int yPos = dry + i * iListElementHeight + 10 - scroll;
                     int yClip = std::max(dry, yPos + 20),

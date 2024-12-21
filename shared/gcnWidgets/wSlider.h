@@ -170,7 +170,7 @@ namespace SHR {
         // Inherited from Widget
 
         virtual void draw(Graphics *graphics);
-
+        virtual void logic();
 
         // Inherited from MouseListener.
 
@@ -179,6 +179,7 @@ namespace SHR {
         virtual void mouseExited(MouseEvent &mouseEvent);
 
         virtual void mousePressed(MouseEvent &mouseEvent);
+        virtual void mouseReleased(MouseEvent &mouseEvent);
 
         virtual void mouseDragged(DragEvent &mouseEvent);
 
@@ -270,7 +271,9 @@ namespace SHR {
         Orientation mOrientation;
         Style mStyle;
 
-        float fTimer;
+        float fTimer, fTimerD;
+        bool isScrollingTo = false;
+        bool isScrollingToNext;
 
         bool mHasMouse;
         std::vector<double> vKeys;
