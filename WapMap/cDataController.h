@@ -46,24 +46,26 @@ protected:
     unsigned int _iFileSize = 0;
     cAssetBank<cAsset> *_hBank = 0;
     bool _bForceReload = false;
+
+    friend class cBankPalettes;
 public:
     virtual ~cAsset() {}
 
-    const char *GetName() { return _strName.c_str(); };
+    const char *GetName() { return _strName.c_str(); }
 
-    cFile& GetFile() { return _hFile; };
+    cFile& GetFile() { return _hFile; }
 
     void SetFile(cFile nFile);
 
-    unsigned int GetFileSize() { return _iFileSize; };
+    unsigned int GetFileSize() { return _iFileSize; }
 
-    bool IsLoaded() { return _bLoaded; };
+    bool IsLoaded() { return _bLoaded; }
 
-    void SetFileModTime(time_t tTime) { _iLastDate = tTime; };
+    void SetFileModTime(time_t tTime) { _iLastDate = tTime; }
 
-    std::string GetHash() { return _strHash; };
+    std::string GetHash() { return _strHash; }
 
-    bool IsActual() { return _bLoaded && (_iLoadedDate != 0 && _iLoadedDate == _iLastDate || _iLoadedDate == 0); };
+    bool IsActual() { return _bLoaded && (_iLoadedDate != 0 && _iLoadedDate == _iLastDate || _iLoadedDate == 0); }
 
     virtual void Load() = 0;
 
@@ -71,17 +73,15 @@ public:
 
     void Reload();
 
-    void SetPackage(cAssetPackage *ptr) { hParent = ptr; };
+    void SetPackage(cAssetPackage *ptr) { hParent = ptr; }
 
-    cAssetPackage *GetPackage() { return hParent; };
+    cAssetPackage *GetPackage() { return hParent; }
 
-    virtual std::string GetMountPoint() { return ""; }; // Get rid or pure virtual?
+    cAssetBank<cAsset> *GetAssignedBank() { return _hBank; }
 
-    cAssetBank<cAsset> *GetAssignedBank() { return _hBank; };
+    void SetForceReload(bool b) { _bForceReload = b; }
 
-    void SetForceReload(bool b) { _bForceReload = b; };
-
-    bool NeedReload() { return _bForceReload; };
+    bool NeedReload() { return _bForceReload; }
 };
 
 struct cDC_MountEntry {
@@ -113,7 +113,7 @@ public:
 
     T *GetAssetByIterator(int iIT) { return m_vAssets[iIT]; }
 
-    std::string getElementAt(int i) override { return m_vAssets[i]->GetMountPoint(); }
+    std::string getElementAt(int i) override { return m_vAssets[i]->GetName(); }
 
     int getNumberOfElements() override { return m_vAssets.size(); }
 

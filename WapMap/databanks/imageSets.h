@@ -38,7 +38,7 @@ public:
 
     void Unload() override;
 
-    std::string GetMountPoint() override;
+    std::string GetMountPoint();
 
     friend class cBankImageSet;
 
@@ -47,14 +47,13 @@ public:
 
 class cSprBankAsset : public cAsset {
 protected:
-    std::string strID;
     std::string strHash;
     std::vector<cSprBankAssetIMG *> m_vSprites;
     int m_iSize = 0;
     int m_iMaxID = 0;
     int m_iMaxWidth = 0, m_iMaxHeight = 0;
 
-    cSprBankAsset(std::string id) : strID(id) {}
+    cSprBankAsset(std::string id) { _strName = id; }
 
     void DeleteIMG(cSprBankAssetIMG *img);
 
@@ -80,7 +79,7 @@ public:
 
     int GetSpritesCount() { return m_vSprites.size(); };
 
-    const char *GetID() { return strID.c_str(); };
+    const char *GetID() { return _strName.c_str(); };
 
     int GetSize() { return m_iSize; };
 

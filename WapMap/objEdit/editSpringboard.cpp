@@ -38,6 +38,13 @@ namespace ObjEdit {
         win->add(butPick, 165, 15);
 
         bPicking = false;
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            int z = obj->GetLogic()[0] == 'G' ? 1 : 2000;
+            hTempObj->SetParam(WWD::Param_LocationZ, z);
+            GetUserDataFromObj(hTempObj)->SetZ(z);
+            hState->vPort->MarkToRedraw();
+        }
     }
 
     cEditObjSpringboard::~cEditObjSpringboard() {

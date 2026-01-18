@@ -35,17 +35,18 @@ namespace ObjEdit {
             win->add(rbType[i], 5 + x * 71, 5 + y * 60 + 30 - rbType[i]->getHeight() / 2);
         }
 
-        bool bAny = 0;
-        for (int i = 0; i < 11; i++)
-            if (rbType[i]->isSelected()) {
-                bAny = 1;
-                break;
-            }
-        if (!bAny) {
-            rbType[0]->setSelected(1);
-            hTempObj->SetLogic("HealthPowerup");
-            hTempObj->SetImageSet(hState->hInvCtrl->GetItemByID(iHealthID[0]).first.c_str());
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 1000);
+            GetUserDataFromObj(hTempObj)->SetZ(1000);
+            hState->vPort->MarkToRedraw();
         }
+
+        for (auto & i : rbType)
+            if (i->isSelected()) return;
+
+        rbType[0]->setSelected(1);
+        hTempObj->SetLogic("HealthPowerup");
+        hTempObj->SetImageSet(hState->hInvCtrl->GetItemByID(iHealthID[0]).first.c_str());
     }
 
     cEditObjHealth::~cEditObjHealth() {

@@ -65,6 +65,12 @@ namespace ObjEdit {
         if (cbDontDisappear->isEnabled())
             cbDontDisappear->setSelected(hTempObj->GetParam(WWD::Param_Damage) == 1);
         win->add(cbDontDisappear, 5, 5 + 120 + 29 + 33 + 5);
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 1000);
+            GetUserDataFromObj(hTempObj)->SetZ(1000);
+            hState->vPort->MarkToRedraw();
+        }
     }
 
     cEditObjSpecialPowerup::~cEditObjSpecialPowerup() {

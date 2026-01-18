@@ -334,7 +334,7 @@ namespace State {
                         strcpy(imgset, ani->GetImageset());
                     if (strlen(imgset) == 0) {
                         const char *id = m_hOwn->hAniBank->GetAssetByIterator(
-                                m_hOwn->dbAssetsAni->getSelected())->GetID();
+                                m_hOwn->dbAssetsAni->getSelected())->GetName();
                         char *idreplace =
                                 m_hOwn->hParser->GetGame() == WWD::Game_Gruntz ? SHR::Replace(id, "IMAGEZ_", "")
                                                                                : SHR::Replace(id, "IMAGES_", "");

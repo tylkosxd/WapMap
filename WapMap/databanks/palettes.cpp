@@ -4,7 +4,7 @@
 
 void cBankPalettes::BatchProcessEnd() {
     for (int i = m_vAssets.size() - 1; i >= 0; i--) {
-        if (m_vAssets[i]->GetMountPoint().ends_with("MAIN.PAL")) {
+        if (m_vAssets[i]->_strName.ends_with("MAIN.PAL")) {
             hDC->SetPalette(m_vAssets[i]->GetPalette());
             return;
         }

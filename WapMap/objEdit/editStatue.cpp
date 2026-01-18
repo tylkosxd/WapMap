@@ -84,7 +84,8 @@ namespace ObjEdit {
         const char* logic = hTempObj->GetLogic();
         int z = hTempObj->GetParam(WWD::Param_LocationZ);
         if (!z) {
-            hTempObj->SetParam(WWD::Param_LocationZ, 1100);
+            z = logic[0] == 'B' ? 1100 : 5000;
+            hTempObj->SetParam(WWD::Param_LocationZ, z);
 			GetUserDataFromObj(hTempObj)->SetZ(z);
 			hState->vPort->MarkToRedraw();
         }

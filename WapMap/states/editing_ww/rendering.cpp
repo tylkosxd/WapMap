@@ -199,126 +199,126 @@ void State::EditingWW::DrawDB() {
     winDB->getAbsolutePosition(dx, dy);
     int tabindex = tadbTabs->getSelectedTabIndex();
 
-    if (tabindex == 1) {
-        //imgset list right separator
-        hge->Gfx_RenderLine(dx + 310, dy + 54, dx + 310, dy + 54 + 540, GV->colLineBright);
-        hge->Gfx_RenderLine(dx + 309, dy + 53, dx + 309, dy + 54 + 540, GV->colLineDark);
-        //imget list upper separator
-        hge->Gfx_RenderLine(dx + 9, dy + 184, dx + 308, dy + 184, GV->colLineBright);
-        hge->Gfx_RenderLine(dx + 9, dy + 183, dx + 308, dy + 183, GV->colLineDark);
+//     if (tabindex == 1) {
+//         //imgset list right separator
+//         hge->Gfx_RenderLine(dx + 310, dy + 54, dx + 310, dy + 54 + 540, GV->colLineBright);
+//         hge->Gfx_RenderLine(dx + 309, dy + 53, dx + 309, dy + 54 + 540, GV->colLineDark);
+//         //imget list upper separator
+//         hge->Gfx_RenderLine(dx + 9, dy + 184, dx + 308, dy + 184, GV->colLineBright);
+//         hge->Gfx_RenderLine(dx + 9, dy + 183, dx + 308, dy + 183, GV->colLineDark);
+//
+//         if (dbAssetsImg->getSelected() != -1 && dbFramesImg->getSelected() != -1) {
+//             //image list right separator
+//             hge->Gfx_RenderLine(dx + 494, dy + 54, dx + 494, dy + 260, GV->colLineBright);
+//             hge->Gfx_RenderLine(dx + 493, dy + 53, dx + 493, dy + 260, GV->colLineDark);
+//             //image properties separators
+//             for (int i = 0; i < 8; i++) {
+//                 hge->Gfx_RenderLine(dx + 494, dy + 100 + i * 20, dx + winDB->getWidth() - 5, dy + 100 + i * 20,
+//                                     GV->colLineBright);
+//                 hge->Gfx_RenderLine(dx + 494, dy + 99 + i * 20, dx + winDB->getWidth() - 5, dy + 99 + i * 20,
+//                                     GV->colLineDark);
+//             }
+//             //image preview flags upper separator
+//             hge->Gfx_RenderLine(dx + 310, dy + 262, dx + winDB->getWidth() - 5, dy + 262, GV->colLineBright);
+//             hge->Gfx_RenderLine(dx + 310, dy + 261, dx + winDB->getWidth() - 5, dy + 261, GV->colLineDark);
+//             //image preview upper separator
+//             hge->Gfx_RenderLine(dx + 310, dy + 292, dx + winDB->getWidth() - 5, dy + 292, GV->colLineBright);
+//             hge->Gfx_RenderLine(dx + 310, dy + 291, dx + winDB->getWidth() - 5, dy + 291, GV->colLineDark);
+//             //flags left separator
+//             hge->Gfx_RenderLine(dx + 655, dy + 99, dx + 655, dy + 260, GV->colLineBright);
+//             hge->Gfx_RenderLine(dx + 654, dy + 99, dx + 654, dy + 260, GV->colLineDark);
+//             //user data vertical separator
+//             hge->Gfx_RenderLine(dx + 575, dy + 239, dx + 575, dy + 260, GV->colLineBright);
+//             hge->Gfx_RenderLine(dx + 574, dy + 239, dx + 574, dy + 260, GV->colLineDark);
+//
+//             cSprBankAssetIMG *img = SprBank->GetAssetByIterator(dbAssetsImg->getSelected())->GetIMGByIterator(
+//                     dbFramesImg->getSelected());
+//
+//             GV->fntMyriad16->printf(dx + 650, dy + 99, HGETEXT_RIGHT, "~y~%d", 0, dbFramesImg->getSelected());
+//             GV->fntMyriad16->printf(dx + 650, dy + 119, HGETEXT_RIGHT, "~y~%d", 0, img->GetID());
+//             /*GV->fntMyriad16->printf(dx+650, dy+139, HGETEXT_RIGHT, "~y~%d", 0, img->GetFileID());
+// 			char * fl = SHR::FormatSize(img->GetFileSize());
+// 			GV->fntMyriad16->printf(dx+650, dy+159, HGETEXT_RIGHT, "~y~%s", 0, fl);
+// 			delete [] fl;
+// 			GV->fntMyriad16->printf(dx+650, dy+179, HGETEXT_RIGHT, "~y~%d~l~x~y~%d", 0, img->GetFileDimX(), img->GetFileDimY());
+// 			GV->fntMyriad16->printf(dx+650, dy+199, HGETEXT_RIGHT, "~y~%d~l~x~y~%d", 0, img->GetFileOffsetX(), img->GetFileOffsetY());
+// 			GV->fntMyriad16->printf(dx+570, dy+239, HGETEXT_RIGHT, "~y~%d", 0, img->GetFileUserData(0));
+// 			GV->fntMyriad16->printf(dx+650, dy+239, HGETEXT_RIGHT, "~y~%d", 0, img->GetFileUserData(1));
+// 			GV->fntMyriad16->SetColor(0xFF000000);
+// 			GV->fntMyriad16->Render(dx+790, dy+80, HGETEXT_RIGHT, img->GetFileHash().c_str());*/
+//
+//             /*int flagn = 1;
+// 			for(int i=0;i<8;i++){
+// 			 char ident[32];
+// 			 sprintf(ident, "Flag_%d", i+1);
+// 			 GV->fntMyriad16->Render(dx+676, dy+99+i*20, HGETEXT_LEFT, GETL2S("WinDatabase", ident));
+// 			 hgeSprite * spr = (img->GetFileFlags() & flagn ? GV->gcnParts.sprCBoxOn : GV->gcnParts.sprCBox);
+// 			 spr->Render(dx+658, dy+102+i*20);
+// 			 flagn *= 2;
+// 			}*/
+//
+//             int vpx = dx + 320, vpy = dy + 302;
+//             hge->Gfx_SetClipping(vpx, vpy, 465, 282);
+//             GV->sprCheckboard->SetColor(0xFFFFFFFF);
+//             for (int y = 0; y < 3; y++)
+//                 for (int x = 0; x < 4; x++) {
+//                     GV->sprCheckboard->Render(vpx + 120 * x, vpy + 120 * y);
+//                 }
+//
+//             hgeSprite *spr = img->GetSprite();
+//             spr->SetFlip(cbdbisFlipX->isSelected(), cbdbisFlipY->isSelected());
+//             int sprx = vpx + 233 - idbisMoveX,
+//                 spry = vpy + 141 - idbisMoveY;
+//             spr->Render(sprx, spry);
+//
+//             if (cbdbisBorder->isSelected()) {
+//                 float hsx, hsy;
+//                 spr->GetHotSpot(&hsx, &hsy);
+//                 float fsprw = spr->GetWidth() / 2, fsprh = spr->GetHeight() / 2;
+//
+//                 hsx -= fsprw;
+//                 hsy -= fsprh;
+//
+//                 hge->Gfx_RenderLine(sprx - fsprw - hsx, spry - fsprh - hsy, sprx + fsprw - hsx, spry - fsprh - hsy,
+//                                     0xFFFF0000);
+//                 hge->Gfx_RenderLine(sprx + fsprw - hsx, spry - fsprh - hsy, sprx + fsprw - hsx, spry + fsprh - hsy,
+//                                     0xFFFF0000);
+//                 hge->Gfx_RenderLine(sprx + fsprw - hsx, spry + fsprh - hsy, sprx - fsprw - hsx, spry + fsprh - hsy,
+//                                     0xFFFF0000);
+//                 hge->Gfx_RenderLine(sprx - fsprw - hsx, spry + fsprh - hsy, sprx - fsprw - hsx, spry - fsprh - hsy,
+//                                     0xFFFF0000);
+//             }
+//             /*if( cbdbisOffsetBorder->isSelected() && (img->GetFileOffsetX() != 0 || img->GetFileOffsetY() != 0) ){
+// 			 float hsx, hsy;
+// 			 spr->GetHotSpot(&hsx, &hsy);
+// 			 float fsprw = spr->GetWidth()/2, fsprh = spr->GetHeight()/2;
+//
+// 			 hsx -= fsprw+img->GetFileOffsetX();
+// 			 hsy -= fsprh+img->GetFileOffsetY();
+//
+// 			 hge->Gfx_RenderLine(sprx-fsprw-hsx, spry-fsprh-hsy, sprx+fsprw-hsx, spry-fsprh-hsy, 0xFFFF00FF);
+// 			 hge->Gfx_RenderLine(sprx+fsprw-hsx, spry-fsprh-hsy, sprx+fsprw-hsx, spry+fsprh-hsy, 0xFFFFFF00);
+// 			 hge->Gfx_RenderLine(sprx+fsprw-hsx, spry+fsprh-hsy, sprx-fsprw-hsx, spry+fsprh-hsy, 0xFFFFFF00);
+// 			 hge->Gfx_RenderLine(sprx-fsprw-hsx, spry+fsprh-hsy, sprx-fsprw-hsx, spry-fsprh-hsy, 0xFFFFFF00);
+// 			}*/
+//             hge->Gfx_SetClipping();
+//         }
+//     } else if (tabindex == 1) {
+//         hge->Gfx_RenderLine(dx + 461, dy + 54, dx + 461, dy + 190, GV->colLineBright);
+//         hge->Gfx_RenderLine(dx + 460, dy + 53, dx + 460, dy + 190, GV->colLineDark);
+//     }
 
-        if (dbAssetsImg->getSelected() != -1 && dbFramesImg->getSelected() != -1) {
-            //image list right separator
-            hge->Gfx_RenderLine(dx + 494, dy + 54, dx + 494, dy + 260, GV->colLineBright);
-            hge->Gfx_RenderLine(dx + 493, dy + 53, dx + 493, dy + 260, GV->colLineDark);
-            //image properties separators
-            for (int i = 0; i < 8; i++) {
-                hge->Gfx_RenderLine(dx + 494, dy + 100 + i * 20, dx + winDB->getWidth() - 5, dy + 100 + i * 20,
-                                    GV->colLineBright);
-                hge->Gfx_RenderLine(dx + 494, dy + 99 + i * 20, dx + winDB->getWidth() - 5, dy + 99 + i * 20,
-                                    GV->colLineDark);
-            }
-            //image preview flags upper separator
-            hge->Gfx_RenderLine(dx + 310, dy + 262, dx + winDB->getWidth() - 5, dy + 262, GV->colLineBright);
-            hge->Gfx_RenderLine(dx + 310, dy + 261, dx + winDB->getWidth() - 5, dy + 261, GV->colLineDark);
-            //image preview upper separator
-            hge->Gfx_RenderLine(dx + 310, dy + 292, dx + winDB->getWidth() - 5, dy + 292, GV->colLineBright);
-            hge->Gfx_RenderLine(dx + 310, dy + 291, dx + winDB->getWidth() - 5, dy + 291, GV->colLineDark);
-            //flags left separator
-            hge->Gfx_RenderLine(dx + 655, dy + 99, dx + 655, dy + 260, GV->colLineBright);
-            hge->Gfx_RenderLine(dx + 654, dy + 99, dx + 654, dy + 260, GV->colLineDark);
-            //user data vertical separator
-            hge->Gfx_RenderLine(dx + 575, dy + 239, dx + 575, dy + 260, GV->colLineBright);
-            hge->Gfx_RenderLine(dx + 574, dy + 239, dx + 574, dy + 260, GV->colLineDark);
-
-            cSprBankAssetIMG *img = SprBank->GetAssetByIterator(dbAssetsImg->getSelected())->GetIMGByIterator(
-                    dbFramesImg->getSelected());
-
-            GV->fntMyriad16->printf(dx + 650, dy + 99, HGETEXT_RIGHT, "~y~%d", 0, dbFramesImg->getSelected());
-            GV->fntMyriad16->printf(dx + 650, dy + 119, HGETEXT_RIGHT, "~y~%d", 0, img->GetID());
-            /*GV->fntMyriad16->printf(dx+650, dy+139, HGETEXT_RIGHT, "~y~%d", 0, img->GetFileID());
-			char * fl = SHR::FormatSize(img->GetFileSize());
-			GV->fntMyriad16->printf(dx+650, dy+159, HGETEXT_RIGHT, "~y~%s", 0, fl);
-			delete [] fl;
-			GV->fntMyriad16->printf(dx+650, dy+179, HGETEXT_RIGHT, "~y~%d~l~x~y~%d", 0, img->GetFileDimX(), img->GetFileDimY());
-			GV->fntMyriad16->printf(dx+650, dy+199, HGETEXT_RIGHT, "~y~%d~l~x~y~%d", 0, img->GetFileOffsetX(), img->GetFileOffsetY());
-			GV->fntMyriad16->printf(dx+570, dy+239, HGETEXT_RIGHT, "~y~%d", 0, img->GetFileUserData(0));
-			GV->fntMyriad16->printf(dx+650, dy+239, HGETEXT_RIGHT, "~y~%d", 0, img->GetFileUserData(1));
-			GV->fntMyriad16->SetColor(0xFF000000);
-			GV->fntMyriad16->Render(dx+790, dy+80, HGETEXT_RIGHT, img->GetFileHash().c_str());*/
-
-            /*int flagn = 1;
-			for(int i=0;i<8;i++){
-			 char ident[32];
-			 sprintf(ident, "Flag_%d", i+1);
-			 GV->fntMyriad16->Render(dx+676, dy+99+i*20, HGETEXT_LEFT, GETL2S("WinDatabase", ident));
-			 hgeSprite * spr = (img->GetFileFlags() & flagn ? GV->gcnParts.sprCBoxOn : GV->gcnParts.sprCBox);
-			 spr->Render(dx+658, dy+102+i*20);
-			 flagn *= 2;
-			}*/
-
-            int vpx = dx + 320, vpy = dy + 302;
-            hge->Gfx_SetClipping(vpx, vpy, 465, 282);
-            GV->sprCheckboard->SetColor(0xFFFFFFFF);
-            for (int y = 0; y < 3; y++)
-                for (int x = 0; x < 4; x++) {
-                    GV->sprCheckboard->Render(vpx + 120 * x, vpy + 120 * y);
-                }
-
-            hgeSprite *spr = img->GetSprite();
-            spr->SetFlip(cbdbisFlipX->isSelected(), cbdbisFlipY->isSelected());
-            int sprx = vpx + 233 - idbisMoveX,
-                spry = vpy + 141 - idbisMoveY;
-            spr->Render(sprx, spry);
-
-            if (cbdbisBorder->isSelected()) {
-                float hsx, hsy;
-                spr->GetHotSpot(&hsx, &hsy);
-                float fsprw = spr->GetWidth() / 2, fsprh = spr->GetHeight() / 2;
-
-                hsx -= fsprw;
-                hsy -= fsprh;
-
-                hge->Gfx_RenderLine(sprx - fsprw - hsx, spry - fsprh - hsy, sprx + fsprw - hsx, spry - fsprh - hsy,
-                                    0xFFFF0000);
-                hge->Gfx_RenderLine(sprx + fsprw - hsx, spry - fsprh - hsy, sprx + fsprw - hsx, spry + fsprh - hsy,
-                                    0xFFFF0000);
-                hge->Gfx_RenderLine(sprx + fsprw - hsx, spry + fsprh - hsy, sprx - fsprw - hsx, spry + fsprh - hsy,
-                                    0xFFFF0000);
-                hge->Gfx_RenderLine(sprx - fsprw - hsx, spry + fsprh - hsy, sprx - fsprw - hsx, spry - fsprh - hsy,
-                                    0xFFFF0000);
-            }
-            /*if( cbdbisOffsetBorder->isSelected() && (img->GetFileOffsetX() != 0 || img->GetFileOffsetY() != 0) ){
-			 float hsx, hsy;
-			 spr->GetHotSpot(&hsx, &hsy);
-			 float fsprw = spr->GetWidth()/2, fsprh = spr->GetHeight()/2;
-
-			 hsx -= fsprw+img->GetFileOffsetX();
-			 hsy -= fsprh+img->GetFileOffsetY();
-
-			 hge->Gfx_RenderLine(sprx-fsprw-hsx, spry-fsprh-hsy, sprx+fsprw-hsx, spry-fsprh-hsy, 0xFFFF00FF);
-			 hge->Gfx_RenderLine(sprx+fsprw-hsx, spry-fsprh-hsy, sprx+fsprw-hsx, spry+fsprh-hsy, 0xFFFFFF00);
-			 hge->Gfx_RenderLine(sprx+fsprw-hsx, spry+fsprh-hsy, sprx-fsprw-hsx, spry+fsprh-hsy, 0xFFFFFF00);
-			 hge->Gfx_RenderLine(sprx-fsprw-hsx, spry+fsprh-hsy, sprx-fsprw-hsx, spry-fsprh-hsy, 0xFFFFFF00);
-			}*/
-            hge->Gfx_SetClipping();
-        }
-    } else if (tabindex == 1) {
-        hge->Gfx_RenderLine(dx + 461, dy + 54, dx + 461, dy + 190, GV->colLineBright);
-        hge->Gfx_RenderLine(dx + 460, dy + 53, dx + 460, dy + 190, GV->colLineDark);
-    }
-
-    if (tabindex == 2) {
+    if (tabindex == 0) {
         hge->Gfx_RenderLine(dx, dy + 191, dx + winDB->getWidth(), dy + 191, GV->colLineBright);
         hge->Gfx_RenderLine(dx, dy + 190, dx + winDB->getWidth(), dy + 190, GV->colLineDark);
     }
 
-    if (!sadbFramesImg->isVisible() && tabindex == 1 ||
-        !sadbFramesAni->isVisible() && tabindex == 2) {
+    if (//!sadbFramesImg->isVisible() && tabindex == 1 ||
+        !sadbFramesAni->isVisible() && tabindex == 0) {
         GV->fntMyriad16->printf(dx + 700, dy + 100, HGETEXT_CENTER, GETL(Lang_SelectResourceFromList), 0);
     }
 
-    if (tabindex == 2 && dbAssetsAni->getSelected() != -1) {
+    if (tabindex == 0 && dbAssetsAni->getSelected() != -1) {
         if (dbFramesAni->getSelected() == -1 ||
             dbFramesAni->getSelected() >= dbFramesAni->getListModel()->getNumberOfElements())
             dbFramesAni->setSelected(0);

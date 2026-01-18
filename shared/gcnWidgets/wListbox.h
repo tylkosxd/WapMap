@@ -44,6 +44,8 @@ namespace SHR {
 
         void removeSelectionListener(gcn::SelectionListener *selectionListener);
 
+        void drawBackground(Graphics *graphics);
+
         virtual unsigned int getRowHeight() const;
 
         virtual void draw(Graphics *graphics);

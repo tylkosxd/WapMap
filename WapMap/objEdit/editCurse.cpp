@@ -3,6 +3,7 @@
 #include "../langID.h"
 #include "../states/editing_ww.h"
 #include "../databanks/imageSets.h"
+#include "../cObjectUserData.h"
 
 extern HGE *hge;
 
@@ -40,17 +41,19 @@ namespace ObjEdit {
             //rbCurses[i]->setHeight(15);
             win->add(rbCurses[i], i * 131 + (65 - rbCurses[i]->getWidth() / 2), 80);
         }
-        bool bAnySelected = 0;
-        for (int i = 0; i < 6; i++)
-            if (rbCurses[i]->isSelected()) {
-                bAnySelected = 1;
-                break;
-            }
-        if (!bAnySelected) {
-            rbCurses[0]->setSelected(1);
-            hTempObj->SetImageSet(CURSES[0]);
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 1000);
+            GetUserDataFromObj(hTempObj)->SetZ(1000);
             hState->vPort->MarkToRedraw();
         }
+
+        for (auto & rbCurse : rbCurses)
+            if (rbCurse->isSelected()) return;
+
+        rbCurses[0]->setSelected(1);
+        hTempObj->SetImageSet(CURSES[0]);
+        hState->vPort->MarkToRedraw();
     }
 
     cEditObjCurse::~cEditObjCurse() {

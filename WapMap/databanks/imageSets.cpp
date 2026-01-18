@@ -26,7 +26,7 @@ cSprBankAsset::~cSprBankAsset() {
 
 cSprBankAsset *cBankImageSet::GetAssetByID(const char *pszID) {
     for (auto & m_vAsset : m_vAssets) {
-        if (!strcmp(m_vAsset->strID.c_str(), pszID)) {
+        if (!strcmp(m_vAsset->_strName.c_str(), pszID)) {
             return m_vAsset;
         }
     }
@@ -84,7 +84,7 @@ cSprBankAssetIMG::cSprBankAssetIMG(cFile file, int it, cBankImageSet *par, cSprB
     //hAtlaser->AddSprite(imgSprite);
 
     //size_t lp = hFile.strPath.find_last_of('/');
-    //_strName = hFile.strPath.substr((lp==std::string::npos ? 0 : lp+1));
+    _strName = GetMountPoint();//hFile.strPath.substr((lp==std::string::npos ? 0 : lp+1));
     //GV->Console->Printf("scanned: name %s frame %d", m_szName, m_iID);
 }
 
@@ -388,7 +388,7 @@ cSprBankAsset *cBankImageSet::AllocateAssetForMountPoint(cDC_MountEntry mountEnt
 }
 
 void cBankImageSet::DeleteAsset(cSprBankAsset *hAsset) {
-    std::string strMount = hAsset->GetMountPoint();
+    std::string strMount = ((cSprBankAssetIMG*)hAsset)->GetMountPoint();
     strMount = strMount.substr(8);
     size_t pos = strMount.find('/');
     if (pos == std::string::npos) return;

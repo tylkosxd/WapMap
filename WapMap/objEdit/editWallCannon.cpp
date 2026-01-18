@@ -114,6 +114,12 @@ namespace ObjEdit {
         win->add(tfAngle, 150, 110);
 
         bDraggingArrow = 0;
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 3990);
+            GetUserDataFromObj(hTempObj)->SetZ(3990);
+            hState->vPort->MarkToRedraw();
+        }
     }
 
     int cEditObjWallCannon::CalcAngle(int iX, int iY, bool bOr) {

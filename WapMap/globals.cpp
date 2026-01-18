@@ -134,22 +134,25 @@ cGlobals::cGlobals() {
     const char *lang = ini->GetValue("WapMap", "Language", "English");
     try {
         Lang = new SHR::cLanguage(lang, WA_LANGVER);
-    }
-    catch (int &i) {
+    } catch (int &i) {
         char tmp[128], tmp2[64];
         if (i == -1)
             sprintf(tmp2, "language not found");
-        else if (i == -2)
+        else if (i == -2) {
             sprintf(tmp2, "invalid version (%d, but requires %d)", atoi(lang), WA_LANGVER);
-        else
+        } else
             sprintf(tmp2, "unknown error");
         sprintf(tmp, "Unable to load language '%s' (%s).", lang, tmp2);
         Console->Printf("~r~%s~w~", tmp);
-        State::MessageBox(PRODUCT_NAME, tmp, ST_DIALOG_ICON_ERROR);
-        exit(123);
+        if (i == -2) {
+            lang = "English";
+            Lang = new SHR::cLanguage(lang, WA_LANGVER);
+        } else {
+            exit(123);
+        }
     }
 
-    Console->Printf("~g~Loaded language '~y~%s~g~' by ~y~%s~w~.", lang, Lang->GetAuthor());
+    Console->Printf("~g~Loaded language '~y~%s~g~'.", lang);
 
     if (!strcmp(Lang->GetCode(), "RU")) {
         Console->Printf("~y~Detected russian, switching to CP1251.");

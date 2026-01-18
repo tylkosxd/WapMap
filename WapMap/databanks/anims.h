@@ -6,7 +6,6 @@
 
 class cAniBankAsset : public cAsset {
 protected:
-    std::string m_szID;
     ANI::Animation *m_hAni;
 
     friend class cBankAni;
@@ -22,7 +21,7 @@ public:
 
     ANI::Animation *GetAni() { return m_hAni; };
 
-    const char *GetID() { return m_szID.c_str(); };
+    friend bool cAniBank_SortAssets(cAniBankAsset *a, cAniBankAsset *b);
 };
 
 class cBankAni : public cAssetBank<cAniBankAsset> {

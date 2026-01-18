@@ -31,13 +31,13 @@ protected:
     friend class cBankTile;
 
 public:
-    int GetID() { return iID; };
+    int GetID() { return iID; }
 
     void Load() override;
 
     void Unload() override;
 
-    std::string GetMountPoint() override;
+    std::string GetMountPoint();
 };
 
 class cTileImageSet : public cAsset {
@@ -69,21 +69,21 @@ public:
     cTile *GetTileByIterator(int piIt) {
         if (piIt < 0 || piIt >= m_vTiles.size()) return NULL;
         return m_vTiles[piIt];
-    };
+    }
 
-    int GetTilesCount() { return m_vTiles.size(); };
+    int GetTilesCount() { return m_vTiles.size(); }
 
-    int GetBrushesCount() { return m_vBrushes.size(); };
+    int GetBrushesCount() { return m_vBrushes.size(); }
 
-    int GetMaxTileID() { return m_iTileMaxID; };
+    int GetMaxTileID() { return m_iTileMaxID; }
 
-    cBrush *GetBrushByIterator(int it) { return m_vBrushes[it]; };
+    cBrush *GetBrushByIterator(int it) { return m_vBrushes[it]; }
 
-    const char *GetName() { return m_szName; };
+    const char *GetName() { return m_szName; }
 
     void UpdateHash();
 
-    std::string GetHash() { return strHash; };
+    std::string GetHash() { return strHash; }
 
     void Load() override {}
 
@@ -111,16 +111,16 @@ public:
 
     int GetFreeSlotsNum();
 
-    bool IsEmpty() { return iUsedSlots == 0; };
+    bool IsEmpty() { return iUsedSlots == 0; }
 
     static void CalculateDimension(int iTileNum, int tileW, int tileH, int &iTexW, int &iTexH);
 
     void GetLastSlotPos(int &x, int &y) {
         x = iLastSlotX;
         y = iLastSlotY;
-    };
+    }
 
-    HTEXTURE GetTexture() { return hTex; };
+    HTEXTURE GetTexture() { return hTex; }
 
     friend class cTile;
 };
@@ -139,13 +139,13 @@ public:
 
     cTile *FindTile(short piID);
 
-    cTileImageSet *GetSet(int piID) { return m_vAssets[piID]; };
+    cTileImageSet *GetSet(int piID) { return m_vAssets[piID]; }
 
     cTileImageSet *GetSet(const char *pszSet, bool bCaseSensitive = 1);
 
-    int GetSetsCount() { return m_vAssets.size(); };
+    int GetSetsCount() { return m_vAssets.size(); }
 
-    void AddTileset(cTileImageSet *ptr) { m_vAssets.push_back(ptr); };
+    void AddTileset(cTileImageSet *ptr) { m_vAssets.push_back(ptr); }
 
     void ReloadBrushes();
 
@@ -155,7 +155,7 @@ public:
         static const std::string name = "TILES";
         static const std::string namez = "TILEZ";
         return hDC->GetGame() == WWD::Game_Gruntz ? namez : name;
-    };
+    }
 
     void BatchProcessStart() override;
 

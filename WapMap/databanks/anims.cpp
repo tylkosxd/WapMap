@@ -8,7 +8,7 @@ extern structProgressInfo _ghProgressInfo;
 extern HGE *hge;
 
 bool cAniBank_SortAssets(cAniBankAsset *a, cAniBankAsset *b) {
-    return (std::string(a->GetID()) < std::string(b->GetID()));
+    return a->_strName < b->_strName;
 }
 
 void cAniBankAsset::Load() {
@@ -27,7 +27,7 @@ void cAniBankAsset::Unload() {
 
 cAniBankAsset *cBankAni::GetAssetByID(const char *pszID) {
     for (auto & m_vAsset : m_vAssets) {
-        if (!strcmp(m_vAsset->m_szID.c_str(), pszID)) {
+        if (!strcmp(m_vAsset->_strName.c_str(), pszID)) {
             return m_vAsset;
         }
     }
@@ -36,7 +36,7 @@ cAniBankAsset *cBankAni::GetAssetByID(const char *pszID) {
 
 cAniBankAsset::cAniBankAsset(cFile hFile, std::string id) {
     SetFile(hFile);
-    m_szID = id;
+    _strName = id;
 }
 
 cAniBankAsset::~cAniBankAsset() {

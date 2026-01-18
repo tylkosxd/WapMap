@@ -1,6 +1,7 @@
 #include "editCrabNest.h"
 #include "../langID.h"
 #include "../states/editing_ww.h"
+#include "../cObjectUserData.h"
 
 extern HGE *hge;
 
@@ -89,6 +90,12 @@ namespace ObjEdit {
         hInventory->SetPosition(hState->vPort->GetX() + hState->vPort->GetWidth() - hInventory->GetWidth(),
                                 hState->vPort->GetY() + hState->vPort->GetHeight() - hInventory->GetHeight());
         hInventory->SetVisible(1);
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 1);
+            GetUserDataFromObj(hTempObj)->SetZ(1);
+            hState->vPort->MarkToRedraw();
+        }
     }
 
     cEditObjCrabNest::~cEditObjCrabNest() {

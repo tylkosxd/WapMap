@@ -61,11 +61,17 @@ namespace ObjEdit {
         cbAddGlitter->addActionListener(hAL);
         cbAddGlitter->setSelected(!strcmp(hTempObj->GetLogic(), "TreasurePowerup"));
         win->add(cbAddGlitter, 5, 507);
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 1000);
+            GetUserDataFromObj(hTempObj)->SetZ(1000);
+            hState->vPort->MarkToRedraw();
+        }
     }
 
     cEditObjTreasure::~cEditObjTreasure() {
-        for (int i = 0; i < 31; i++)
-            delete rbType[i];
+        for (auto & i : rbType)
+            delete i;
         delete win;
         hState->vPort->MarkToRedraw();
     }

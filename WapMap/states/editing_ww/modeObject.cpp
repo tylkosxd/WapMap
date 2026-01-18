@@ -476,7 +476,6 @@ void State::EditingWW::CreateObjectWithEasyEdit(gcn::Widget *widg) {
     bool bDoContext = true;
     if (widg == hmbObject->butIconCurse) {
         obj->SetLogic("CursePowerup");
-        obj->SetImageSet("GAME_CURSES_FREEZE");
     } else if (widg == hmbObject->butIconSpikes) {
         if (hParser->GetBaseLevel() == 9) {
             obj->SetLogic("SawBlade");
@@ -504,6 +503,7 @@ void State::EditingWW::CreateObjectWithEasyEdit(gcn::Widget *widg) {
         obj->SetLogic("EndOfLevelPowerup");
         obj->SetImageSet("GAME_MAPPIECE");
         bDoContext = false;
+        obj->SetParam(WWD::Param_LocationZ, 1000);
     } else if (widg == hmbObject->butIconPowderKeg) {
         obj->SetLogic("PowderKeg");
         obj->SetImageSet("LEVEL_POWDERKEG");
@@ -534,16 +534,14 @@ void State::EditingWW::CreateObjectWithEasyEdit(gcn::Widget *widg) {
         else if (hParser->GetBaseLevel() == 14)
             obj->SetImageSet("LEVEL_CRUMBLINPEG2");
     } else if (widg == hmbObject->butIconStatue) {
-        obj->SetLogic("FrontStatue");
+        obj->SetLogic("BehindStatue");
         obj->SetImageSet("LEVEL_STATUE");
-        obj->SetParam(WWD::Param_LocationZ, 5000);
     } else if (widg == hmbObject->butIconBreakPlank) {
         obj->SetLogic("BreakPlank");
         obj->SetImageSet("LEVEL_BREAKPLANK");
         obj->SetParam(WWD::Param_Counter, 500);
     } else if (widg == hmbObject->butIconCrate) {
         obj->SetLogic("FrontCrate");
-        obj->SetParam(WWD::Param_LocationZ, 5000);
         if (hParser->GetBaseLevel() == 11)
             obj->SetImageSet("LEVEL_BREAKJEM");
         else if (hParser->GetBaseLevel() == 14)

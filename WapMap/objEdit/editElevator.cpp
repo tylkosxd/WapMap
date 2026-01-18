@@ -195,6 +195,12 @@ namespace ObjEdit {
         hTempObj->SetParam(WWD::Param_Width, 0);
         hTempObj->SetParam(WWD::Param_Height, 0);
 
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 2000);
+            GetUserDataFromObj(hTempObj)->SetZ(2000);
+            hState->vPort->MarkToRedraw();
+        }
+
         UpdateDirection(true);
         UpdateOneWayCheckBoxEnabled();
         UpdateAllowedDirections();

@@ -137,7 +137,7 @@ void cBankTile::SortTilesets() {
 }
 
 void cBankTile::DeleteAsset(cTileImageSet *hAsset) {
-    std::string strMount = hAsset->GetMountPoint();
+    std::string strMount = ((cTile*) hAsset)->GetMountPoint();
     strMount = strMount.substr(7);
     size_t pos = strMount.find('/');
     if (pos == std::string::npos) return;
@@ -440,6 +440,7 @@ cTile::cTile(cImageInfo inf, int id, cTileImageSet *ts, cBankTile *bank) {
     cFile f;
     f.hFeed = 0;
     SetFile(f);
+    _strName = GetMountPoint();
 }
 
 cTile::~cTile() {

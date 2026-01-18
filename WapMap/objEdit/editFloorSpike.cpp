@@ -31,6 +31,12 @@ namespace ObjEdit {
         win->setMovable(0);
         st->conMain->add(win, st->vPort->GetX(), st->vPort->GetY() + st->vPort->GetHeight() - win->getHeight());
 
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 2000);
+            GetUserDataFromObj(hTempObj)->SetZ(2000);
+            hState->vPort->MarkToRedraw();
+        }
+
         for (int i = 0; i < 3; i++)
             rbType[i] = NULL;
 

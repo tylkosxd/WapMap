@@ -53,6 +53,12 @@ namespace ObjEdit {
 
         win->add(_butAddNext, 0, yoff + 40);
         win->add(_butSave, 100, yoff + 40);
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 2000);
+            GetUserDataFromObj(hTempObj)->SetZ(2000);
+            hState->vPort->MarkToRedraw();
+        }
     }
 
     cEditObjCrumblingPeg::~cEditObjCrumblingPeg() {

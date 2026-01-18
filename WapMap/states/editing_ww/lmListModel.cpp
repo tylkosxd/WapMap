@@ -59,7 +59,7 @@ namespace State {
         } else if (m_iType == LMODEL_ANIMATIONS) {
             if (m_hOwn->hParser == NULL || i < 0 || i >= m_hOwn->hAniBank->getNumberOfElements())
                 return "";
-            return m_hOwn->hAniBank->GetAssetByIterator(i)->GetID();
+            return m_hOwn->hAniBank->GetAssetByIterator(i)->GetName();
         } else if (m_iType == LMODEL_ANIMFRAMES) {
             if (m_hOwn->dbAssetsAni->getSelected() == -1) return "";
             ANI::Animation *ani = m_hOwn->hAniBank->GetAssetByIterator(m_hOwn->dbAssetsAni->getSelected())->GetAni();

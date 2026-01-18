@@ -78,6 +78,12 @@ namespace ObjEdit {
 
         bPick = 0;
 
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 1000);
+            GetUserDataFromObj(hTempObj)->SetZ(1000);
+            hState->vPort->MarkToRedraw();
+        }
+
         RebuildWindow();
     }
 

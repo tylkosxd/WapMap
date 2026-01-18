@@ -46,7 +46,7 @@ void winPaletteBrowser::Draw(int piCode) {
     #define TILE_SIZE 12
     for (int y = 0; y < 16; y++) {
         for (int x = 0; x < 16; x++, i++) {
-            SHR::SetQuad(&q, palette->GetColor(i), x*TILE_SIZE+startX, y*TILE_SIZE+startY,
+            SHR::SetQuad(&q, SETA(palette->GetColor(i), myWin.getAlpha()), x*TILE_SIZE+startX, y*TILE_SIZE+startY,
                  x*TILE_SIZE+startX+TILE_SIZE-1, y*TILE_SIZE+startY+TILE_SIZE-1);
             hge->Gfx_RenderQuad(&q);
         }

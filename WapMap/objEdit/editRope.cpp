@@ -60,6 +60,12 @@ namespace ObjEdit {
             win->setHeight(100);
             win->setY(win->getY() - 60);
         }
+
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 3990);
+            GetUserDataFromObj(hTempObj)->SetZ(3990);
+            hState->vPort->MarkToRedraw();
+        }
     }
 
     cEditObjRope::~cEditObjRope() {

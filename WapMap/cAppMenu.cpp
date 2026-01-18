@@ -653,6 +653,7 @@ void cAppMenu::action(const gcn::ActionEvent &actionEvent) {
         } else {
             GV->editState->winDB->setVisible(true);
             GV->editState->conMain->moveToTop(GV->editState->winDB);
+            GV->editState->tadbTabs->setSelectedTab(id == APPMEN_ASSETS_SOUNDS);
         }
         hEntries[AppMenu_Assets]->GetContext()->setVisible(false);
     }

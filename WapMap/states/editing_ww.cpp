@@ -847,8 +847,8 @@ void State::EditingWW::Init() {
     condbSounds->setDimension(gcn::Rectangle(0, 0, 790, 570));
 
     tadbTabs = new SHR::TabbedArea();
-    tadbTabs->addTab(GETL2S("WinDatabase", "Tab_Tilesets"), condbTiles);
-    tadbTabs->addTab(GETL2S("WinDatabase", "Tab_Imagesets"), condbImages);
+    // tadbTabs->addTab(GETL2S("WinDatabase", "Tab_Tilesets"), condbTiles);
+    // tadbTabs->addTab(GETL2S("WinDatabase", "Tab_Imagesets"), condbImages);
     tadbTabs->addTab(GETL2S("WinDatabase", "Tab_Anims"), condbAnims);
     tadbTabs->addTab(GETL2S("WinDatabase", "Tab_Sounds"), condbSounds);
     tadbTabs->setDimension(gcn::Rectangle(0, 0, 790, 570));

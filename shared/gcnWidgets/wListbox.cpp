@@ -20,6 +20,7 @@ namespace SHR {
         addKeyListener(this);
 
         mOpaque = true;
+        mBackgroundColor = 0x131313;
     }
 
     ListBox::ListBox(ListModel *listModel)
@@ -34,15 +35,26 @@ namespace SHR {
         addKeyListener(this);
 
         mOpaque = true;
+        mBackgroundColor = 0x131313;
+    }
+
+    void ListBox::drawBackground(Graphics *graphics) {
+        if (mOpaque) {
+            Color color(getBackgroundColor());
+            color.a = getAlpha();
+            graphics->setColor(color);
+            graphics->fillRectangle(gcn::Rectangle(0, 0, getWidth(), getHeight()));
+        }
     }
 
     void ListBox::draw(Graphics *graphics) {
-        unsigned char alpha = getAlpha();
-
-        if (mOpaque) {
-            graphics->setColor(gcn::Color(0x131313, alpha));
-            graphics->fillRectangle(mDimension);
-        }
+        drawBackground(graphics);
+        // unsigned char alpha = getAlpha();
+        //
+        // if (mOpaque) {
+        //     graphics->setColor(gcn::Color(0x131313, alpha));
+        //     graphics->fillRectangle(mDimension);
+        // }
 
         if (mListModel == NULL) {
             return;

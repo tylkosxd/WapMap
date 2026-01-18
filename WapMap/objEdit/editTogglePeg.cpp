@@ -131,6 +131,8 @@ namespace ObjEdit {
 
         if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
             hTempObj->SetParam(WWD::Param_LocationZ, 2000);
+            GetUserDataFromObj(hTempObj)->SetZ(2000);
+            hState->vPort->MarkToRedraw();
         }
     }
 

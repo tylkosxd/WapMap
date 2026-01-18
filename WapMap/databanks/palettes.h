@@ -9,15 +9,13 @@ class cPalette : public cAsset {
     std::string mountPoint;
     PID::Palette* palette;
 public:
-    cPalette(PID::Palette* palette, std::string mountPoint) : palette(palette), mountPoint(mountPoint.c_str() + 10) {}
+    cPalette(PID::Palette* palette, std::string mountPoint) : palette(palette) { _strName = mountPoint.c_str() + 10; }
     ~cPalette() override { delete palette; }
 
     PID::Palette* GetPalette() { return palette; }
 
     void Load() override {}
     void Unload() override {}
-
-    std::string GetMountPoint() override { return mountPoint; }
 };
 
 class cBankPalettes : public cAssetBank<cPalette> {

@@ -150,6 +150,12 @@ namespace ObjEdit {
         butPick->addActionListener(hAL);
         win->add(butPick, xoffset + 5, 15 + 22 * 5);
 
+        if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
+            hTempObj->SetParam(WWD::Param_LocationZ, 4010);
+            GetUserDataFromObj(hTempObj)->SetZ(4010);
+            hState->vPort->MarkToRedraw();
+        }
+
         UpdateRectMarks();
     }
 

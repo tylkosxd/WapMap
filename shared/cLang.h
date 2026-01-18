@@ -13,8 +13,6 @@ namespace SHR {
 
         ~cLanguage();
 
-        const char *GetAuthor() { return hINI->GetValue("Info", "Author", "unknown"); };
-
         const char *GetString(const char *pszSection, int piID);
 
         const char *GetStringS(const char *pszSection, const char *pszID);
