@@ -1013,14 +1013,14 @@ void State::EditingWW::DrawViewport() {
                         r[1] = obj->GetAttackRect();
                     }
 
-                    char szRectID[3][32];
-                    sprintf(szRectID[0], "SoundRect_1");
-                    sprintf(szRectID[1], "SoundRect_2");
-                    sprintf(szRectID[2], "SoundRect_3");
+                    wchar_t szRectID[3][32];
+                    wsprintfW(szRectID[0], L"SoundRect_1");
+                    wsprintfW(szRectID[1], L"SoundRect_2");
+                    wsprintfW(szRectID[2], L"SoundRect_3");
                     for (int i = 1; i >= 0; i--)
                         if (!r[i].x1 || !r[i].y1 || !r[i].x2 || !r[i].y2) {
                             r[i] = r[i + 1];
-                            strcpy(szRectID[i], szRectID[i + 1]);
+                            wcscpy(szRectID[i], szRectID[i + 1]);
                             szRectID[i + 1][0] = '\0';
                             r[i + 1] = WWD::Rect(0, 0, 0, 0);
                         }
@@ -1040,10 +1040,10 @@ void State::EditingWW::DrawViewport() {
                             int cx = std::max(vPort->GetX(), r[i].x1),
                                 cy = std::max(vPort->GetY(), r[i].y1);
                             GV->fntMyriad16->printf(cx + 11, cy + 11, HGETEXT_LEFT, "~l~%s", 0,
-                                                    GETL2S("EditObj_Dialog", szRectID[i]));
+                                                    GETL2SV("EditObj_Dialog", szRectID[i]));
                             GV->fntMyriad16->SetColor(SETA(dwCols[i], 255));
                             GV->fntMyriad16->printf(cx + 10, cy + 10, HGETEXT_LEFT, "%s", 0,
-                                                    GETL2S("EditObj_Dialog", szRectID[i]));
+                                                    GETL2SV("EditObj_Dialog", szRectID[i]));
                         }
                     }
                     vPort->ClipScreen();

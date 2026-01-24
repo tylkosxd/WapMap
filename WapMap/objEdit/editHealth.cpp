@@ -125,10 +125,10 @@ namespace ObjEdit {
                 }
         }
 
-        char tmp[64];
-        sprintf(tmp, "E_%d", hState->hInvCtrl->GetItemByID(iHealthID[picked]).second);
+        wchar_t tmp[64];
+        wsprintfW(tmp, L"E_%d", hState->hInvCtrl->GetItemByID(iHealthID[picked]).second);
         GV->fntMyriad16->SetColor(0xFFe1e1e1);
         GV->fntMyriad16->printf(dx + 5, dy + 28 + 267 - 90 + 15, HGETEXT_LEFT, "%s: ~y~%s", 0,
-                                GETL2S("EditObj_Inventory", "Effect"), GETL2S("EditObj_Inventory", tmp));
+                                GETL2S("EditObj_Inventory", "Effect"), GETL2SV("EditObj_Inventory", tmp));
     }
 }

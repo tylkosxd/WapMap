@@ -30,9 +30,9 @@ namespace State {
                 return "---";
         } else if (m_iType == LMODEL_SEARCHTERM) {
             if (i < 0 || i > 3) return "";
-            char tmp[32];
-            sprintf(tmp, "Term_%d", i);
-            return GETL2S("ObjectSearch", tmp);
+            wchar_t tmp[32];
+            wsprintfW(tmp, L"Term_%d", i);
+            return GETL2SV("ObjectSearch", tmp);
         } else if (m_iType == LMODEL_SCALE) {
             switch (i) {
                 case 0:

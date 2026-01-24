@@ -31,7 +31,7 @@ namespace State {
         int yOffset = (hDest == 0 ? 40 + (iImportType == ImageImportObject) * 20 : 0);
 
         myWin = new SHR::Win(&GV->gcnParts,
-                             GETL2S("Win_ImageImport", iImportType == ImageImportTile ? "WinCaption" : "WinCaption2"));
+                             GETL2SV("Win_ImageImport", iImportType == ImageImportTile ? L"WinCaption" : L"WinCaption2"));
         //int height = hge->System_GetState(HGE_SCREENHEIGHT)-200;
         myWin->setDimension(gcn::Rectangle(hge->System_GetState(HGE_SCREENWIDTH) / 2 - 300,
                                            hge->System_GetState(HGE_SCREENHEIGHT) / 2 - 250 - yOffset / 2, 600,
@@ -50,7 +50,7 @@ namespace State {
 
         if (!hDest) {
             labDestName = new SHR::Lab(
-                    GETL2S("Win_ImageImport", iImportType == ImageImportTile ? "TilesetName" : "ImagesetName"));
+                    GETL2SV("Win_ImageImport", iImportType == ImageImportTile ? L"TilesetName" : L"ImagesetName"));
             myWin->add(labDestName, 5, 10);
             int descw = labDestName->getWidth();
 
@@ -70,9 +70,9 @@ namespace State {
             tfDestName->addActionListener(this);
             myWin->add(tfDestName, 10 + descw, 10);
 
-            labWarnDestName = new SHR::Lab(GETL2S("Win_ImageImport",
-                                                  iImportType == ImageImportTile ? "WarnSpecifyTileset"
-                                                                                 : "WarnSpecifyImageset"));
+            labWarnDestName = new SHR::Lab(GETL2SV("Win_ImageImport",
+                                                  iImportType == ImageImportTile ? L"WarnSpecifyTileset"
+                                                                                 : L"WarnSpecifyImageset"));
             labWarnDestName->setColor(0xFFA10808);
             myWin->add(labWarnDestName, tfDestName->getX(), 30);
         } else {
@@ -298,9 +298,9 @@ namespace State {
             return;
         }*/ else if (tfDestName != 0 && actionEvent.getSource() == tfDestName) {
             if (tfDestName->getText().length() == 0) {
-                labWarnDestName->setCaption(GETL2S("Win_ImageImport",
-                                                   iImportType == ImageImportTile ? "WarnSpecifyTileset"
-                                                                                  : "WarnSpecifyImageset"));
+                labWarnDestName->setCaption(GETL2SV("Win_ImageImport",
+                                                   iImportType == ImageImportTile ? L"WarnSpecifyTileset"
+                                                                                  : L"WarnSpecifyImageset"));
                 labWarnDestName->adjustSize();
                 labWarnDestName->setVisible(1);
                 if (labMountOutV != 0) {
@@ -387,9 +387,9 @@ namespace State {
                     }
                 } else if (asFnd && asFnd->GetFile().hFeed == GV->editState->hDataCtrl->GetFeed(DB_FEED_CUSTOM)) {
                     vImages[i].labWarnID->setVisible(1);
-                    vImages[i].labWarnID->setCaption(GETL2S("Win_ImageImport",
-                                                            iImportType == ImageImportTile ? "WarnUsedByCustomTile"
-                                                                                           : "WarnUsedByCustomImage"));
+                    vImages[i].labWarnID->setCaption(GETL2SV("Win_ImageImport",
+                                                            iImportType == ImageImportTile ? L"WarnUsedByCustomTile"
+                                                                                           : L"WarnUsedByCustomImage"));
                     vImages[i].labWarnID->setColor(0xFFa13a3a);
                     vImages[i].labWarnID->adjustSize();
                     if (!vImages[i].bBadFlag) {
@@ -398,9 +398,9 @@ namespace State {
                     }
                 } else if (asFnd) {
                     vImages[i].labWarnID->setVisible(1);
-                    vImages[i].labWarnID->setCaption(GETL2S("Win_ImageImport",
-                                                            iImportType == ImageImportTile ? "InfoTileReplace"
-                                                                                           : "InfoImageReplace"));
+                    vImages[i].labWarnID->setCaption(GETL2SV("Win_ImageImport",
+                                                            iImportType == ImageImportTile ? L"InfoTileReplace"
+                                                                                           : L"InfoImageReplace"));
                     vImages[i].labWarnID->setColor(0xFFa1a1a1);
                     vImages[i].labWarnID->adjustSize();
                 } else {
@@ -622,7 +622,7 @@ namespace State {
         n.butRemove->addActionListener(this);
         n.butRemove->setRenderBG(0);
         conFiles->add(n.butRemove);
-        n.labID = new SHR::Lab(GETL2S("Win_ImageImport", iImportType == ImageImportTile ? "TileID" : "ImageID"));
+        n.labID = new SHR::Lab(GETL2SV("Win_ImageImport", iImportType == ImageImportTile ? L"TileID" : L"ImageID"));
         conFiles->add(n.labID);
         n.tfID = new SHR::TextField();
         n.tfID->SetNumerical(1, 0);

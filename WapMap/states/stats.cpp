@@ -124,10 +124,10 @@ void State::MapStats::Init() {
             treasures[9] * 25000;
 
     pieTreasures = new SHR::cPieChart();
+    wchar_t tmp1[15];
     for (int i = 0; i < 10; i++) {
-        char tmp[15];
-        sprintf(tmp, "Lab_Treasure%d", i + 1);
-        pieTreasures->AddPart(GETL2S("Stats", tmp), treasures[i]);
+        wsprintfW(tmp1, L"Lab_Treasure%d", i + 1);
+        pieTreasures->AddPart(GETL2SV("Stats", tmp1), treasures[i]);
     }
     pieTreasures->SetBgCol(0xFF4d4d4d);
     pieTreasures->Render(200);

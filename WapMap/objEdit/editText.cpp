@@ -25,7 +25,7 @@ namespace ObjEdit {
         areaY = hTempObj->GetParam(WWD::Param_LocationY);
 
         tbText = new SHR::TextBox(GETL2S("EditObj_Text", "Sample"));
-        tbText->setFont(GV->gcnParts.gcnfntMyriad13);
+        tbText->setFont(GV->gcnParts.gcnfntMyriad16);
         tbText->setDimension(gcn::Rectangle(0, 0, 100, 20));
         tbText->setMinimalSize(300, 100);
         tbText->addActionListener(hAL);

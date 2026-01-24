@@ -131,15 +131,15 @@ namespace ObjEdit {
                                     GETL2S("EditObj_Inventory", "Effect"),
                                     GETL2S("EditObj_Inventory", "ItemID"),
                                     pickedid);
-            char tmp[32];
-            sprintf(tmp, "E_%d", pickedid);
+            wchar_t tmp[32];
+            wsprintfW(tmp, L"E_%d", pickedid);
             if (pickedid == 32 && isWarpNotFunctional) {
                 tmp[4] = 'B';
                 tmp[5] = 0;
             }
             GV->fntMyriad16->printf(dx + 5, dy + 28 + 267 + 7 + 15, HGETEXT_LEFT,
                                     "~y~%s~w~", 0,
-                                    GETL2S("EditObj_Inventory", tmp));
+                                    GETL2SV("EditObj_Inventory", tmp));
         }
     }
 

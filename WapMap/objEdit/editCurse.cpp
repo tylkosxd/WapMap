@@ -32,9 +32,9 @@ namespace ObjEdit {
         for (int i = 0; i < 6; i++) {
             char tmp[12];
             sprintf(tmp, "%p", this);
-            char tmp2[32];
-            sprintf(tmp2, "Curse%d", i);
-            rbCurses[i] = new SHR::RadBut(GV->hGfxInterface, GETL2S("EditObj_Curse", tmp2), tmp,
+            wchar_t tmp2[32];
+            wsprintfW(tmp2, L"Curse%d", i);
+            rbCurses[i] = new SHR::RadBut(GV->hGfxInterface, GETL2SV("EditObj_Curse", tmp2), tmp,
                                           !(strcmp(obj->GetImageSet(), CURSES[i])));
             rbCurses[i]->adjustSize();
             rbCurses[i]->addActionListener(hAL);
@@ -110,13 +110,13 @@ namespace ObjEdit {
         }
         hge->Gfx_RenderLine(dx, dy + 121, dx + win->getWidth(), dy + 121, 0xFF1f1f1f);
         GV->fntMyriad16->SetColor(0xFFe1e1e1);
-        char tmp[64];
+        wchar_t tmp[64];
         for (int i = 0; i < 6; i++)
             if (rbCurses[i]->isSelected()) {
-                sprintf(tmp, "CurseDesc%d", i);
+                wsprintfW(tmp, L"CurseDesc%d", i);
                 break;
             }
         GV->fntMyriad16->printf(dx + 15, dy + 132, HGETEXT_LEFT, "%s: ~y~%s~l~", 0,
-                                GETL2S("EditObj_Curse", "CurseEffect"), GETL2S("EditObj_Curse", tmp), 0);
+                                GETL2S("EditObj_Curse", "CurseEffect"), GETL2SV("EditObj_Curse", tmp), 0);
     }
 }

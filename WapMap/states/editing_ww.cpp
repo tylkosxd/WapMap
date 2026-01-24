@@ -873,9 +873,9 @@ void State::EditingWW::Init() {
     condbImages->add(labdbisSetFileSize, 5, 65);
 
     for (int i = 0; i < 3; i++) {
-        char ident[64];
-        sprintf(ident, "Show_%d", i + 1);
-        rbdbisShow[i] = new SHR::RadBut(GV->hGfxInterface, GETL2S("WinDatabase", ident), "db_is_show");
+        wchar_t ident[64];
+        wsprintfW(ident, L"Show_%d", i + 1);
+        rbdbisShow[i] = new SHR::RadBut(GV->hGfxInterface, GETL2SV("WinDatabase", ident), "db_is_show");
         rbdbisShow[i]->adjustSize();
         condbImages->add(rbdbisShow[i], 10 + i * 100, 520);
     }
@@ -1043,11 +1043,11 @@ void State::EditingWW::Init() {
     butmsSave->addActionListener(mainListener);
     winMapShot->add(butmsSave, 390, 245);
 
-    labmsSaveAs = new SHR::Lab(GV->Lang->GetString("Strings", Lang_SaveAs));
+    labmsSaveAs = new SHR::Lab(GETL(Lang_SaveAs));
     labmsSaveAs->adjustSize();
     winMapShot->add(labmsSaveAs, 5, 15);
 
-    sprintf(tmp, "%s: 25.0%%", GV->Lang->GetString("Strings", Lang_Scale));
+    sprintf(tmp, "%s: 25.0%%", GETL(Lang_Scale));
     labmsScale = new SHR::Lab(tmp);
     labmsScale->adjustSize();
     winMapShot->add(labmsScale, 5, 47);
@@ -2001,7 +2001,6 @@ bool State::EditingWW::Think() {
             if (fade_fAlpha > 255) {
                 fade_iAction++;
                 GV->sprLogoBig->SetColor(0xFFFFFFFF);
-                GV->fntMyriad10->SetColor(0xFFFFFFFF);
                 GV->bWinter = false;
                 GV->sprSnowflake->SetColor(0xFFFFFFFF);
 

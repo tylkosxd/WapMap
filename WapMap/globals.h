@@ -360,7 +360,7 @@ public:
     hgeSprite *sprSnowflake;
 
     hgeSprite *sprTile;
-    hgeFont *fntMyriad10, *fntMyriad20, *fntSystem17, *fntMyriad16, *fntMyriad80, *fntMinimal;
+    hgeFont *fntMyriad16, *fntMyriad20, *fntMyriad80, *fntMinimal, *fntSystem17;
 
     gcn::HGEInput *gcnInput;
     gcn::HGEGraphics *gcnGraphics;

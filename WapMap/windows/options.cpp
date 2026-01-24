@@ -185,7 +185,7 @@ winOptions::winOptions() : cWindow(GETL(Lang_Options)) {
 
         //crazyhook options
 
-        labCrazyHookSettings = new SHR::Lab(GETL2S("Options", (GV->editState->hNativeController->IsCrazyHookAvailable() ? "CrazyHook" : "CrazyHookNotFound")));
+        labCrazyHookSettings = new SHR::Lab(GETL2SV("Options", (GV->editState->hNativeController->IsCrazyHookAvailable() ? L"CrazyHook" : L"CrazyHookNotFound")));
         labCrazyHookSettings->adjustSize();
         conClaw->add(labCrazyHookSettings, xOffset, yOffset);
 
@@ -483,7 +483,7 @@ void winOptions::UpdatedClawExePath(bool forceDetect) {
     cboptCrazyHookDebugInfo->setEnabled(b);
     cboptCrazyHookGodMode->setEnabled(b);
     cboptCrazyHookArmor->setEnabled(b);
-    labCrazyHookSettings->setCaption(GETL2S("Options", (b ? "CrazyHook" : "CrazyHookNotFound")));
+    labCrazyHookSettings->setCaption(GETL2SV("Options", (b ? L"CrazyHook" : L"CrazyHookNotFound")));
     labCrazyHookSettings->adjustSize();
     ddoptGameRes->setEnabled(b);
 
