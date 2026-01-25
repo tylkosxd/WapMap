@@ -119,7 +119,7 @@ DocumentData* State::LoadMap::MapLoadTask() {
     dd->hParser = hParser;
     barWhole->setProgress(100);
 
-    while (!wasRendered);
+    while (!wasRendered) {}
 
     return dd;
 }

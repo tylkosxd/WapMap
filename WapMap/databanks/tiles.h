@@ -51,6 +51,8 @@ private:
     std::vector<cTile *> m_vTiles;
     std::vector<cBrush *> m_vBrushes;
 
+    bool isActionTileset;
+
     friend class cBankTile;
 
 public:

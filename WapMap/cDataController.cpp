@@ -8,6 +8,7 @@
 #include "databanks/logics.h"
 #include <direct.h>
 #include <filesystem>
+#include "states/editing_ww.h"
 
 extern HGE *hge;
 cDataController *_ghDataController = 0;
@@ -433,6 +434,13 @@ void cDataController::FixCustomDir() {
     tmp = strCustomPath + "/" + "TILES";
     mkdir(tmp.c_str());
     hCustom = new cDiscFeed(strCustomPath);
+}
+
+void cDataController::FixTileProperties(std::vector<int>& idsToAdd) {
+    hParser->SetTileAttribsCount(idsToAdd[0] + 1); // added in reverse order so 1st is biggest
+    for (const int id : idsToAdd) {
+        hParser->SetTileAttribs(id, new WWD::SingleTileAttrib(0, 0, WWD::Attrib_Clear));
+    }
 }
 
 std::vector<cFile> cDataController::GetFilesList(std::string strPath, int iLoadPolicy) {

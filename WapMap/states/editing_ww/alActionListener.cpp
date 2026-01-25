@@ -1197,16 +1197,32 @@ namespace State {
 
             for (int i = 0; i < 5; i++) {
                 if (actionEvent.getSource() == m_hOwn->rbtpIn[i]) {
-                    switch (m_hOwn->hTempAttrib->getType()) {
-                        case WWD::AttribType_Single:
-                            ((WWD::SingleTileAttrib *) m_hOwn->hTempAttrib)->setAttrib((WWD::TILE_ATTRIB) i);
-                            break;
-                        case WWD::AttribType_Double:
-                            ((WWD::DoubleTileAttrib *) m_hOwn->hTempAttrib)->setInsideAttrib((WWD::TILE_ATTRIB) i);
-                            break;
+                    if (m_hOwn->hTempAttrib) {
+                        switch (m_hOwn->hTempAttrib->getType()) {
+                            case WWD::AttribType_Single:
+                                ((WWD::SingleTileAttrib *) m_hOwn->hTempAttrib)->setAttrib((WWD::TILE_ATTRIB) i);
+                                break;
+                            case WWD::AttribType_Double:
+                                ((WWD::DoubleTileAttrib *) m_hOwn->hTempAttrib)->setInsideAttrib((WWD::TILE_ATTRIB) i);
+                                break;
+                        }
+                    } else {
+                        m_hOwn->hTempAttrib = new WWD::SingleTileAttrib(
+                            atoi(m_hOwn->tftpW->getText().c_str()),
+                            atoi(m_hOwn->tftpH->getText().c_str()),
+                            (WWD::TILE_ATTRIB) i
+                        );
                     }
                 } else if (actionEvent.getSource() == m_hOwn->rbtpOut[i]) {
-                    ((WWD::DoubleTileAttrib *) m_hOwn->hTempAttrib)->setOutsideAttrib((WWD::TILE_ATTRIB) i);
+                    if (m_hOwn->hTempAttrib)
+                        ((WWD::DoubleTileAttrib *) m_hOwn->hTempAttrib)->setOutsideAttrib((WWD::TILE_ATTRIB) i);
+                    else
+                        m_hOwn->hTempAttrib = new WWD::DoubleTileAttrib(
+                            atoi(m_hOwn->tftpW->getText().c_str()),
+                            atoi(m_hOwn->tftpH->getText().c_str()),
+                            WWD::TILE_ATTRIB::Attrib_Clear,
+                            (WWD::TILE_ATTRIB) i
+                        );
                 }
             }
         }

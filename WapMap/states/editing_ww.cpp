@@ -2623,14 +2623,17 @@ void State::EditingWW::FreeResources() {
     //delete hStartingPosObj;
 }
 
-void State::EditingWW::MarkUnsaved() {
-    if (MDI->GetActiveDoc()->bSaved) {
+void State::EditingWW::MarkUnsaved(WWD::Parser* context) {
+    auto* activeTab = MDI->GetActiveDoc();
+    if (activeTab && (!context || activeTab->hParser == context) && activeTab->bSaved) {
         char tmp[128];
         char *filename = SHR::GetFile(hParser->GetFilePath());
         sprintf(tmp, "%s* - %s", filename, WA_TITLEBAR);
         delete[] filename;
         hge->System_SetState(HGE_TITLE, tmp);
         MDI->GetActiveDoc()->bSaved = 0;
+    } else if (context) {
+        MDI->MarkAsAutoFixed(context);
     }
 }
 

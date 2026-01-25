@@ -114,7 +114,13 @@ DocumentData *cMDI::AddDocument(DocumentData *dd) {
         strrchr(dd->szFileName, '.')[0] = 0;
     }
 
-    dd->bSaved = true;
+    auto it = std::ranges::find(m_vhAutoFixedMaps, dd->hParser);
+    if (it != m_vhAutoFixedMaps.end()) {
+        m_vhAutoFixedMaps.erase(it);
+        dd->bSaved = false;
+    } else {
+        dd->bSaved = true;
+    }
 
     dd->fZoom = 1;
 

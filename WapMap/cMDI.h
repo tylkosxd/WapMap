@@ -3,6 +3,7 @@
 
 #include "../shared/cWWD.h"
 #include "../shared/gcnWidgets/wContext.h"
+#include <set>
 
 #define MDI_CONTEXT_CLOSEEXCEPTACTIVE 1
 #define MDI_CONTEXT_CLOSEALL          2
@@ -99,6 +100,7 @@ struct DocumentData {
 
 class cMDI : public gcn::ActionListener {
 private:
+    std::set<WWD::Parser *> m_vhAutoFixedMaps;
     std::vector<DocumentData *> m_vhDoc;
     std::vector<std::string> vstrRecentlyClosed;
     int m_iActiveDoc, m_iLastActiveDoc, m_iContextMenuFocusedDoc;
@@ -117,6 +119,8 @@ public:
     cMDI();
 
     ~cMDI();
+
+    void MarkAsAutoFixed(WWD::Parser * hParser) { m_vhAutoFixedMaps.insert(hParser); }
 
     DocumentData *AddDocument(DocumentData *dd);
 
