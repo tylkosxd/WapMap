@@ -12,7 +12,7 @@ namespace SHR {
 
         hgeSprite *sprIconQuestion, *sprIconInfo, *sprIconWarning, *sprIconError;
 
-        gcn::HGEImageFont *gcnfntMyriad13, *gcnfntMyriad10, *gcnfntSystem;
+        gcn::HGEImageFont *gcnfntMyriad16;
     };
 };
 

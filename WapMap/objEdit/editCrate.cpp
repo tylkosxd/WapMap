@@ -289,7 +289,7 @@ namespace ObjEdit {
             labAlign->setColor(ddDurability->isEnabled() ? 0xFFe1e1e1 : 0xFFb2b2b2);
             labTreasures->setColor(ddDurability->isEnabled() ? 0xFFe1e1e1 : 0xFFb2b2b2);
             labDurability->setColor(ddDurability->isEnabled() ? 0xFFe1e1e1 : 0xFFb2b2b2);
-            butWarpPick->setCaption(GETL2S("EditObj_Warp", (bPick ? "Unpick" : "Pick")));
+            butWarpPick->setCaption(GETL2SV("EditObj_Warp", (bPick ? L"Unpick" : L"Pick")));
         } else if (actionEvent.getSource() == butRandomize) {
             int iRandNum = 1;
             if (bStackable) {

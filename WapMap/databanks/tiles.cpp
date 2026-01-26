@@ -28,6 +28,7 @@ cTileImageSet::cTileImageSet(int tileWidth, int tileHeight, const char *pszName)
     m_iTileMaxID = -1;
     m_szName = new char[strlen(pszName) + 1];
     strcpy(m_szName, pszName);
+    isActionTileset = strcmp(pszName, "ACTION") == 0;
 }
 
 void cTilesetTexture::CalculateDimension(int iTileNum, int tileW, int tileH, int &iTexW, int &iTexH) {
@@ -53,6 +54,18 @@ void cBankTile::BatchProcessStart() {
 void cBankTile::BatchProcessEnd() {
     for (auto & m_vhSet : m_vAssets) {
         m_vhSet->Sort();
+        if (m_vhSet->isActionTileset) {
+            int tileAttribsCount = hDC->GetTileAttribsCount();
+            if (tileAttribsCount <= m_vhSet->m_iTileMaxID) {
+                std::vector<int> tilesWithoutAttribs = {};
+                for (auto b = m_vhSet->m_vTiles.rbegin(); b != m_vhSet->m_vTiles.rend(); b++) {
+                    if ((*b)->GetID() < tileAttribsCount) break;
+                    tilesWithoutAttribs.push_back((*b)->GetID());
+                }
+
+                hDC->FixTileProperties(tilesWithoutAttribs);
+            }
+        }
     }
     if (bReloadBrushes) {
         if (GV->editState->iActiveTool == EWW_TOOL_BRUSH) {

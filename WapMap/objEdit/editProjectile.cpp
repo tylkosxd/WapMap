@@ -271,7 +271,7 @@ namespace ObjEdit {
             bPick = !bPick;
             bAllowDragging = !bPick;
             bDrag = 0;
-            butPick->setCaption(GETL2S("EditObj_Projectile", bPick ? "Cancel" : "Pick"));
+            butPick->setCaption(GETL2SV("EditObj_Projectile", bPick ? L"Cancel" : L"Pick"));
             tfX1->setEnabled(!bPick);
             tfY1->setEnabled(!bPick);
             tfX2->setEnabled(!bPick);

@@ -1,9 +1,10 @@
 #ifndef H_LANG_IDENTIFIERS
 #define H_LANG_IDENTIFIERS
 
-#define GETL(y) GV->Lang->GetString("Strings", y)
-#define GETL2(x, y) GV->Lang->GetString(x, y)
-#define GETL2S(x, y) GV->Lang->GetStringS(x, y)
+#define GETL(y) GV->Lang->GetString(L"Strings", y)
+#define GETL2(x, y) GV->Lang->GetString(L ## x, y)
+#define GETL2S(x, y) GV->Lang->GetStringS(L ## x, L ## y)
+#define GETL2SV(x, y) GV->Lang->GetStringS(L ## x, y)
 
 enum LangID {
     Lang_MainMenu = 0,

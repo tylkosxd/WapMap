@@ -65,7 +65,7 @@ namespace ObjEdit {
             iPickY = (hTempObj->GetParam(WWD::Param_MaxY) == 0 ? 450 : hTempObj->GetParam(WWD::Param_MaxY));
             tfJumpHeight->setEnabled(!bPicking);
             _butSave->setEnabled(!bPicking);
-            butPick->setCaption(GETL2S("EditObj_Springboard", bPicking ? "Cancel" : "Pick"));
+            butPick->setCaption(GETL2SV("EditObj_Springboard", bPicking ? L"Cancel" : L"Pick"));
         } else if (actionEvent.getSource() == tfJumpHeight) {
             int nval = atoi(tfJumpHeight->getText().c_str());
             hTempObj->SetParam(WWD::Param_MaxY, nval == 0 ? 450 : nval);

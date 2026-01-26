@@ -172,7 +172,7 @@ cGlobals::cGlobals() {
             if (w != horizontal || h != vertical) {
                 w = horizontal;
                 h = vertical;
-                MessageBoxA(0, Lang->GetString("Strings", Lang_SmallScreenWarning_Message), Lang->GetString("Strings", Lang_SmallScreenWarning_Title), 0);
+                MessageBoxA(0, GETL(Lang_SmallScreenWarning_Message), GETL(Lang_SmallScreenWarning_Title), 0);
             }
         } else {
             int smallw = 10000, smallh = 10000;
@@ -229,10 +229,7 @@ cGlobals::~cGlobals() {
     delete Console;
     delete sprLogoBig;
     delete sprBlank;
-    delete gcnParts.gcnfntMyriad10;
-    delete gcnParts.gcnfntMyriad13;
-    delete gcnParts.gcnfntSystem;
-    delete fntMyriad10;
+    delete gcnParts.gcnfntMyriad16;
     delete fntMyriad16;
     delete fntMyriad20;
     delete fntMyriad80;
@@ -265,6 +262,28 @@ int Console_Panic(lua_State *L) {
     GV->Console->Printf("~r~Lua: %s~w~", lua_tostring(L, -1));
     longjmp(GV->jmp_env, 1);
     return 0;
+}
+
+BOOL IsWindows11OrGreater()
+{
+    OSVERSIONINFOEX vi;
+    ULONGLONG conditions;
+
+    memset (&vi, 0, sizeof(vi));
+    vi.dwOSVersionInfoSize = sizeof(vi);
+    vi.dwMajorVersion = 10;
+    vi.dwMinorVersion = 0;
+    vi.dwBuildNumber = 21996;
+    conditions = VerSetConditionMask (0,
+            VER_MAJORVERSION, VER_GREATER_EQUAL);
+    conditions = VerSetConditionMask (conditions,
+            VER_MINORVERSION, VER_GREATER_EQUAL);
+    conditions = VerSetConditionMask (conditions,
+            VER_BUILDNUMBER, VER_GREATER_EQUAL);
+
+    return VerifyVersionInfo (&vi,
+            VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER,
+            conditions) != FALSE;
 }
 
 void cGlobals::Init() {
@@ -348,8 +367,13 @@ void cGlobals::Init() {
         iOS = OS_8;
         sprintf(szNameOS, "Win8");
     } else if (dwMajorVersion == 10) {
-        iOS = OS_10;
-        sprintf(szNameOS, "Win10");
+        if (IsWindows11OrGreater()) {
+            iOS = OS_11;
+            sprintf(szNameOS, "Win11");
+        } else {
+            iOS = OS_10;
+            sprintf(szNameOS, "Win10");
+        }
     } else {
         iOS = OS_UNKNOWN;
         sprintf(szNameOS, "???");
@@ -559,7 +583,6 @@ void cGlobals::Init() {
     } else {
         fntMyriad16 = SHR::LoadFontFromSFS(&repo, "16px.fnt", "16px.png");
     }
-    fntMyriad10 = SHR::LoadFontFromSFS(&repo, "10px.fnt", "10px.png");
     fntMyriad20 = SHR::LoadFontFromSFS(&repo, "20px.fnt", "20px.png");
     fntMyriad80 = SHR::LoadFontFromSFS(&repo, "80px.fnt", "80px.png");
     fntSystem17 = SHR::LoadFontFromSFS(&repo, "17px.fnt", "17px.png");
@@ -578,11 +601,8 @@ void cGlobals::Init() {
     gcnInput = new gcn::HGEInput();
 
     Console->Print("   Fonts...");
-    gcnParts.gcnfntMyriad13 = new gcn::HGEImageFont(fntMyriad16, 0);
-    gcnParts.gcnfntMyriad10 = new gcn::HGEImageFont(fntMyriad10, 0);
-    gcnParts.gcnfntSystem = new gcn::HGEImageFont(fntSystem17, 0);
-
-    gcn::Widget::setGlobalFont(gcnParts.gcnfntMyriad13);
+    gcnParts.gcnfntMyriad16 = new gcn::HGEImageFont(fntMyriad16, 0);
+    gcn::Widget::setGlobalFont(gcnParts.gcnfntMyriad16);
 
     Console->Print("   UI assets...");
 
@@ -853,7 +873,7 @@ void cGlobals::ExecuteLua(const char *script, bool popuponerror) {
         if (luaL_dostring(conL, script)) {
             Console->Printf("~r~Lua parser error: %s~w~", lua_tostring(conL, -1));
             if (popuponerror) {
-                StateMgr->Push(new State::Dialog(Lang->GetString("Strings", Lang_LuaError), lua_tostring(conL, -1),
+                StateMgr->Push(new State::Dialog(GETL(Lang_LuaError), lua_tostring(conL, -1),
                                                  ST_DIALOG_ICON_ERROR, ST_DIALOG_BUT_OK));
             }
         }

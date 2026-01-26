@@ -140,7 +140,7 @@ namespace ObjEdit {
             }
         if (actionEvent.getSource() == butPick) {
             bPicking = !bPicking;
-            butPick->setCaption(GETL2S("EditObj_Projectile", bPicking ? "Cancel" : "Pick"));
+            butPick->setCaption(GETL2SV("EditObj_Projectile", bPicking ? L"Cancel" : L"Pick"));
             for (int i = 0; i < 4; i++)
                 tf[i]->setEnabled(!bPicking);
         }

@@ -592,9 +592,9 @@ namespace ObjEdit {
 
     std::string lmEditObjDialogSizes::getElementAt(int i) {
         if (i < 0 || i > 6) return "";
-        char id[64];
-        sprintf(id, "FirstRect%d", i + 1);
-        return GETL2S("EditObj_Dialog", id);
+        wchar_t id[64];
+        wsprintfW(id, L"FirstRect%d", i + 1);
+        return GETL2SV("EditObj_Dialog", id);
     }
 
     int lmEditObjDialogSizes::getNumberOfElements() {

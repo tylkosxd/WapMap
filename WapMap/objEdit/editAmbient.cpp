@@ -72,7 +72,7 @@ namespace ObjEdit {
         }
 
         for (int i = 0; i < 2; i++) {
-            cbArea[i] = new SHR::CBox(GV->hGfxInterface, GETL2S("EditObj_Ambient", i ? "SecondArea" : "SpecifyArea"));
+            cbArea[i] = new SHR::CBox(GV->hGfxInterface, GETL2SV("EditObj_Ambient", i ? L"SecondArea" : L"SpecifyArea"));
             cbArea[i]->adjustSize();
             cbArea[i]->addActionListener(hAL);
             win->add(cbArea[i], 5 + i * 177, 115 + 75);
@@ -127,7 +127,7 @@ namespace ObjEdit {
         for (int i = 0; i < 2; i++) {
             hPickArea[i]->setEnabled(cbArea[i]->isSelected());
 
-            labTimeMin[i] = new SHR::Lab(GETL2S("EditObj_Ambient", i ? "TimeMax" : "TimeMin"));
+            labTimeMin[i] = new SHR::Lab(GETL2SV("EditObj_Ambient", i ? L"TimeMax" : L"TimeMin"));
             labTimeMin[i]->adjustSize();
             win->add(labTimeMin[i], 5, 350 + 75 + 25 * i);
 
@@ -138,7 +138,7 @@ namespace ObjEdit {
             tfTimeOn[i]->addActionListener(hAL);
             win->add(tfTimeOn[i], 172 - 75, 350 + 75 + 25 * i);
 
-            labTimeMax[i] = new SHR::Lab(GETL2S("EditObj_Ambient", i ? "TimeMax" : "TimeMin"));
+            labTimeMax[i] = new SHR::Lab(GETL2SV("EditObj_Ambient", i ? L"TimeMax" : L"TimeMin"));
             labTimeMax[i]->adjustSize();
             win->add(labTimeMax[i], 182, 350 + 75 + 25 * i);
 

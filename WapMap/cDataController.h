@@ -243,6 +243,7 @@ public:
 
     WWD::GAME GetGame() { return hParser->GetGame(); }
     int GetBaseLevel() { return hParser->GetBaseLevel(); }
+    int GetTileAttribsCount() { return hParser->GetTileAttribsCount(); }
 
     std::vector<cAssetBank<cAsset> *> GetBanks() { return vhBanks; }
 
@@ -262,6 +263,8 @@ public:
     cParallelLoop *GetLooper() { return hLooper; };
 
     void FixCustomDir();
+
+    void FixTileProperties(std::vector<int>& idsToAdd);
 
     void OpenCodeEditor(std::string logicName, bool nonExisting = false);
 

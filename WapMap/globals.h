@@ -45,6 +45,7 @@ enum WindowsVer {
     OS_7,
     OS_8,
     OS_10,
+    OS_11,
 };
 
 enum Gfx32Icons {
@@ -360,7 +361,7 @@ public:
     hgeSprite *sprSnowflake;
 
     hgeSprite *sprTile;
-    hgeFont *fntMyriad10, *fntMyriad20, *fntSystem17, *fntMyriad16, *fntMyriad80, *fntMinimal;
+    hgeFont *fntMyriad16, *fntMyriad20, *fntMyriad80, *fntMinimal, *fntSystem17;
 
     gcn::HGEInput *gcnInput;
     gcn::HGEGraphics *gcnGraphics;

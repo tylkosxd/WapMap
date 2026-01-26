@@ -29,15 +29,15 @@ namespace ObjEdit {
         sprintf(tmp, "a_%p", this);
         for (int i = 0; i < vstrpTypes.size(); i++) {
             bool diff = false;
-            char tmp2[128];
+            wchar_t tmp2[128];
             if (i > 0 && vstrpTypes[i].first == vstrpTypes[i - 1].first) {
-                sprintf(tmp2, "Logic_%s2", vstrpTypes[i].first.c_str());
+                wsprintfW(tmp2, L"Logic_%s2", vstrpTypes[i].first.c_str());
                 diff = true;
             } else {
-                sprintf(tmp2, "Logic_%s", vstrpTypes[i].first.c_str());
+                wsprintfW(tmp2, L"Logic_%s", vstrpTypes[i].first.c_str());
             }
 
-            auto typeRB = new SHR::RadBut(GV->hGfxInterface, GETL2S("EditObj_Enemy", tmp2), tmp,
+            auto typeRB = new SHR::RadBut(GV->hGfxInterface, GETL2SV("EditObj_Enemy", tmp2), tmp,
                                           !strcmp(hTempObj->GetLogic(), vstrpTypes[i].first.c_str()) && (!diff ||
                                                                                                          (hTempObj->GetUserValue(
                                                                                                                  0) &&
@@ -63,9 +63,9 @@ namespace ObjEdit {
 
         sprintf(tmp, "c_%p", this);
         for (int i = 0; i < 4; i++) {
-            char tmp2[128];
-            sprintf(tmp2, "Behaviour_%d", i + 1);
-            rbFlags[i] = new SHR::RadBut(GV->hGfxInterface, GETL2S("EditObj_Enemy", tmp2), tmp, 0);
+            wchar_t tmp2[128];
+            wsprintfW(tmp2, L"Behaviour_%d", i + 1);
+            rbFlags[i] = new SHR::RadBut(GV->hGfxInterface, GETL2SV("EditObj_Enemy", tmp2), tmp, 0);
             rbFlags[i]->adjustSize();
             win->add(rbFlags[i], 5, yoffset + 20 + i * 20);
         }
@@ -323,7 +323,7 @@ namespace ObjEdit {
         butPickSpeedXY->setVisible(warpvis || gemvis);
         butPickSpeedXY->setEnabled(!hRectPick->IsPicking());
         if (warpvis || gemvis) {
-            labWarpDest->setCaption(GETL2S("EditObj_Enemy", (gemvis ? "GemDest" : "WarpDest")));
+            labWarpDest->setCaption(GETL2SV("EditObj_Enemy", (gemvis ? L"GemDest" : L"WarpDest")));
             labWarpDest->adjustSize();
         }
 
@@ -358,7 +358,7 @@ namespace ObjEdit {
             }
         }
 
-        butPickSpeedXY->setCaption(GETL2S("EditObj_Enemy", bPickSpeedXY ? "Cancel" : "Pick"));
+        butPickSpeedXY->setCaption(GETL2SV("EditObj_Enemy", bPickSpeedXY ? L"Cancel" : L"Pick"));
         labMoveArea->setColor(SETA(GV->colFontWhite, !bPickSpeedXY ? 0xFF : 0x77));
         hRectPick->setEnabled(cbPatrol->isSelected() && !bPickSpeedXY);
         butClearArea->setEnabled(cbPatrol->isSelected() && !bPickSpeedXY && !hRectPick->IsPicking());
@@ -512,9 +512,9 @@ namespace ObjEdit {
             spr->RenderEx(mx, my, 0, GV->editState->fZoom);
             mx += (spr->GetWidth() / 2 + 15) * GV->editState->fZoom;
             GV->fntMyriad16->printf(mx + 1, my + 1, HGETEXT_LEFT, "~l~%s %d, %d", 0,
-                                    GETL2S("EditObj_Enemy", bPickGem ? "GemDest" : "WarpDest"), wmx, wmy);
+                                    GETL2SV("EditObj_Enemy", bPickGem ? L"GemDest" : L"WarpDest"), wmx, wmy);
             GV->fntMyriad16->printf(mx, my, HGETEXT_LEFT, "~w~%s ~y~%d~w~, ~y~%d", 0,
-                                    GETL2S("EditObj_Enemy", bPickGem ? "GemDest" : "WarpDest"), wmx, wmy);
+                                    GETL2SV("EditObj_Enemy", bPickGem ? L"GemDest" : L"WarpDest"), wmx, wmy);
         }
     }
 

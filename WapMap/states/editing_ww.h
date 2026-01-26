@@ -729,7 +729,7 @@ namespace State {
 
         void FreeResources();
 
-        void MarkUnsaved();
+        void MarkUnsaved(WWD::Parser* context = 0);
 
         void SwitchPlane();
 

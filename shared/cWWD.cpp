@@ -1554,7 +1554,7 @@ void WWD::Plane::ClearImageSets() {
 
 void WWD::Parser::SetTileAttribs(int piTile, TileAttrib* htaAttribs)
 {
-    if (*m_hTileAttribs[piTile] != *htaAttribs) {
+    if (!m_hTileAttribs[piTile] || *m_hTileAttribs[piTile] != *htaAttribs) {
         delete m_hTileAttribs[piTile];
         switch (htaAttribs->getType()) {
         case WWD::AttribType_Single:
@@ -1567,7 +1567,7 @@ void WWD::Parser::SetTileAttribs(int piTile, TileAttrib* htaAttribs)
             m_hTileAttribs[piTile] = new WWD::MaskTileAttrib((WWD::MaskTileAttrib*)htaAttribs);
             break;
         }
-        GV->editState->MarkUnsaved();
+        GV->editState->MarkUnsaved(this);
     }
 }
 

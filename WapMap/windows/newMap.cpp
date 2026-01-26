@@ -81,17 +81,20 @@ winNewMap::winNewMap()
         }
 
         if (levels) {
-            char tmp[16]; char* num = NULL;
-            if (!separateLevelIcons) {
+            if (separateLevelIcons) {
+                wchar_t tmp[16];
+                MultiByteToWideChar(CP_UTF8, 0, WWD::GAME_NAMES[game], -1, tmp, 16);
+                wchar_t* end = tmp + strlen(WWD::GAME_NAMES[game]);
+                for (int i = 1; i <= levels; ++i) {
+                    wsprintfW(end, L"_%d", i);
+                    folder->AddElement(std::make_shared<SHR::TreeElement>(GETL2SV("NewMap", tmp),
+                            GV->sprLevelsMicro16[game - WWD::Games_First][i - 1]));
+                }
+            } else {
+                char tmp[16]; char* num = NULL;
                 strcpy(tmp, GETL2S("NewMap", "Area"));
                 num = tmp + strlen(tmp);
-            }
-            for (int i = 1; i <= levels; ++i) {
-                if (separateLevelIcons) {
-                    sprintf(tmp, "%s_%d", WWD::GAME_NAMES[game], i);
-                    folder->AddElement(std::make_shared<SHR::TreeElement>(GETL2S("NewMap", tmp),
-                            GV->sprLevelsMicro16[game - WWD::Games_First][i - 1]));
-                } else {
+                for (int i = 1; i <= levels; ++i) {
                     sprintf(num, " %d", i);
                     folder->AddElement(std::make_shared<SHR::TreeElement>(tmp, GV->sprGamesSmall[game]));
                 }
