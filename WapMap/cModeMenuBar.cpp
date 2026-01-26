@@ -155,6 +155,8 @@ cmmbObject::cmmbObject(int startX) : cModeMenuBar(startX) {
     butIconStalactite->SetTooltip(GETL2("Tooltip", Lang_TT_Stalactite));
     butIconLaser = GV->editState->MakeButton(xOff, yOff, Icon_Laser, GV->editState->conMain, 1, 0);
     butIconLaser->SetTooltip(GETL2("Tooltip", Lang_TT_Laser));
+    butIconLavaHand = GV->editState->MakeButton(xOff, yOff, Icon_LavaHand, GV->editState->conMain, 1, 0);
+    butIconLavaHand->SetTooltip(GETL2("Tooltip", Lang_TT_LavaHand));
 
     butIconEyeCandy = GV->editState->MakeButton(xOff, yOff, Icon_Decoration, GV->editState->conMain, 1, 0);
     butIconEyeCandy->SetTooltip(GETL2("Tooltip", Lang_TT_Decor));
@@ -174,7 +176,9 @@ cmmbObject::cmmbObject(int startX) : cModeMenuBar(startX) {
     butIconMapPiece->SetTooltip(GETL2("Tooltip", Lang_TT_EndOfLevel));
 
     vButtons.push_back(butIconSearchObject);
+
     vButtons.push_back(butIconNewObjEmpty);
+
     vButtons.push_back(butIconCrumblinPeg);
     vButtons.push_back(butIconBreakPlank);
     vButtons.push_back(butIconTogglePeg);
@@ -182,12 +186,14 @@ cmmbObject::cmmbObject(int startX) : cModeMenuBar(startX) {
     vButtons.push_back(butIconPathElevator);
     vButtons.push_back(butIconSpringBoard);
     vButtons.push_back(butIconRope);
+
     vButtons.push_back(butIconTreasure);
     vButtons.push_back(butIconHealth); //10
     vButtons.push_back(butIconCatnip);
     vButtons.push_back(butIconCurse);
     vButtons.push_back(butIconCrate);
     vButtons.push_back(butIconStatue);
+
     vButtons.push_back(butIconEnemy); //15-19
     vButtons.push_back(butIconPowderKeg); //20
     vButtons.push_back(butIconCannon);
@@ -196,6 +202,8 @@ cmmbObject::cmmbObject(int startX) : cModeMenuBar(startX) {
     vButtons.push_back(butIconCrabNest); //25
     vButtons.push_back(butIconStalactite);
     vButtons.push_back(butIconLaser);
+    vButtons.push_back(butIconLavaHand);
+
     vButtons.push_back(butIconEyeCandy);
     vButtons.push_back(butIconText);
     vButtons.push_back(butIconShake); //30
@@ -275,6 +283,9 @@ cmmbObject::cmmbObject(int startX) : cModeMenuBar(startX) {
             cNewObjContextEl(NOBJCON_LASER, GETL2S("ContextNewObj", "Laser"), GV->sprIcons16[Icon16_Laser],
                              butIconLaser));
     vContextElements.push_back(
+            cNewObjContextEl(NOBJCON_LAVAHAND, GETL2S("ContextNewObj", "LavaHand"), GV->sprIcons16[Icon16_LavaHand],
+                             butIconLavaHand));
+    vContextElements.push_back(
             cNewObjContextEl(NOBJCON_EYECANDY, GETL2S("ContextNewObj", "EyeCandy"), GV->sprIcons16[Icon16_Decoration],
                              butIconEyeCandy));
     vContextElements.push_back(
@@ -350,6 +361,7 @@ void cmmbObject::DocumentSwitched() {
         ADD_BUTTON(butIconCrabNest, base == 7);
         ADD_BUTTON(butIconStalactite, base == 12);
         ADD_BUTTON(butIconLaser, base == 11);
+        ADD_BUTTON(butIconLavaHand, base == 14);
         ADD_SEPARATOR();
         ADD_BUTTON(butIconEyeCandy, true);
         ADD_BUTTON(butIconText, true);

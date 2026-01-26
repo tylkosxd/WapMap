@@ -622,6 +622,11 @@ void State::EditingWW::CreateObjectWithEasyEdit(gcn::Widget *widg) {
         obj->SetImageSet("LEVEL_LASER");
         obj->SetParam(WWD::Param_Damage, 10);
         obj->SetParam(WWD::Param_Counter, 1500);
+    } else if (widg == hmbObject->butIconLavaHand) {
+        obj->SetLogic("LavaHand");
+        obj->SetImageSet("LEVEL_LAVAHAND");
+        obj->SetParam(WWD::Param_Smarts, 3); //throws
+        obj->SetParam(WWD::Param_Speed, 2000); //delay
     } else if (widg == hmbObject->butIconSound) {
         obj->SetLogic("GlobalAmbientSound");
         obj->SetImageSet("GAME_SOUNDICON");

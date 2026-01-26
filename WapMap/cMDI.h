@@ -86,6 +86,8 @@ struct DocumentData {
     std::vector<State::PlaneData *> hPlaneData;
     WWD::Object *hStartingPosObj;
     float fCamX, fCamY;
+    float fPrevWarpX = 0.0f;
+    float fPrevWarpY = 0.0f;
     int iSelectedPlane;
     bool bSaved;
     std::vector<WWD::Object *> vObjectsPicked;

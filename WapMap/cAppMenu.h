@@ -28,6 +28,11 @@
 #define APPMEN_VIEW_TILEPROP   3
 #define APPMEN_VIEW_GUIDELINES 4
 
+#define APPMEN_GO_SPAWN         1
+#define APPMEN_GO_LOCATION      2
+#define APPMEN_GO_COORDS        3
+#define APPMEN_GO_PREV_WARP     4
+
 #define APPMEN_PLANEVIS_BORDER  1
 #define APPMEN_PLANEVIS_GRID    2
 #define APPMEN_PLANEVIS_OBJECTS 3
@@ -97,6 +102,7 @@ enum enAppMenu_Entries {
     AppMenu_File = 0,
     AppMenu_Edit,
     AppMenu_View,
+    AppMenu_Navigation,
     AppMenu_Tools,
     AppMenu_Assets,
     AppMenu_WapMap,

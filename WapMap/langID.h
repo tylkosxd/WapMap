@@ -377,8 +377,9 @@ enum LangTooltipID {
     Lang_TT_DialogTrigger,
     Lang_TT_AmbientSound,
     Lang_TT_EndOfLevel,
-
+    
     Lang_TT_ZoomTool,
+    Lang_TT_LavaHand
 };
 
 enum LangWinDatabase {
