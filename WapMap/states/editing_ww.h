@@ -43,6 +43,7 @@
 #include "../cAppMenu.h"
 #include "../windows/newMap.h"
 #include "../windows/paletteBrowser.h"
+#include "../windows/goToCoords.h"
 
 #ifndef byte
 typedef unsigned char byte;
@@ -518,7 +519,7 @@ namespace State {
 
         SHR::Container *conWriteID;
         SHR::TextField *tfWriteID;
-
+        
         cAutoUpdater *hAU;
 
 #ifdef WM_ADD_LUA_EXECUTER
@@ -1070,6 +1071,7 @@ namespace State {
         winOptions *hwinOptions;
         winAbout *hwinAbout;
         winPaletteBrowser *hwinPaletteBrowser;
+        winGoToCoords *hwinGoToCoords;
 
         void TextEditMoveToNextTile(bool saving = false);
 

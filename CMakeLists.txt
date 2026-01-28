@@ -260,6 +260,7 @@ add_executable(WapMap
 	${PROJECT_SOURCE_DIR}/WapMap/vpFocusWidg.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/about.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/imgsetBrowser.cpp
+	${PROJECT_SOURCE_DIR}/WapMap/windows/goToCoords.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/newMap.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/options.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/tileBrowser.cpp

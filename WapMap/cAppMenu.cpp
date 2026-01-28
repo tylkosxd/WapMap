@@ -123,7 +123,6 @@ cAppMenu::cAppMenu() {
     workcon->AddElement(APPMEN_GO_PREV_WARP, GETL2S("AppMenu", "Go_Prev_Warp"), GV->sprIcons16[Icon16_Warp]);
     workcon->adjustSize();
     workcon->GetElementByID(APPMEN_GO_LOCATION)->SetEnabled(0);
-    workcon->GetElementByID(APPMEN_GO_COORDS)->SetEnabled(0);
 
     workcon = hEntries[AppMenu_Tools]->GetContext();
     workcon->AddElement(APPMEN_TOOLS_MAPSHOT, GETL(Lang_MapShot), GV->sprIcons16[Icon16_Mapshot]);
@@ -620,10 +619,12 @@ void cAppMenu::action(const gcn::ActionEvent &actionEvent) {
             int startX = GV->editState->hParser->GetStartX(), startY = GV->editState->hParser->GetStartY();
             GV->editState->fCamX = startX - GV->editState->vPort->GetWidth() / 2 / GV->editState->fZoom;
             GV->editState->fCamY = startY - GV->editState->vPort->GetHeight() / 2 / GV->editState->fZoom;
+            iOpened = AppMenu_Navigation;
         } else if (id == APPMEN_GO_LOCATION) {
             // should open a window with saved coordinates. Saved prior by right-clicking on an empty space and clicking "Save location"
         } else if (id == APPMEN_GO_COORDS) {
-            // should open a window to input the coordinates (either world coords or tile coords, choosen with a radio buttons) and a "Go" button
+            GV->editState->hwinGoToCoords->Open();
+            hEntries[AppMenu_Navigation]->GetContext()->setVisible(false);
         } else if (id == APPMEN_GO_PREV_WARP) {
             int warpX = GV->editState->MDI->GetActiveDoc()->fPrevWarpX;
             int warpY = GV->editState->MDI->GetActiveDoc()->fPrevWarpY;
@@ -631,8 +632,8 @@ void cAppMenu::action(const gcn::ActionEvent &actionEvent) {
                 GV->editState->fCamX = warpX - GV->editState->vPort->GetWidth() / 2 / GV->editState->fZoom;
                 GV->editState->fCamY = warpY - GV->editState->vPort->GetHeight() / 2 / GV->editState->fZoom;
             }
+            iOpened = AppMenu_Navigation;
         }
-        iOpened = AppMenu_Navigation;
     } else if (actionEvent.getSource() == conPlanesVisibilityList) {
         int id = conPlanesVisibilityList->GetSelectedID();
         GV->editState->hPlaneData[id]->bDraw = !GV->editState->hPlaneData[id]->bDraw;

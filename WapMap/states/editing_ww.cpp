@@ -310,12 +310,14 @@ void State::EditingWW::Init() {
     hwinImageSetBrowser = new winImageSetBrowser();
     hwinAbout = new winAbout();
     hwinPaletteBrowser = new winPaletteBrowser();
+    hwinGoToCoords = new winGoToCoords();
     hWindows.push_back(hwinNewMap);
     hWindows.push_back(hwinOptions);
     hWindows.push_back(hwinTileBrowser);
     hWindows.push_back(hwinImageSetBrowser);
     hWindows.push_back(hwinAbout);
     hWindows.push_back(hwinPaletteBrowser);
+    hWindows.push_back(hwinGoToCoords);
 
     for (auto & hWindow : hWindows) {
         SHR::Win *win = hWindow->GetWindow();

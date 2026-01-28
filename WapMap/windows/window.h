@@ -41,6 +41,8 @@ public:
     SHR::Win *GetWindow() { return &myWin; };
 
     void action(const gcn::ActionEvent &) override {};
+
+    bool isOpened() { return myWin.isVisible();}
 };
 
 #endif // H_WINDOW
