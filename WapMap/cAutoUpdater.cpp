@@ -19,6 +19,10 @@ extern HGE *hge;
 cAutoUpdater *_AU_GLOBAL_PTR;
 int DOWNLOAD_PROGRESS = 0;
 
+bool isDisplayingFirstRunMessage() {
+    return GV->bFirstRun && GV->editState->FirstRun_data;
+}
+
 void from_json(const nlohmann::json &j, GitAPIReleaseAsset &releaseAsset) {
     j.at("browser_download_url").get_to(releaseAsset.browser_download_url);
     j.at("size").get_to(releaseAsset.size);
@@ -57,8 +61,14 @@ void cAUAL::action(const gcn::ActionEvent &actionEvent) {
             for (size_t i = 0; i < entries_count; i++) {
                 auto entry = archive->GetEntry(i);
                 std::string filepath = prefix + entry->GetFullName();
-                auto dataStream = entry->GetDecompressionStream();
 
+                if (filepath.back() == '/') {
+                    filepath.pop_back();
+                    CreateDirectory(filepath.c_str(), NULL);
+                    continue;
+                }
+
+                auto dataStream = entry->GetDecompressionStream();
                 fs.open(filepath, std::fstream::binary | std::fstream::out);
                 utils::stream::copy(*dataStream, fs);
                 fs.flush();
@@ -191,7 +201,7 @@ bool cAutoUpdater::Think() {
                     for (auto asset : assets) {
                         if (!asset.browser_download_url.empty()) {
                             releaseAsset = asset;
-                            PopupQuestion(GV->editState->conMain);
+                            PopupQuestion();
                             return false;
                         }
                     }
@@ -231,7 +241,10 @@ cAutoUpdater::~cAutoUpdater() {
     }
 }
 
-void cAutoUpdater::PopupQuestion(SHR::Container *dest) {
+void cAutoUpdater::PopupQuestion() {
+    iState = AU_ASKING_TO_UPDATE;
+    if (isDisplayingFirstRunMessage()) return;
+
     hAL = new cAUAL(this);
     if (winActualize == NULL)
         winActualize = new SHR::Win(&GV->gcnParts, GETL(Lang_ActualizeCaption));
@@ -239,7 +252,6 @@ void cAutoUpdater::PopupQuestion(SHR::Container *dest) {
         winActualize->setCaption(GETL(Lang_ActualizeCaption));
     winActualize->setDimension(
             gcn::Rectangle(0, 0, 400, 120 + GV->fntMyriad16->GetStringBlockHeight(390, GETL(Lang_ActualizeQuestion))));
-    winActualize->setMovable(false);
     if (labActualize == NULL)
         labActualize = new SHR::Lab(GETL(Lang_ActualizeQuestion));
     else
@@ -248,7 +260,7 @@ void cAutoUpdater::PopupQuestion(SHR::Container *dest) {
     labActualize->adjustSize();
     labActualize->setHeight(winActualize->getHeight() - 60);
     winActualize->add(labActualize, (winActualize->getWidth() - labActualize->getWidth()) / 2, 15);
-    dest->add(winActualize, hge->System_GetState(HGE_SCREENWIDTH) / 2 - 200,
+    GV->editState->conMain->add(winActualize, hge->System_GetState(HGE_SCREENWIDTH) / 2 - 200,
               hge->System_GetState(HGE_SCREENHEIGHT) / 2 - winActualize->getHeight() / 2);
 
     butYes = new SHR::But(GV->hGfxInterface, GETL(Lang_Yes));
@@ -260,8 +272,6 @@ void cAutoUpdater::PopupQuestion(SHR::Container *dest) {
     butNo->setDimension(gcn::Rectangle(0, 0, 100, 32));
     butNo->addActionListener(hAL);
     winActualize->add(butNo, 225, winActualize->getHeight() - 55);
-
-    iState = AU_ASKING_TO_UPDATE;
 }
 
 void cAutoUpdater::TransformToExit() {

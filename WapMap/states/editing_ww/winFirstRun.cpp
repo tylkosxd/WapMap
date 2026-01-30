@@ -5,10 +5,18 @@
 #include "../../windows/options.h"
 
 extern HGE *hge;
+extern cAutoUpdater *_AU_GLOBAL_PTR;
 
 #define HEIGHT int height = GV->fntMyriad16->GetStringBlockHeight(370, GETL2S("FirstRun", "Text")) + 100;
 
+constexpr bool hasUpdateReady() {
+    return GV->bAutoUpdate && _AU_GLOBAL_PTR && _AU_GLOBAL_PTR->releaseAsset.size;
+}
+
 void State::EditingWW::FirstRun_Open() {
+    if (hasUpdateReady()) {
+        return;
+    }
     if (FirstRun_data != 0) {
         conMain->moveToTop(FirstRun_data->win);
         return;
@@ -44,6 +52,10 @@ void State::EditingWW::FirstRun_Close() {
     delete FirstRun_data->win;
     delete FirstRun_data;
     FirstRun_data = 0;
+
+    if (hasUpdateReady()) {
+        _AU_GLOBAL_PTR->PopupQuestion();
+    }
 }
 
 void State::EditingWW::FirstRun_Think() {
