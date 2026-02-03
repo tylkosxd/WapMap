@@ -1,45 +1,34 @@
-﻿#include <windows.h>
-#include <cstdio>
-#include <string>
+﻿#include <filesystem>
+#include <thread>
+#include <chrono>
+#include <windows.h>
+
+namespace fs = std::filesystem;
 
 #define UPDATE_DIRECTORY ".wm_update"
-
-const char* files_all = "*";
-const char* files_update = UPDATE_DIRECTORY "/*";
-const char* save_settings = ".settings.cfg";
+#define UPDATE_DIRECTORY_LENGTH sizeof(UPDATE_DIRECTORY)
 
 int main()
 {
-	Sleep(1000);
-	rename(&save_settings[1], save_settings);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 
-	WIN32_FIND_DATAA FindFileData;
-	HANDLE hFind;
+	for (const fs::directory_entry& entry : fs::recursive_directory_iterator(UPDATE_DIRECTORY)) {
+		auto* relativePath = entry.path().c_str() + UPDATE_DIRECTORY_LENGTH;
 
-	hFind = FindFirstFileA((LPCSTR)files_all, &FindFileData);
-	if (hFind != INVALID_HANDLE_VALUE)
-	{
-		do {
-			if (FindFileData.cFileName[0] == '.') continue;
-			remove(FindFileData.cFileName);
-		} while (FindNextFileA(hFind, &FindFileData) != 0);
+		if (entry.is_directory()) {
+			fs::create_directory(relativePath);
+			continue;
+		}
+
+		if (fs::exists(relativePath)) {
+			if (fs::last_write_time(relativePath) >= entry.last_write_time()) continue;
+			fs::remove(relativePath);
+		}
+
+		fs::rename(entry.path(), relativePath);
 	}
 
-	hFind = FindFirstFileA((LPCSTR)files_update, &FindFileData);
-	if (hFind != INVALID_HANDLE_VALUE)
-	{
-		do {
-			if (!strcmp(FindFileData.cFileName, ".") || !strcmp(FindFileData.cFileName, "..")) continue;
-			std::string filepath(files_update);
-			filepath.pop_back();
-			filepath += FindFileData.cFileName;
-			rename(filepath.c_str(), FindFileData.cFileName);
-		} while (FindNextFileA(hFind, &FindFileData) != 0);
-	}
-
-	rename(save_settings, &save_settings[1]);
-	
-	RemoveDirectoryA(UPDATE_DIRECTORY);
+	fs::remove_all(UPDATE_DIRECTORY);
 
 	ShellExecuteA(
 		NULL,
@@ -49,10 +38,8 @@ int main()
 		"",
 		SW_SHOWNORMAL
 	);
-
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdline, int) {
 	return main();
 }
- 

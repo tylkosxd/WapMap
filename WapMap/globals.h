@@ -289,6 +289,9 @@ enum Gfx16Icons {
     Icon16_Mirror,
     Icon16_Invert,
     Icon16_LavaHand,
+    Icon16_Coords,
+    Icon16_Location,
+    Icon16_Refresh,
     Gfx16Icons_Count
 };
 

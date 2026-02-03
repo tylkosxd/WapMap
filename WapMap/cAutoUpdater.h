@@ -62,7 +62,7 @@ public:
     std::string response;
     bool bKill = false;
 
-    GitAPIReleaseAsset releaseAsset;
+    GitAPIReleaseAsset releaseAsset { "", 0 };
     const char *hUpdatePackage = 0;
     size_t downloadedBytes = 0;
 
@@ -83,7 +83,7 @@ public:
     SHR::ProgressBar *pbProgress;
     WIDG::Viewport *vpActualize;
 
-    void PopupQuestion(SHR::Container *dest);
+    void PopupQuestion();
 
     void TransformToDownload();
 
