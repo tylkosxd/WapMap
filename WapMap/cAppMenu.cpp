@@ -118,11 +118,10 @@ cAppMenu::cAppMenu() {
 
     workcon = hEntries[AppMenu_Navigation]->GetContext();
     workcon->AddElement(APPMEN_GO_SPAWN, GETL2S("AppMenu", "Go_Spawn"), GV->sprIcons16[Icon16_ClawHead]);
+    workcon->AddElement(APPMEN_GO_PREV_WARP, GETL2S("AppMenu", "Go_Prev_Warp"), GV->sprIcons16[Icon16_Warp]);
     workcon->AddElement(APPMEN_GO_LOCATION, GETL2S("AppMenu", "Go_Location"), GV->sprIcons16[Icon16_DownRight]);
     workcon->AddElement(APPMEN_GO_COORDS, GETL2S("AppMenu", "Go_Coords"), GV->sprIcons16[Icon16_DownRight]);
-    workcon->AddElement(APPMEN_GO_PREV_WARP, GETL2S("AppMenu", "Go_Prev_Warp"), GV->sprIcons16[Icon16_Warp]);
     workcon->adjustSize();
-    workcon->GetElementByID(APPMEN_GO_LOCATION)->SetEnabled(0);
 
     workcon = hEntries[AppMenu_Tools]->GetContext();
     workcon->AddElement(APPMEN_TOOLS_MAPSHOT, GETL(Lang_MapShot), GV->sprIcons16[Icon16_Mapshot]);
@@ -621,7 +620,8 @@ void cAppMenu::action(const gcn::ActionEvent &actionEvent) {
             GV->editState->fCamY = startY - GV->editState->vPort->GetHeight() / 2 / GV->editState->fZoom;
             iOpened = AppMenu_Navigation;
         } else if (id == APPMEN_GO_LOCATION) {
-            // should open a window with saved coordinates. Saved prior by right-clicking on an empty space and clicking "Save location"
+            GV->editState->hwinLocationsBrowser->Open();
+            hEntries[AppMenu_Navigation]->GetContext()->setVisible(false);
         } else if (id == APPMEN_GO_COORDS) {
             GV->editState->hwinGoToCoords->Open();
             hEntries[AppMenu_Navigation]->GetContext()->setVisible(false);

@@ -8,158 +8,222 @@ enum WWDx_BlockType {
     BlockType_MetaInfo = 0,
     BlockType_MetaEndInfo,
     BlockType_Header,
-    BlockType_Guides
+    BlockType_Guides,
+    BlockType_Favourites
 };
 
-cIO_WWDx::cIO_WWDx(DocumentData *dd) {
-    hDocumentData = dd;
-}
-
-cIO_WWDx::~cIO_WWDx() {
-
-}
-
-
-std::string cIO_WWDx::ReadZeroTerminatedString(std::istream *hStream) {
+std::string cIO_WWDx::ReadCString(std::istream *hStream) {
     std::string acc("");
+    char h;
     while (1) {
-        byte a;
-        hStream->RBYTE(a);
-        if (a == 0) break;
-        acc.append(1, a);
+        hStream->RBYTE(h);
+        if (h == 0) break;
+        acc.append(1, h);
     }
     return acc;
 }
 
 void cIO_WWDx::SerializeTo(std::iostream *hStream) {
-    int initpos = hStream->tellp();
-    int metasize = 0;
-    char tmpbuf[256];
-    int tmpi, blocklen;
+    char hBlockType;
+    int iBlockSize = 0;
+    const int iInitPos = hStream->tellp();
 
-    sprintf(tmpbuf, "<wm_meta>");
-    hStream->write((char *) tmpbuf, 9);
-    metasize += 9;
-
-    tmpbuf[0] = BlockType_MetaInfo;
-    hStream->write((char *) tmpbuf, 1);
-    tmpi = 4;
-    hStream->WLEN(&tmpi, 4);
-    tmpi = 0;
-    hStream->WLEN(&tmpi, 4);
-    metasize += 9;
-
-    tmpbuf[0] = BlockType_Header;
-    hStream->write((char *) tmpbuf, 1);
-    blocklen = 4 + strlen(hDocumentData->strWapMapVersion.c_str()) + 1 + 4;
-    blocklen += hDocumentData->strMapVersion.length() + 1;
-    blocklen += hDocumentData->strMapDescription.length() + 1;
-    hStream->WLEN(&blocklen, 4);
-    tmpi = hDocumentData->iWapMapBuild;
-    hStream->WLEN(&tmpi, 4);
-    strcpy(tmpbuf, hDocumentData->strWapMapVersion.c_str());
-    hStream->write((char *) tmpbuf, strlen(hDocumentData->strWapMapVersion.c_str()) + 1);
-
-    hStream->WLEN(&(hDocumentData->iMapBuild), 4);
-
-    int strlen = hDocumentData->strMapVersion.length();
-    char *varbuf = new char[strlen + 1];
-    strcpy(varbuf, hDocumentData->strMapVersion.c_str());
-    hStream->WLEN(varbuf, strlen + 1);
-    delete[] varbuf;
-
-    strlen = hDocumentData->strMapDescription.length();
-    varbuf = new char[strlen + 1];
-    strcpy(varbuf, hDocumentData->strMapDescription.c_str());
-    hStream->WLEN(varbuf, strlen + 1);
-    delete[] varbuf;
-    metasize += 5 + blocklen;
-
-    if (hDocumentData->vGuides.size() > 0) {
-        tmpbuf[0] = BlockType_Guides;
-        hStream->write((char *) tmpbuf, 1);
-        blocklen = 4 + 5 * hDocumentData->vGuides.size();
-        hStream->WLEN(&blocklen, 4);
-
-        tmpi = hDocumentData->vGuides.size();
-        hStream->WLEN(&tmpi, 4);
-        for (size_t i = 0; i < hDocumentData->vGuides.size(); i++) {
-            tmpbuf[0] = hDocumentData->vGuides[i].bOrient;
-            tmpi = hDocumentData->vGuides[i].iPos;
-            hStream->write((char *) tmpbuf, 1);
-            hStream->WLEN(&tmpi, 4);
-        }
-
-        metasize += 5 + blocklen;
+    StartTag: {
+        hStream->WLEN(startTag, WWDX_START_TAG_SIZE);
     }
 
-    tmpbuf[0] = BlockType_MetaEndInfo;
-    hStream->write((char *) tmpbuf, 1);
-    tmpi = 4;
-    hStream->WLEN(&tmpi, 4);
-    tmpi = 0;
-    hStream->WLEN(&tmpi, 4);
-    metasize += 9;
+    MetaInfo: {
+        hBlockType = BlockType_MetaInfo;
+        hStream->WBYTE(hBlockType);
+        iBlockSize = 4;
+        hStream->WLEN(&iBlockSize, 4);
 
-    sprintf(tmpbuf, "</wm_meta>");
-    hStream->write((char *) tmpbuf, 10);
-    metasize += 10;
+        int iTemp = 0; // temporarily set to 0, write in MetaSize
+        hStream->WLEN(&iTemp, 4);
+    }
 
-    hStream->seekp(initpos + 9 + 5, std::ios_base::beg);
-    hStream->WLEN(&metasize, 4);
-    hStream->seekp(initpos + metasize - 10 - 4, std::ios_base::beg);
-    hStream->WLEN(&metasize, 4);
+    Header: {
+        hBlockType = BlockType_Header;
+        hStream->WBYTE(hBlockType);
+        const int iPosBlockSize = hStream->tellp();
+        iBlockSize = 0; // temporarily set to 0 and save the p position, write here later
+        hStream->WLEN(&iBlockSize, 4);
+
+        hStream->WLEN(&(hDocumentData->iWapMapBuild), 4);
+        iBlockSize = 4;
+
+        int iLen = hDocumentData->strWapMapVersion.length() + 1;
+        hStream->WLEN(hDocumentData->strWapMapVersion.c_str(), iLen);
+        iBlockSize += iLen;
+
+        hStream->WLEN(&(hDocumentData->iMapBuild), 4);
+        iBlockSize += 4;
+
+        iLen = hDocumentData->strMapVersion.length() + 1;
+        hStream->WLEN(hDocumentData->strMapVersion.c_str(), iLen);
+        iBlockSize += iLen;
+
+        iLen = hDocumentData->strMapDescription.length() + 1;
+        hStream->WLEN(hDocumentData->strMapDescription.c_str(), iLen);
+        iBlockSize += iLen;
+
+        const int iPos = hStream->tellp();
+        hStream->seekp(iPosBlockSize, std::ios_base::beg);
+        hStream->WLEN(&iBlockSize, 4);
+        hStream->seekp(iPos, std::ios_base::beg);
+    }
+
+    Guides: {
+        const int iGuidesCount = hDocumentData->vGuides.size();
+        if (iGuidesCount == 0)
+            goto Favourites;
+
+        hBlockType = BlockType_Guides;
+        hStream->WBYTE(hBlockType);
+        iBlockSize = 4 + 5 * iGuidesCount;
+        hStream->WLEN(&iBlockSize, 4);
+
+        hStream->WLEN(&iGuidesCount, 4);
+        char cOrient;
+        for (int i = 0; i < iGuidesCount; i++) {
+            cOrient = hDocumentData->vGuides[i].bOrient;
+            hStream->WBYTE(cOrient);
+            hStream->WLEN(&(hDocumentData->vGuides[i].iPos), 4);
+        }
+    }
+
+    Favourites: {
+        const int iFavsCount = hDocumentData->vFavLocations.size();
+        if (iFavsCount == 0)
+            goto MetaEndInfo;
+
+        hBlockType = BlockType_Favourites;
+        hStream->WBYTE(hBlockType);
+        iBlockSize = 0;
+        const int iBlockSizePos = hStream->tellp();
+        hStream->WLEN(&iBlockSize, 4); // temporarily set to 0 and save the p position, write here later
+        
+        hStream->WLEN(&iFavsCount, 4);
+        iBlockSize += 4;
+
+        int iLen;
+        for (int i = 0; i < iFavsCount; i++) {
+            const auto fav = hDocumentData->vFavLocations[i];
+            iLen = strlen(fav.Name) + 1;
+            hStream->WLEN(fav.Name, iLen);
+            hStream->WLEN(&(fav.X), 4);
+            hStream->WLEN(&(fav.Y), 4);
+            iBlockSize += iLen + 4 + 4;
+        }
+
+        const int iPos = hStream->tellp();
+        hStream->seekp(iBlockSizePos, std::ios_base::beg);
+        hStream->WLEN(&iBlockSize, 4);
+        hStream->seekp(iPos, std::ios_base::beg);
+    }
+
+    MetaEndInfo: {
+        hBlockType = BlockType_MetaEndInfo;
+        hStream->WBYTE(hBlockType);
+        iBlockSize = 4;
+        hStream->WLEN(&iBlockSize, 4);
+
+        int iTemp = 0; // temporarily set to zero, write in MetaSize
+        hStream->WLEN(&iTemp, 4);
+    }
+
+    EndTag: {
+        hStream->WLEN(endTag, WWDX_END_TAG_SIZE);
+    }
+
+    MetaSize: {
+        const int iMetaSize = (int)(hStream->tellp()) - iInitPos;
+        hStream->seekp(iInitPos + WWDX_START_TAG_SIZE + WWDX_TAG_HEADER_SIZE, std::ios_base::beg);
+        hStream->WLEN(&iMetaSize, 4);
+        hStream->seekp(iInitPos + iMetaSize - WWDX_END_TAG_SIZE - 4, std::ios_base::beg);
+        hStream->WLEN(&iMetaSize, 4);
+    }
 }
 
 void cIO_WWDx::DeserializeFrom(std::istream *hStream) {
-    char tmpbuf[256];
-    for (int i = 0; i < 256; i++) tmpbuf[i] = 0;
-    hStream->seekg(-10, std::ios_base::cur);
-    hStream->RLEN(tmpbuf, 10);
-    if (strcmp(tmpbuf, "</wm_meta>") != 0) return;
-    hStream->seekg(-14, std::ios_base::cur);
-    int metasize;
-    hStream->RINT(metasize);
-    hStream->seekg(10 - metasize, std::ios_base::cur);
-    if (metasize < 19 + 9 + 9) return;
+    char buff[32] = {0};
+    char hBlockType;
+    int iBlockSize, iMetaSize;
 
-    for (int i = 0; i < 256; i++) tmpbuf[i] = 0;
-    hStream->RLEN(tmpbuf, 9);
-    if (strcmp(tmpbuf, "<wm_meta>") != 0) return;
+    hStream->clear();
+    hStream->seekg(-WWDX_END_TAG_SIZE, std::ios_base::cur);
+    hStream->read(buff, WWDX_END_TAG_SIZE);
+    if (strncmp(buff, endTag, WWDX_END_TAG_SIZE))
+        return;
+
+    hStream->seekg(-WWDX_END_TAG_SIZE - 4, std::ios_base::cur);
+
+    hStream->RINT(iMetaSize);
+    metaSize = iMetaSize;
+    if (iMetaSize < WWDX_META_MIN_SIZE)
+        return;
+    
+    memset(buff, 0, sizeof(buff));
+
+    hStream->seekg(WWDX_END_TAG_SIZE - iMetaSize, std::ios_base::cur);
+
+    hStream->RLEN(buff, WWDX_START_TAG_SIZE);
+    if (strncmp(buff, startTag, WWDX_START_TAG_SIZE))
+        return;
 
     while (1) {
-        byte b;
-        hStream->RBYTE(b);
-        WWDx_BlockType blocktype = (WWDx_BlockType) b;
-        int blocklen;
-        hStream->RINT(blocklen);
-        int datastart = hStream->tellg();
+        hStream->RBYTE(hBlockType);
+        WWDx_BlockType id = (WWDx_BlockType) hBlockType;
+        hStream->RINT(iBlockSize);
+        const int iBlockPos = hStream->tellg();
 
-        if (blocktype == BlockType_MetaEndInfo) {
-            return;
-        } else if (blocktype == BlockType_Header) {
-            hStream->RINT(hDocumentData->iWapMapBuild);
-            hDocumentData->strWapMapVersion = ReadZeroTerminatedString(hStream);
-            hStream->RINT(hDocumentData->iMapBuild);
-            hDocumentData->strMapVersion = ReadZeroTerminatedString(hStream);
-            hDocumentData->strMapDescription = ReadZeroTerminatedString(hStream);
-        } else if (blocktype == BlockType_Guides) {
-            int guidecount;
-            hStream->RINT(guidecount);
-            for (int i = 0; i < guidecount; i++) {
-                byte a;
-                hStream->RBYTE(a);
-                int pos;
-                hStream->RINT(pos);
-                stGuideLine ng;
-                ng.iPos = pos;
-                ng.bOrient = a;
-                hDocumentData->vGuides.push_back(ng);
+        switch (id) {
+            case BlockType_MetaEndInfo:
+                return;
+            case BlockType_Header: {
+                hStream->RINT(hDocumentData->iWapMapBuild);
+                hDocumentData->strWapMapVersion = ReadCString(hStream);
+                hStream->RINT(hDocumentData->iMapBuild);
+                hDocumentData->strMapVersion = ReadCString(hStream);
+                hDocumentData->strMapDescription = ReadCString(hStream);
+                break;
             }
+            case BlockType_Guides: {
+                size_t guideCount;
+                hStream->RINT(guideCount);
+
+                char hOrient; 
+                int iPos;
+                for (int i = 0; i < guideCount; i++) {
+                    hStream->RBYTE(hOrient);
+                    hStream->RINT(iPos);
+                    stGuideLine guide;
+                    guide.iPos = iPos;
+                    guide.bOrient = hOrient;
+                    hDocumentData->vGuides.push_back(guide);
+                    break;
+                }
+            }
+            case BlockType_Favourites: {
+                size_t favCount;
+                hStream->RINT(favCount);
+                for (int i = 0; i < favCount; i++) {
+                    stLocation fav;
+                    std::string name = ReadCString(hStream);
+                    snprintf(fav.Name, 63, "%s", name.c_str());
+                    fav.Name[63] = 0;
+                    hStream->RINT(fav.X);
+                    hStream->RINT(fav.Y);
+                    hDocumentData->vFavLocations.push_back(fav);
+                }
+                break;
+            }
+            default:
+                break;      
         }
 
-        int actpos = hStream->tellg();
-        if (actpos != datastart + blocklen)
-            hStream->seekg(datastart + blocklen - actpos, std::ios_base::cur);
+        int iPos = hStream->tellg();
+        if (iPos != iBlockPos + iBlockSize)
+            hStream->seekg(iBlockPos + iBlockSize - iPos, std::ios_base::cur);
     }
 }

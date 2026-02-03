@@ -3,67 +3,95 @@
 
 #include "../../shared/cWWD.h"
 
+#define WWDX_START_TAG_SIZE 9
+#define WWDX_END_TAG_SIZE 10
+#define WWDX_TAG_HEADER_SIZE 5
+#define WWDX_META_MIN_SIZE 37
+
 struct DocumentData;
 
 class cIO_WWDx : public WWD::CustomMetaSerializer {
 private:
     DocumentData *hDocumentData;
 
-    std::string ReadZeroTerminatedString(std::istream *hStream);
+    std::string ReadCString(std::istream *hStream);
+
+    const char startTag[WWDX_START_TAG_SIZE] = {'<', 'w', 'm', '_', 'm', 'e', 't', 'a', '>'};
+
+    const char endTag[WWDX_END_TAG_SIZE] = {'<', '/', 'w', 'm', '_', 'm', 'e', 't', 'a', '>'};
+
+    unsigned int metaSize = 0;
 
 public:
-    cIO_WWDx(DocumentData *dd);
+    cIO_WWDx(DocumentData *dd) {hDocumentData = dd;};
 
-    ~cIO_WWDx();
+    ~cIO_WWDx() {};
 
     virtual void SerializeTo(std::iostream *hStream);
 
     virtual void DeserializeFrom(std::istream *hStream);
+
+    unsigned int getSize() override { return metaSize; }
 };
 
-/**
- WWD extended meta
- typy danych;
-    zstring - oznacza string zakonczony nullem
+/*
+WWD extended meta
+Data types:
+    zstring - null-terminated string
 
- Ogolny schemat:
- 1) tag poczatkowy
-    string 9 bajtow - "<wm_meta>" (bez nulla na koncu)
- 2) bloki
-    kazdy blok sklada sie z naglowka bloku i nastepujacych po nim danych bloku.
-    - budowa naglowka bloku
-      1 bajt - identyfikator bloku [wymienione dalej]
-      4 bajty - integer, dlugosc danych bloku
+General:
+    Starting tag:
+        "<wm_meta>" - WITHOUT null at the end.
 
-    Jesli typ bloku nie jest obslugiwany, wystarczy przeskoczyc do przodu o dlugosc
-    danych bloku.
+    Blocks:
+        Every block starts with the block header:
+            typedef struct {
+                byte ID;
+                size_t dataSize;
+            } metaHeader;
 
-    Pierwszym blokiem musi byc blok MetaInfo (ID=0), a ostatnim MetaEndInfo (ID=1),
-    natomiast miedzy nimi moga wystepowac w dowolnej kolejnosci dowolne bloki. Zaden
-    blok nie moze sie powtarzac (tzn. nie moga istniec dwa bloki o takim samym ID).
+        Which is followed by the block's data.
 
- 3) tag koncowy
-    string 10 bajtow - "</wm_meta>" (bez nulla na koncu)
+        If a block's type (ID) is not supported, just skip forward by the length of its data size.
 
- typy blokow:
-    MetaInfo (ID - 0)
-        4 bajty - integer, dlugosc wszystkich danych (wlacznie z tagiem poczatku i konca)
+        First block must be MetaInfo (ID = 0), the last MetaEndInfo (ID = 1),
+        whereas in between them can be any amount of blocks in any order.
 
-    MetaEndInfo (ID - 1)
-        4 bajty - integer, dlugosc wszystkich danych (wlacznie z tagiem poczatku i konca)
+        Blocks of the same type should not repeat - that is only one block of a given type should exist.
 
-    Header (ID - 2)
-        4 bajty - integer, build WM z ktorego zostala zapisana mapa
-        zstring - wersja WM z ktorego zostala zapisana mapa (np. "0.1.2.3")
-        4 bajty - integer, build mapy
-        zstring - wersja mapy jako string
-        zstring - opis mapy
+    End tag:
+        "</wm_meta>" - WITHOUT null at the end.
 
-    Guides (ID - 3)
-        4 bajty - integer, ilosc linii pomocniczych
-        kolejno kazda linia pomocnicza:
-            1 bajt - orientacja linii (1 - pozioma, 0 - pionowa)
-            4 bajty - integer, pozycja linii
-**/
+    Block types:
+
+        MetaInfo (ID = 0, Size = 4):
+            size_t metaSize; // includes the starting and ending tags
+
+        MetaEndInfo (ID = 1, Size = 4):
+            size_t metaSize; // includes the starting and ending tags
+
+        Header (ID = 2, Size = varying):
+            int wapMapBuild;
+            zstring wapMapVersion;
+            int wwdBuild;
+            zstring wwdVersion;
+            zstring wwdDescription;
+        
+        Guides (ID = 3, Size = varying):
+            size_t guidesNumber;
+            struct {
+                char orientation; // 1 - horizontal, 0 - vertical
+                unsigned int position;
+            } guide[guidesNumber];
+
+        Favourite locations (ID = 4, Size = varying):
+            size_t favsNumber;
+            struct {
+                zstring name; // max. 64 bytes
+                unsigned int positionX;
+                unsigned int positionY;
+            } favourite[favsNumber];
+
+*/
 
 #endif // IO_WWDX

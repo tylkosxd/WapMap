@@ -311,6 +311,7 @@ void State::EditingWW::Init() {
     hwinAbout = new winAbout();
     hwinPaletteBrowser = new winPaletteBrowser();
     hwinGoToCoords = new winGoToCoords();
+    hwinLocationsBrowser = new winLocationsBrowser();
     hWindows.push_back(hwinNewMap);
     hWindows.push_back(hwinOptions);
     hWindows.push_back(hwinTileBrowser);
@@ -318,6 +319,7 @@ void State::EditingWW::Init() {
     hWindows.push_back(hwinAbout);
     hWindows.push_back(hwinPaletteBrowser);
     hWindows.push_back(hwinGoToCoords);
+    hWindows.push_back(hwinLocationsBrowser);
 
     for (auto & hWindow : hWindows) {
         SHR::Win *win = hWindow->GetWindow();
@@ -1754,19 +1756,21 @@ void State::EditingWW::Init() {
 
     //conmodUseAsBrush = new SHR::ContextModel();
     //conmodUseAsBrush->AddElement(OBJMENU_USEASBRUSH, GETL(Lang_UseAsBrush), GV->sprIcons16[Icon16_Brush]);
-
+    
     conmodAtEmptyPaste = new SHR::ContextModel();
     conmodAtEmptyPaste->AddElement(OBJMENU_PASTE, GETL(Lang_Paste), GV->sprIcons16[Icon16_Paste]);
     conmodAtEmptyPaste->AddElement(OBJMENU_NEWOBJ, GETL(Lang_NewObjectCtx), GV->sprIcons16[Icon16_Star]);
     conmodAtEmptyPaste->AddElement(OBJMENU_SETSPAWNP, GETL(Lang_SetSpawnPoint), GV->sprIcons16[Icon16_Move]);
     conmodAtEmptyPaste->AddElement(OBJMENU_TESTFROMHERE, GETL2S("Various", "ContextTestFromHere"),
                                    GV->sprIcons16[Icon16_Play]);
+    conmodAtEmptyPaste->AddElement(OBJMENU_ADDFAVLOC, GETL(Lang_AddFavLocation), GV->sprIcons16[Icon16_Add]);
 
     conmodAtEmpty = new SHR::ContextModel();
     conmodAtEmpty->AddElement(OBJMENU_NEWOBJ, GETL(Lang_NewObjectCtx), GV->sprIcons16[Icon16_Star]);
     conmodAtEmpty->AddElement(OBJMENU_SETSPAWNP, GETL(Lang_SetSpawnPoint), GV->sprIcons16[Icon16_Move]);
     conmodAtEmpty->AddElement(OBJMENU_TESTFROMHERE, GETL2S("Various", "ContextTestFromHere"),
                               GV->sprIcons16[Icon16_Play]);
+    conmodAtEmpty->AddElement(OBJMENU_ADDFAVLOC, GETL(Lang_AddFavLocation), GV->sprIcons16[Icon16_Add]);
 
     conmodAtEmptyPaste->GetElementByID(OBJMENU_NEWOBJ)->SetCascade(hmbObject->GetContext());
     conmodAtEmpty->GetElementByID(OBJMENU_NEWOBJ)->SetCascade(hmbObject->GetContext());

@@ -210,6 +210,8 @@ namespace WWD {
         virtual void SerializeTo(std::iostream *hStream) {};
 
         virtual void DeserializeFrom(std::istream *hStream) {};
+
+        virtual unsigned int getSize() { return 0; };
     };
 
     class Exception {

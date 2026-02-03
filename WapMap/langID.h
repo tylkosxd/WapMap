@@ -207,7 +207,7 @@ enum LangID {
     Lang_SearchObject,
     Lang_FREE1,
     Lang_FREE2,
-    Lang_FREE3,
+    Lang_AddFavLocation,
     Lang_LocationX,
     Lang_LocationY,
     Lang_Invert,

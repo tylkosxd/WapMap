@@ -675,6 +675,12 @@ namespace State {
                         m_hOwn->vPort->MarkToRedraw();
                         m_hOwn->MarkUnsaved();
                     }
+                } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_ADDFAVLOC) {
+                    int orix, oriy;
+                    m_hOwn->objContext->getAbsolutePosition(orix, oriy);
+                    int x = m_hOwn->Scr2WrdX(m_hOwn->GetActivePlane(), orix);
+                    int y = m_hOwn->Scr2WrdY(m_hOwn->GetActivePlane(), oriy);
+                    m_hOwn->hwinLocationsBrowser->AddFavLocation(x, y);
                 } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_TESTFROMHERE) {
                     if (strlen(m_hOwn->MDI->GetActiveDoc()->hParser->GetFilePath()) > 0) {
                         int worldX = m_hOwn->Scr2WrdX(m_hOwn->GetActivePlane(), m_hOwn->contextX),
