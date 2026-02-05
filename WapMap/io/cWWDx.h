@@ -16,11 +16,11 @@ private:
 
     std::string ReadCString(std::istream *hStream);
 
-    const char startTag[WWDX_START_TAG_SIZE] = {'<', 'w', 'm', '_', 'm', 'e', 't', 'a', '>'};
+    const char m_startTag[WWDX_START_TAG_SIZE] = {'<', 'w', 'm', '_', 'm', 'e', 't', 'a', '>'};
 
-    const char endTag[WWDX_END_TAG_SIZE] = {'<', '/', 'w', 'm', '_', 'm', 'e', 't', 'a', '>'};
+    const char m_endTag[WWDX_END_TAG_SIZE] = {'<', '/', 'w', 'm', '_', 'm', 'e', 't', 'a', '>'};
 
-    unsigned int metaSize = 0;
+    int m_metaSize = 0;
 
 public:
     cIO_WWDx(DocumentData *dd) {hDocumentData = dd;};
@@ -31,7 +31,7 @@ public:
 
     virtual void DeserializeFrom(std::istream *hStream);
 
-    unsigned int getSize() override { return metaSize; }
+    unsigned int getSize() override { return m_metaSize; }
 };
 
 /*

@@ -7,7 +7,7 @@
 enum WWDx_BlockType {
     BlockType_MetaInfo = 0,
     BlockType_MetaEndInfo,
-    BlockType_Header,
+    BlockType_WapMapHeader,
     BlockType_Guides,
     BlockType_Favourites
 };
@@ -29,7 +29,7 @@ void cIO_WWDx::SerializeTo(std::iostream *hStream) {
     const int iInitPos = hStream->tellp();
 
     StartTag: {
-        hStream->WLEN(startTag, WWDX_START_TAG_SIZE);
+        hStream->WLEN(m_startTag, WWDX_START_TAG_SIZE);
     }
 
     MetaInfo: {
@@ -42,8 +42,8 @@ void cIO_WWDx::SerializeTo(std::iostream *hStream) {
         hStream->WLEN(&iTemp, 4);
     }
 
-    Header: {
-        hBlockType = BlockType_Header;
+    WapMapHeader: {
+        hBlockType = BlockType_WapMapHeader;
         hStream->WBYTE(hBlockType);
         const int iPosBlockSize = hStream->tellp();
         iBlockSize = 0; // temporarily set to 0 and save the p position, write here later
@@ -133,7 +133,7 @@ void cIO_WWDx::SerializeTo(std::iostream *hStream) {
     }
 
     EndTag: {
-        hStream->WLEN(endTag, WWDX_END_TAG_SIZE);
+        hStream->WLEN(m_endTag, WWDX_END_TAG_SIZE);
     }
 
     MetaSize: {
@@ -153,13 +153,13 @@ void cIO_WWDx::DeserializeFrom(std::istream *hStream) {
     hStream->clear();
     hStream->seekg(-WWDX_END_TAG_SIZE, std::ios_base::cur);
     hStream->read(buff, WWDX_END_TAG_SIZE);
-    if (strncmp(buff, endTag, WWDX_END_TAG_SIZE))
+    if (strncmp(buff, m_endTag, WWDX_END_TAG_SIZE))
         return;
 
     hStream->seekg(-WWDX_END_TAG_SIZE - 4, std::ios_base::cur);
 
     hStream->RINT(iMetaSize);
-    metaSize = iMetaSize;
+    m_metaSize = iMetaSize;
     if (iMetaSize < WWDX_META_MIN_SIZE)
         return;
     
@@ -168,7 +168,7 @@ void cIO_WWDx::DeserializeFrom(std::istream *hStream) {
     hStream->seekg(WWDX_END_TAG_SIZE - iMetaSize, std::ios_base::cur);
 
     hStream->RLEN(buff, WWDX_START_TAG_SIZE);
-    if (strncmp(buff, startTag, WWDX_START_TAG_SIZE))
+    if (strncmp(buff, m_startTag, WWDX_START_TAG_SIZE))
         return;
 
     while (1) {
@@ -180,7 +180,7 @@ void cIO_WWDx::DeserializeFrom(std::istream *hStream) {
         switch (id) {
             case BlockType_MetaEndInfo:
                 return;
-            case BlockType_Header: {
+            case BlockType_WapMapHeader: {
                 hStream->RINT(hDocumentData->iWapMapBuild);
                 hDocumentData->strWapMapVersion = ReadCString(hStream);
                 hStream->RINT(hDocumentData->iMapBuild);
@@ -191,22 +191,25 @@ void cIO_WWDx::DeserializeFrom(std::istream *hStream) {
             case BlockType_Guides: {
                 size_t guideCount;
                 hStream->RINT(guideCount);
+                if (guideCount == 0)
+                    break;
 
                 char hOrient; 
                 int iPos;
                 for (int i = 0; i < guideCount; i++) {
-                    hStream->RBYTE(hOrient);
-                    hStream->RINT(iPos);
                     stGuideLine guide;
-                    guide.iPos = iPos;
-                    guide.bOrient = hOrient;
+                    hStream->RBYTE(guide.bOrient);
+                    hStream->RINT(guide.iPos);
                     hDocumentData->vGuides.push_back(guide);
-                    break;
                 }
+                break;
             }
             case BlockType_Favourites: {
                 size_t favCount;
                 hStream->RINT(favCount);
+                if (favCount == 0)
+                    break;
+
                 for (int i = 0; i < favCount; i++) {
                     stLocation fav;
                     std::string name = ReadCString(hStream);
@@ -219,7 +222,7 @@ void cIO_WWDx::DeserializeFrom(std::istream *hStream) {
                 break;
             }
             default:
-                break;      
+                break;
         }
 
         int iPos = hStream->tellg();
