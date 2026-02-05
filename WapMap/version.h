@@ -3,8 +3,8 @@
 
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 5
-#define PATCH_VERSION 0
-#define WA_VER 39
+#define PATCH_VERSION 1
+#define WA_VER 40
 
 #define PRODUCT_NAME "WapMap"
 #define INTERNAL_NAME PRODUCT_NAME ".exe"
