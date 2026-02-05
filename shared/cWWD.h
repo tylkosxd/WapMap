@@ -572,7 +572,7 @@ namespace WWD {
 
         ~Plane();
 
-        void (*m_hObjDeletionCB)(Object *obj);
+        void (*m_hObjDeletionCB)(Object *obj, int i);
 
         friend class Parser;
 
@@ -688,7 +688,7 @@ namespace WWD {
 
         void DeleteObjectByID(int piID);
 
-        void SetObjectDeletionCallback(void (*nCB)(Object *obj)) { m_hObjDeletionCB = nCB; };
+        void SetObjectDeletionCallback(void (*nCB)(Object *obj, int i)) { m_hObjDeletionCB = nCB; };
 
         void DeleteObjectFromList(Object *ptr);
 

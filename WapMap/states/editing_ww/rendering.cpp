@@ -2610,8 +2610,14 @@ void State::EditingWW::DrawObjSearch() {
     for (int i = startindex; i < startindex + 4; i++) {
         if (i < 0) continue;
         if (i >= vObjSearchResults.size()) break;
-
-        WWD::Object *obj = GetActivePlane()->GetObjectByIterator(vObjSearchResults[i].first);
+        WWD::Object *obj = 0;
+        if (vObjSearchResults[i].first < GetActivePlane()->GetObjectsCount()) {
+            obj = GetActivePlane()->GetObjectByIterator(vObjSearchResults[i].first);
+            if (obj->GetParam(WWD::Param_ID) != vObjSearchResults[i].second) obj = 0;
+        }
+        if (!obj) {
+            continue;
+        }
         hgeSprite *spr = SprBank->GetObjectSprite(obj);
         spr->SetColor(0xFFFFFFFF);
 		spr->SetFlip(GetUserDataFromObj(obj)->GetFlipX(), GetUserDataFromObj(obj)->GetFlipY(), true);

@@ -37,12 +37,12 @@
 #include "../dialog.h"
 #include "../../version.h"
 
-void EditingWW_ObjDeletionCB(WWD::Object *obj) {
+void EditingWW_ObjDeletionCB(WWD::Object *obj, int i) {
     auto *st = (State::EditingWW *) (GV->StateMgr->GetState());
-    st->NotifyObjectDeletion(obj);
+    st->NotifyObjectDeletion(obj, i);
 }
 
-void State::EditingWW::NotifyObjectDeletion(WWD::Object *obj) {
+void State::EditingWW::NotifyObjectDeletion(WWD::Object *obj, int it) {
     GetUserDataFromObj(obj)->ClearCellReferences();
     delete GetUserDataFromObj(obj);
     for (int i = 0; i < vObjectsBrushCB.size(); i++)
@@ -60,6 +60,15 @@ void State::EditingWW::NotifyObjectDeletion(WWD::Object *obj) {
             vObjectsPicked.erase(vObjectsPicked.begin() + i);
             i--;
         }
+    for (int i = 0; i < vObjSearchResults.size(); i++) {
+        if (vObjSearchResults[i].first == it) {
+            vObjSearchResults.erase(vObjSearchResults.begin() + i);
+            i--;
+        } else if (vObjSearchResults[i].first > it) {
+            vObjSearchResults[i].first--;
+        }
+    }
+    UpdateSearchResultsWindow();
 }
 
 void State::EditingWW::ObjectOverlay() {
@@ -726,11 +735,18 @@ void State::EditingWW::UpdateSearchResults() {
         }
         if (!cbObjSearchCaseSensitive->isSelected()) delete[] comp2;
     }
+    sliSearchObj->setValue(0);
+    UpdateSearchResultsWindow();
+}
+
+void State::EditingWW::UpdateSearchResultsWindow() {
     int normalHeight = int(130 + vObjSearchResults.size() * 140);
     sliSearchObj->setVisible(normalHeight > 550);
     sliSearchObj->setScaleEnd(vObjSearchResults.size() * 140 - sliSearchObj->getHeight() + 3);
-    sliSearchObj->setValue(0);
     sliSearchObj->adjustMarkerLength();
+    if (sliSearchObj->getValue() > sliSearchObj->getScaleEnd()) {
+        sliSearchObj->setValue(sliSearchObj->getScaleEnd());
+    }
     int winHeight = std::min(normalHeight, 550);
     winHeight = std::max(winHeight, 155);
     winSearchObj->setHeight(winHeight);

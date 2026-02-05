@@ -313,7 +313,7 @@ namespace WIDG {
     class Viewport;
 };
 
-void EditingWW_ObjDeletionCB(WWD::Object *obj);
+void EditingWW_ObjDeletionCB(WWD::Object *obj, int i);
 
 class cDynamicListModel : public gcn::ListModel {
 private:
@@ -817,7 +817,7 @@ namespace State {
 
         int iMoveRelX, iMoveRelY;
 
-        void NotifyObjectDeletion(WWD::Object *obj);
+        void NotifyObjectDeletion(WWD::Object *obj, int i);
 
         Viewport *vPort;
         cBankSound *hSndBank;
@@ -869,6 +869,7 @@ namespace State {
         void RenderObjectClipboardPreview();
 
         void UpdateSearchResults();
+        void UpdateSearchResultsWindow();
 
         //EWW_TOOL_OBJSELAREA tool vars
         SHR::Win *wintoolSelArea; //tool window

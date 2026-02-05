@@ -880,7 +880,7 @@ void WWD::Plane::DeleteObject(Object *ptr) {
     for (size_t i = 0; i < m_vObjects.size(); i++)
         if (m_vObjects[i] == ptr) {
             if (m_hObjDeletionCB != NULL)
-                (*m_hObjDeletionCB)(ptr);
+                (*m_hObjDeletionCB)(ptr, i);
             delete ptr;
             m_vObjects.erase(m_vObjects.begin() + i);
             return;
@@ -904,7 +904,7 @@ void WWD::Plane::DeleteObjectFromListByID(int piID) {
 
 void WWD::Plane::DeleteObjectByIterator(int piID) {
     if (m_hObjDeletionCB != NULL)
-        (*m_hObjDeletionCB)(m_vObjects[piID]);
+        (*m_hObjDeletionCB)(m_vObjects[piID], piID);
     delete m_vObjects[piID];
     m_vObjects[piID] = NULL;
     m_vObjects.erase(m_vObjects.begin() + piID);
@@ -914,7 +914,7 @@ void WWD::Plane::DeleteObjectByID(int piID) {
     for (size_t i = 0; i < m_vObjects.size(); i++) {
         if (m_vObjects[i]->GetParam(Param_ID) == piID) {
             if (m_hObjDeletionCB != NULL)
-                (*m_hObjDeletionCB)(m_vObjects[piID]);
+                (*m_hObjDeletionCB)(m_vObjects[piID], piID);
             delete m_vObjects[i];
             m_vObjects[piID] = NULL;
             m_vObjects.erase(m_vObjects.begin() + i);
