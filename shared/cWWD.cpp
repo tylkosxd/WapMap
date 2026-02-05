@@ -82,6 +82,14 @@ void WWD::Parser::LoadFromStream(std::istream *psSource) {
 
     LoadFileHeader(psSource);
 
+    // read meta before inflating
+    if (hMetaSerializer != 0) {
+        int curPos = psSource->tellg();
+        psSource->seekg(0, std::ios_base::end);
+        hMetaSerializer->DeserializeFrom(psSource);
+        psSource->seekg(curPos, std::ios_base::beg);
+    }
+
 	std::stringstream uncompressed_data;
     if (m_Header.m_iFlags & Flag_w_Compress) {
 #ifdef WAP_MAP
@@ -274,24 +282,12 @@ void WWD::Parser::LoadFromStream(std::istream *psSource) {
 
         m_hTileAttribs[i]->readFromStream(psSource);
     }
+
     int at = psSource->tellg();
     psSource->seekg(0, std::ios_base::end);
     if (((int) psSource->tellg()) - at != 0) {
         throw WWD_EXCEPTION(Error_NotCompleteCRC);
     }
-/*
-#ifdef WAP_MAP
-    if (_ghProgressInfo != 0) {
-        _ghProgressInfo->iDetailedProgress = 7 * 28;
-        _ghProgressInfo->strDetailedCaption = "[META TAGI]";
-        _ghProgressCallback->Tick();
-    }
-#endif // WAP_MAP
-
-    if (hMetaSerializer != 0) {
-        psSource->seekg(0, std::ios_base::end);
-        hMetaSerializer->DeserializeFrom(psSource);
-    }*/
 }
 
 void WWD::Parser::CleanStr(char *pszStr, int piSize) {
@@ -442,11 +438,11 @@ void WWD::Parser::CompileToStream(std::iostream *psDestination) {
     psDestination->seekp(748, std::ios_base::beg);
     psDestination->WLEN(&sum, 4);
 
-    /*if (hMetaSerializer != 0) {
+    if (hMetaSerializer != 0) {
         psDestination->seekp(0, std::ios_base::end);
         psDestination->seekg(0, std::ios_base::end);
         hMetaSerializer->SerializeTo(psDestination);
-    }*/
+    }
 }
 
 unsigned int WWD::Parser::CalculateChecksum(std::istream *psStream, int piOffset) {
@@ -625,7 +621,8 @@ void WWD::Parser::Inflate(std::istream *psSource, std::stringstream& output) {
     unsigned have;
     z_stream strm;
     int initial = psSource->tellg();
-    psSource->seekg(0, std::ios_base::end);
+    int compressedEnd = hMetaSerializer ? -(hMetaSerializer->getSize()) : 0;
+    psSource->seekg(compressedEnd, std::ios_base::end);
     int len = (int) psSource->tellg() - initial;
     psSource->seekg(initial, std::ios_base::beg);
     unsigned char *in = new unsigned char[len];

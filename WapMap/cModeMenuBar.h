@@ -38,6 +38,7 @@
 #define NOBJCON_SHAKE       30
 #define NOBJCON_LASER       31
 #define NOBJCON_STALACTITE  32
+#define NOBJCON_LAVAHAND    33
 
 class cModeMenuBar {
 protected:
@@ -113,7 +114,7 @@ public:
             *butIconPowderKeg, *butIconCannon, *butIconSpikes, *butIconEyeCandy,
             *butIconCheckpoint, *butIconText, *butIconWarp, *butIconDialog, *butIconSound, *butIconRope, *butIconMapPiece,
             *butIconHealth, *butIconCatnip, *butIconProjectile, *butIconCrabNest, *butIconShake, *butIconStalactite, *butIconLaser,
-            *butIconEnemy;
+            *butIconEnemy, *butIconLavaHand;
     std::vector<SHR::But *> vButtons;
 
     cmmbObject(int startX);

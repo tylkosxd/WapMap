@@ -43,6 +43,8 @@ cAppMenu::cAppMenu() {
     hEntries[AppMenu_Edit]->SetEnabled(false);
     hEntries[AppMenu_View] = new cAppMenu_Entry(GETL2S("AppMenu", "Main_View"), Icon16_View);
     hEntries[AppMenu_View]->SetEnabled(false);
+    hEntries[AppMenu_Navigation] = new cAppMenu_Entry(GETL2S("AppMenu", "Main_Navigation"), Icon16_View);
+    hEntries[AppMenu_Navigation]->SetEnabled(false);
     hEntries[AppMenu_Tools] = new cAppMenu_Entry(GETL2S("AppMenu", "Main_Tools"), Icon16_Tools);
     hEntries[AppMenu_Tools]->SetEnabled(false);
     hEntries[AppMenu_Assets] = new cAppMenu_Entry(GETL2S("AppMenu", "Main_Assets"), Icon16_Database);
@@ -114,6 +116,13 @@ cAppMenu::cAppMenu() {
     workcon->GetElementByID(APPMEN_VIEW_PLANES)->SetCascade(conPlanesVisibilityList);
     workcon->adjustSize();
 
+    workcon = hEntries[AppMenu_Navigation]->GetContext();
+    workcon->AddElement(APPMEN_GO_SPAWN, GETL2S("AppMenu", "Go_Spawn"), GV->sprIcons16[Icon16_ClawHead]);
+    workcon->AddElement(APPMEN_GO_PREV_WARP, GETL2S("AppMenu", "Go_Prev_Warp"), GV->sprIcons16[Icon16_Warp]);
+    workcon->AddElement(APPMEN_GO_LOCATION, GETL2S("AppMenu", "Go_Location"), GV->sprIcons16[Icon16_Location]);
+    workcon->AddElement(APPMEN_GO_COORDS, GETL2S("AppMenu", "Go_Coords"), GV->sprIcons16[Icon16_Coords]);
+    workcon->adjustSize();
+
     workcon = hEntries[AppMenu_Tools]->GetContext();
     workcon->AddElement(APPMEN_TOOLS_MAPSHOT, GETL(Lang_MapShot), GV->sprIcons16[Icon16_Mapshot]);
     workcon->AddElement(APPMEN_TOOLS_PLAY, GETL2S("AppMenu", "Tools_Play"), GV->sprIcons16[Icon16_Play]);
@@ -163,6 +172,7 @@ void cAppMenu::SyncDocumentSwitched() {
             GV->editState->MDI->GetDocsCount() > 1);
     hEntries[AppMenu_Edit]->SetEnabled(GV->editState->hParser != NULL);
     hEntries[AppMenu_View]->SetEnabled(GV->editState->hParser != NULL);
+    hEntries[AppMenu_Navigation]->SetEnabled(GV->editState->hParser != NULL);
     hEntries[AppMenu_Tools]->SetEnabled(GV->editState->hParser != NULL);
     hEntries[AppMenu_Assets]->SetEnabled(GV->editState->hParser != NULL);
     if (GV->editState->hParser == NULL) {
@@ -192,6 +202,7 @@ void cAppMenu::SyncDocumentClosed() {
     if (GV->editState->MDI->GetDocsCount() == 0) {
         hEntries[AppMenu_Edit]->SetEnabled(false);
         hEntries[AppMenu_View]->SetEnabled(false);
+        hEntries[AppMenu_Navigation]->SetEnabled(false);
         hEntries[AppMenu_Tools]->SetEnabled(false);
         hEntries[AppMenu_Assets]->SetEnabled(false);
     }
@@ -209,6 +220,7 @@ void cAppMenu::SyncDocumentOpened() {
     SyncMRU();
     hEntries[AppMenu_Edit]->SetEnabled(true);
     hEntries[AppMenu_View]->SetEnabled(true);
+    hEntries[AppMenu_Navigation]->SetEnabled(true);
     hEntries[AppMenu_Tools]->SetEnabled(true);
     hEntries[AppMenu_Assets]->SetEnabled(true);
 }
@@ -600,6 +612,28 @@ void cAppMenu::action(const gcn::ActionEvent &actionEvent) {
                     GV->editState->bDrawTileProperties ? GV->sprIcons16[Icon16_Applied] : NULL, true);
         }
         iOpened = AppMenu_View;
+    } else if (actionEvent.getSource() == hEntries[AppMenu_Navigation]->GetContext()) {
+        int id = hEntries[AppMenu_Navigation]->GetContext()->GetSelectedID();
+        if (id == APPMEN_GO_SPAWN) {
+            int startX = GV->editState->hParser->GetStartX(), startY = GV->editState->hParser->GetStartY();
+            GV->editState->fCamX = startX - GV->editState->vPort->GetWidth() / 2 / GV->editState->fZoom;
+            GV->editState->fCamY = startY - GV->editState->vPort->GetHeight() / 2 / GV->editState->fZoom;
+            iOpened = AppMenu_Navigation;
+        } else if (id == APPMEN_GO_LOCATION) {
+            GV->editState->hwinLocationsBrowser->Open();
+            hEntries[AppMenu_Navigation]->GetContext()->setVisible(false);
+        } else if (id == APPMEN_GO_COORDS) {
+            GV->editState->hwinGoToCoords->Open();
+            hEntries[AppMenu_Navigation]->GetContext()->setVisible(false);
+        } else if (id == APPMEN_GO_PREV_WARP) {
+            int warpX = GV->editState->MDI->GetActiveDoc()->fPrevWarpX;
+            int warpY = GV->editState->MDI->GetActiveDoc()->fPrevWarpY;
+            if (warpX > 0 && warpY > 0) {
+                GV->editState->fCamX = warpX - GV->editState->vPort->GetWidth() / 2 / GV->editState->fZoom;
+                GV->editState->fCamY = warpY - GV->editState->vPort->GetHeight() / 2 / GV->editState->fZoom;
+            }
+            iOpened = AppMenu_Navigation;
+        }
     } else if (actionEvent.getSource() == conPlanesVisibilityList) {
         int id = conPlanesVisibilityList->GetSelectedID();
         GV->editState->hPlaneData[id]->bDraw = !GV->editState->hPlaneData[id]->bDraw;

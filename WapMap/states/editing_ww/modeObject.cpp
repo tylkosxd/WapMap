@@ -32,6 +32,7 @@
 #include "../../objEdit/editEnemy.h"
 #include "../../objEdit/editText.h"
 #include "../../objEdit/editFloorSpike.h"
+#include "../../objEdit/editLavaHand.h"
 #include "../../databanks/logics.h"
 #include "../dialog.h"
 #include "../../version.h"
@@ -427,6 +428,8 @@ bool State::EditingWW::IsEditableObject(WWD::Object* obj, ObjEdit::cObjEdit** hE
         if (hEdit != 0) *hEdit = new ObjEdit::cEditObjLaser(obj, this);
     } else if (!strcmp(obj->GetLogic(), "Stalactite")) {
         if (hEdit != 0) *hEdit = new ObjEdit::cEditObjStalactite(obj, this);
+    } else if (!strcmp(obj->GetLogic(), "LavaHand")) {
+        if (hEdit != 0) *hEdit = new ObjEdit::cEditObjLavaHand(obj, this);
     } else if (!strcmp(obj->GetLogic(), "GlobalAmbientSound") ||
         !strcmp(obj->GetLogic(), "AmbientSound") ||
         !strcmp(obj->GetLogic(), "SpotAmbientSound") ||
@@ -619,6 +622,11 @@ void State::EditingWW::CreateObjectWithEasyEdit(gcn::Widget *widg) {
         obj->SetImageSet("LEVEL_LASER");
         obj->SetParam(WWD::Param_Damage, 10);
         obj->SetParam(WWD::Param_Counter, 1500);
+    } else if (widg == hmbObject->butIconLavaHand) {
+        obj->SetLogic("LavaHand");
+        obj->SetImageSet("LEVEL_LAVAHAND");
+        obj->SetParam(WWD::Param_Smarts, 3); //throws
+        obj->SetParam(WWD::Param_Speed, 2000); //delay
     } else if (widg == hmbObject->butIconSound) {
         obj->SetLogic("GlobalAmbientSound");
         obj->SetImageSet("GAME_SOUNDICON");
@@ -676,38 +684,55 @@ std::vector<cInventoryItem> State::EditingWW::GetContainerItems(WWD::Object *obj
 void State::EditingWW::UpdateSearchResults() {
     vObjSearchResults.clear();
     if (szObjSearchBuffer == NULL || strlen(szObjSearchBuffer) == 0) {
-        winSearchObj->setHeight(135);
+        winSearchObj->setHeight(155);
         labObjSearchResults->setVisible(false);
         butObjSearchSelectAll->setVisible(false);
         sliSearchObj->setVisible(false);
         return;
     }
-    char *comp2 = szObjSearchBuffer;
-    if (!cbObjSearchCaseSensitive->isSelected()) comp2 = SHR::ToLower(szObjSearchBuffer);
-    for (int i = 0; i < GetActivePlane()->GetObjectsCount(); i++) {
-        const char *comp = NULL;
-        if (ddObjSearchTerm->getSelected() == 1) comp = GetActivePlane()->GetObjectByIterator(i)->GetLogic();
-        else if (ddObjSearchTerm->getSelected() == 2) comp = GetActivePlane()->GetObjectByIterator(i)->GetImageSet();
-        else if (ddObjSearchTerm->getSelected() == 3) comp = GetActivePlane()->GetObjectByIterator(i)->GetAnim();
-        else comp = GetActivePlane()->GetObjectByIterator(i)->GetName();
-
-        if (!cbObjSearchCaseSensitive->isSelected())
-            comp = (const char *) SHR::ToLower(comp);
-
-        if (strstr(comp, comp2) != NULL) {
-            vObjSearchResults.emplace_back(i, GetActivePlane()->GetObjectByIterator(i)->GetParam(WWD::Param_ID));
-
-            if (!cbObjSearchCaseSensitive->isSelected())
-                delete[](char *) comp;
+    int selectedTerm = ddObjSearchTerm->getSelected();
+    if (selectedTerm == 4) { // if searching by ID
+        cbObjSearchCaseSensitive->setEnabled(false);
+        if (szObjSearchBuffer[0] >= 0x30 && szObjSearchBuffer[0] <= 0x39) {
+            int comp = std::stoi(szObjSearchBuffer);
+            /* looping cause there is nothing that prevents more than one object to have the same ID. */
+            for (int i = 0; i < GetActivePlane()->GetObjectsCount(); i++) {
+                int id = GetActivePlane()->GetObjectByIterator(i)->GetParam(WWD::Param_ID);
+                
+                if (comp == id) vObjSearchResults.emplace_back(i, id);
+            }
         }
     }
-    if (!cbObjSearchCaseSensitive->isSelected()) delete[] comp2;
+    else {
+        cbObjSearchCaseSensitive->setEnabled(true);
+        char *comp2 = szObjSearchBuffer;
+        if (!cbObjSearchCaseSensitive->isSelected()) comp2 = SHR::ToLower(szObjSearchBuffer);
+        for (int i = 0; i < GetActivePlane()->GetObjectsCount(); i++) {
+            const char *comp = NULL;
+            if (selectedTerm == 1) comp = GetActivePlane()->GetObjectByIterator(i)->GetLogic();
+            else if (selectedTerm == 2) comp = GetActivePlane()->GetObjectByIterator(i)->GetImageSet();
+            else if (selectedTerm == 3) comp = GetActivePlane()->GetObjectByIterator(i)->GetAnim();
+            else comp = GetActivePlane()->GetObjectByIterator(i)->GetName();
+
+            if (!cbObjSearchCaseSensitive->isSelected())
+                comp = (const char *) SHR::ToLower(comp);
+
+            if (strstr(comp, comp2) != NULL) {
+                vObjSearchResults.emplace_back(i, GetActivePlane()->GetObjectByIterator(i)->GetParam(WWD::Param_ID));
+
+                if (!cbObjSearchCaseSensitive->isSelected())
+                    delete[](char *) comp;
+            }
+        }
+        if (!cbObjSearchCaseSensitive->isSelected()) delete[] comp2;
+    }
     int normalHeight = int(130 + vObjSearchResults.size() * 140);
     sliSearchObj->setVisible(normalHeight > 550);
     sliSearchObj->setScaleEnd(vObjSearchResults.size() * 140 - sliSearchObj->getHeight() + 3);
     sliSearchObj->setValue(0);
     sliSearchObj->adjustMarkerLength();
     int winHeight = std::min(normalHeight, 550);
+    winHeight = std::max(winHeight, 155);
     winSearchObj->setHeight(winHeight);
     if (vObjSearchResults.empty()) {
         labObjSearchResults->setCaption(GETL2S("ObjectSearch", "NoResults"));

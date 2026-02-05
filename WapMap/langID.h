@@ -205,9 +205,9 @@ enum LangID {
     Lang_BrushLuaError,
     Lang_BrushOtherError,
     Lang_SearchObject,
-    Lang_ObjSearchHint,
-    Lang_NoSearchResults,
-    Lang_SearchResults,
+    Lang_FREE1,
+    Lang_FREE2,
+    Lang_AddFavLocation,
     Lang_LocationX,
     Lang_LocationY,
     Lang_Invert,
@@ -377,8 +377,9 @@ enum LangTooltipID {
     Lang_TT_DialogTrigger,
     Lang_TT_AmbientSound,
     Lang_TT_EndOfLevel,
-
+    
     Lang_TT_ZoomTool,
+    Lang_TT_LavaHand
 };
 
 enum LangWinDatabase {

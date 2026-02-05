@@ -29,7 +29,7 @@ namespace State {
             else
                 return "---";
         } else if (m_iType == LMODEL_SEARCHTERM) {
-            if (i < 0 || i > 3) return "";
+            if (i < 0 || i > 4) return "";
             wchar_t tmp[32];
             wsprintfW(tmp, L"Term_%d", i);
             return GETL2SV("ObjectSearch", tmp);
@@ -126,7 +126,7 @@ namespace State {
             else
                 return 1;
         } else if (m_iType == LMODEL_SEARCHTERM)
-            return 4;
+            return 5;
         else if (m_iType == LMODEL_PLANESPROP) {
             if (m_hOwn->hParser != NULL)
                 return m_hOwn->hParser->GetPlanesCount() + 1;

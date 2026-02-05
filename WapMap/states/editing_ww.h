@@ -43,6 +43,8 @@
 #include "../cAppMenu.h"
 #include "../windows/newMap.h"
 #include "../windows/paletteBrowser.h"
+#include "../windows/goToCoords.h"
+#include "../windows/goToLocation.h"
 
 #ifndef byte
 typedef unsigned char byte;
@@ -156,6 +158,7 @@ enum OBJMENU {
 	NEWOBJ,
 	EDIT,
 	EDITLOGIC,
+    ADDFAVLOC,
 
 	ZCOORD,
 	ZC_INC,
@@ -221,6 +224,7 @@ enum OBJMENU {
 #define OBJMENU_NEWOBJ       OBJMENU::NEWOBJ
 #define OBJMENU_EDIT         OBJMENU::EDIT
 #define OBJMENU_EDITLOGIC    OBJMENU::EDITLOGIC
+#define OBJMENU_ADDFAVLOC    OBJMENU::ADDFAVLOC
 
 #define OBJMENU_ZCOORD       OBJMENU::ZCOORD
 #define OBJMENU_ZC_INC       OBJMENU::ZC_INC
@@ -518,7 +522,7 @@ namespace State {
 
         SHR::Container *conWriteID;
         SHR::TextField *tfWriteID;
-
+        
         cAutoUpdater *hAU;
 
 #ifdef WM_ADD_LUA_EXECUTER
@@ -1070,6 +1074,8 @@ namespace State {
         winOptions *hwinOptions;
         winAbout *hwinAbout;
         winPaletteBrowser *hwinPaletteBrowser;
+        winGoToCoords *hwinGoToCoords;
+        winLocationsBrowser *hwinLocationsBrowser;
 
         void TextEditMoveToNextTile(bool saving = false);
 

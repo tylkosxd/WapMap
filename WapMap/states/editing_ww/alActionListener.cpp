@@ -675,6 +675,12 @@ namespace State {
                         m_hOwn->vPort->MarkToRedraw();
                         m_hOwn->MarkUnsaved();
                     }
+                } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_ADDFAVLOC) {
+                    int orix, oriy;
+                    m_hOwn->objContext->getAbsolutePosition(orix, oriy);
+                    int x = m_hOwn->Scr2WrdX(m_hOwn->GetActivePlane(), orix);
+                    int y = m_hOwn->Scr2WrdY(m_hOwn->GetActivePlane(), oriy);
+                    m_hOwn->hwinLocationsBrowser->AddFavLocation(x, y);
                 } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_TESTFROMHERE) {
                     if (strlen(m_hOwn->MDI->GetActiveDoc()->hParser->GetFilePath()) > 0) {
                         int worldX = m_hOwn->Scr2WrdX(m_hOwn->GetActivePlane(), m_hOwn->contextX),
@@ -861,6 +867,8 @@ namespace State {
                         destY = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_SpeedY);
                     m_hOwn->fCamX = destX - m_hOwn->vPort->GetWidth() / 2 / m_hOwn->fZoom;
                     m_hOwn->fCamY = destY - m_hOwn->vPort->GetHeight() / 2 / m_hOwn->fZoom;
+                    m_hOwn->MDI->GetActiveDoc()->fPrevWarpX = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationX),
+                    m_hOwn->MDI->GetActiveDoc()->fPrevWarpY = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationY);
                     m_hOwn->objContext->setVisible(false);
                 }
             } else if (actionEvent.getSource() == m_hOwn->advcon_Container) {
@@ -1250,178 +1258,181 @@ namespace State {
             return;
 
         switch (keyEvent.getKey().getValue()) {
-            case Key::ESCAPE: {
-                if (m_hOwn->winWorld->isVisible()) {
-                    m_hOwn->winWorld->setVisible(false);
-                }
-                if (m_hOwn->winpmMain->isVisible()) {
-                    m_hOwn->winpmMain->setVisible(false);
-                }
-                if (m_hOwn->winTileProp->isVisible()) {
-                    m_hOwn->winTileProp->setVisible(false);
-                }
-                if (m_hOwn->winLogicBrowser->isVisible()) {
-                    m_hOwn->winLogicBrowser->setVisible(false);
-                }
-
-                switch (m_hOwn->iActiveTool) {
-                    case EWW_TOOL_DUPLICATE:
-                    case EWW_TOOL_BRUSHOBJECT:
-                    case EWW_TOOL_ALIGNOBJ:
-                    case EWW_TOOL_SPACEOBJ:
-                    case EWW_TOOL_ZOOM:
-                        m_hOwn->SetTool(EWW_TOOL_NONE);
-                        break;
-                    case EWW_TOOL_MOVEOBJECT:
-                        if (m_hOwn->bEditObjDelete) {
-                            std::vector<WWD::Object *> tmp = m_hOwn->vObjectsPicked;
-                            for (auto &object : tmp) {
-                                m_hOwn->GetActivePlane()->DeleteObject(object);
-                            }
-                        } else {
-                            for (auto &object : m_hOwn->vObjectsPicked) {
-                                GetUserDataFromObj(object)->SyncToObj();
-                            }
-                        }
-                        m_hOwn->SetTool(EWW_TOOL_NONE);
-                        m_hOwn->vPort->MarkToRedraw();
-                        m_hOwn->bEditObjDelete = false;
-                        m_hOwn->vObjectsHL.clear();
-                        break;
-                    case EWW_TOOL_OBJSELAREA:
-                        if (m_hOwn->toolsaAction != TOOL_OBJSA_NONE) {
-                            if (m_hOwn->toolsaAction == TOOL_OBJSA_PICKALL) {
-                                m_hOwn->bDragSelection = false;
-                            }
-                            m_hOwn->toolsaAction = TOOL_OBJSA_NONE;
-                            m_hOwn->UpdateSelectAreaWindowButtons();
-                        } else {
-                            m_hOwn->SetTool(EWW_TOOL_NONE);
-                        }
-                        break;
-                }
-
-                for (cWindow *win : m_hOwn->hWindows) {
-                    win->Close();
-                }
-
-                if (m_hOwn->MDI->GetActiveDocIt() == -1 && m_hOwn->MDI->GetDocsCount()) {
-                    m_hOwn->MDI->BackToLastActive();
-                }
-                break;
+        case Key::ESCAPE: {
+            if (m_hOwn->winWorld->isVisible()) {
+                m_hOwn->winWorld->setVisible(false);
             }
-            case Key::F11:
-                m_hOwn->ToggleFullscreen();
-                break;
-            case Key::SPACE: {
-                float mx, my;
-                hge->Input_GetMousePos(&mx, &my);
-                if (!m_hOwn->bDragSelection && !m_hOwn->bDragDropScroll && !m_hOwn->tilContext->isVisible()
-                    && !m_hOwn->objContext->isVisible() && m_hOwn->conMain->getWidgetAt(mx, my) == m_hOwn->vPort->GetWidget()) {
-                    GV->SetCursor(HAND);
+            if (m_hOwn->winpmMain->isVisible()) {
+                m_hOwn->winpmMain->setVisible(false);
+            }
+            if (m_hOwn->winTileProp->isVisible()) {
+                m_hOwn->winTileProp->setVisible(false);
+            }
+            if (m_hOwn->winLogicBrowser->isVisible()) {
+                m_hOwn->winLogicBrowser->setVisible(false);
+            }
+
+            switch (m_hOwn->iActiveTool) {
+                case EWW_TOOL_DUPLICATE:
+                case EWW_TOOL_BRUSHOBJECT:
+                case EWW_TOOL_ALIGNOBJ:
+                case EWW_TOOL_SPACEOBJ:
+                case EWW_TOOL_ZOOM:
+                    m_hOwn->SetTool(EWW_TOOL_NONE);
+                    break;
+                case EWW_TOOL_MOVEOBJECT:
+                    if (m_hOwn->bEditObjDelete) {
+                        std::vector<WWD::Object *> tmp = m_hOwn->vObjectsPicked;
+                        for (auto &object : tmp) {
+                            m_hOwn->GetActivePlane()->DeleteObject(object);
+                        }
+                    } else {
+                        for (auto &object : m_hOwn->vObjectsPicked) {
+                            GetUserDataFromObj(object)->SyncToObj();
+                        }
+                    }
+                    m_hOwn->SetTool(EWW_TOOL_NONE);
+                    m_hOwn->vPort->MarkToRedraw();
+                    m_hOwn->bEditObjDelete = false;
                     m_hOwn->vObjectsHL.clear();
-                }
-                break;
-            } default: {
-                if (keyEvent.isControlPressed()) {
-                    switch (keyEvent.getKey().getValue()) {
-                        case 'd':
-                            if (m_hOwn->iMode == EWW_MODE_OBJECT && !m_hOwn->vObjectsPicked.empty() && m_hOwn->iActiveTool == EWW_TOOL_NONE) {
-                                for (auto it = m_hOwn->vObjectsPicked.begin(); it != m_hOwn->vObjectsPicked.end(); ++it) {
-                                    if (*it == m_hOwn->hStartingPosObj) {
-                                        it = m_hOwn->vObjectsPicked.erase(it);
-                                        if (it == m_hOwn->vObjectsPicked.end()) break;
-                                        continue;
-                                    }
-                                    auto object = new WWD::Object(*it);
-                                    object->SetUserData(new cObjUserData(object));
-                                    m_hOwn->plMain->AddObjectAndCalcID(object);
-                                    GetUserDataFromObj(object)->SyncToObj();
-                                    m_hOwn->hPlaneData[m_hOwn->GetActivePlaneID()]->ObjectData.hQuadTree->UpdateObject(
-                                            object);
-                                }
-
-                                if (m_hOwn->vObjectsPicked.empty()) {
-                                    m_hOwn->vObjectsPicked.emplace_back(m_hOwn->hStartingPosObj);
-                                    return;
-                                }
-
-                                m_hOwn->SetTool(EWW_TOOL_MOVEOBJECT);
-                                m_hOwn->bEditObjDelete = true;
-                                m_hOwn->iMoveRelX = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationX);
-                                m_hOwn->iMoveRelY = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationY);
-
-                                float mx, my;
-                                hge->Input_GetMousePos(&mx, &my);
-                                int wmx = m_hOwn->Scr2WrdX(m_hOwn->GetActivePlane(), mx),
-                                    wmy = m_hOwn->Scr2WrdY(m_hOwn->GetActivePlane(), my);
-
-                                for (auto &object : m_hOwn->vObjectsPicked) {
-                                    GetUserDataFromObj(object)->SetPos(object->GetX() + wmx - m_hOwn->iMoveRelX,
-                                                                       object->GetY() + wmy - m_hOwn->iMoveRelY);
-                                }
-                                m_hOwn->vPort->MarkToRedraw();
-                            }
-                            break;
-                        case 'n':
-                            m_hOwn->hwinNewMap->Open();
-                            break;
-                        case 'o':
-                            m_hOwn->OpenDocuments();
-                            break;
-                        case 's':
-                            if (!m_hOwn->MDI->GetActiveDoc()) return;
-                            if (keyEvent.isShiftPressed()) {
-                                m_hOwn->SaveAs();
-                            } else {
-                                m_hOwn->MDI->SaveCurrent();
-                            }
-                            break;
-                        case 'w':
-                            if (m_hOwn->MDI->GetActiveDoc()) {
-                                m_hOwn->MDI->CloseDocByIt(m_hOwn->MDI->GetActiveDocIt());
-                            }
-                            break;
-                        case 't':
-                            if (keyEvent.isShiftPressed()) {
-                                if (m_hOwn->MDI->GetCachedClosedDocsCount() > 0) {
-                                    GV->editState->vstrMapsToLoad.emplace_back(m_hOwn->MDI->GetMostRecentlyClosedDoc());
-                                }
-                            }
-                            break;
-                        case 'r':
-                            m_hOwn->hRulers->SetVisible(!m_hOwn->hRulers->IsVisible());
-                            break;
-                        case 'v':
-                            if (m_hOwn->iMode == EWW_MODE_OBJECT && m_hOwn->iActiveTool == EWW_TOOL_NONE && !m_hOwn->vObjectClipboard.empty()) {
-                                float mx, my;
-                                hge->Input_GetMousePos(&mx, &my);
-                                if (m_hOwn->conMain->getWidgetAt(mx, my) == m_hOwn->vPort->GetWidget()) {
-                                    m_hOwn->contextX = mx;
-                                    m_hOwn->contextY = my;
-                                    m_hOwn->objContext->EmulateClickID(OBJMENU_PASTE);
-                                }
-                            }
-                            break;
+                    break;
+                case EWW_TOOL_OBJSELAREA:
+                    if (m_hOwn->toolsaAction != TOOL_OBJSA_NONE) {
+                        if (m_hOwn->toolsaAction == TOOL_OBJSA_PICKALL) {
+                            m_hOwn->bDragSelection = false;
+                        }
+                        m_hOwn->toolsaAction = TOOL_OBJSA_NONE;
+                        m_hOwn->UpdateSelectAreaWindowButtons();
+                    } else {
+                        m_hOwn->SetTool(EWW_TOOL_NONE);
                     }
-                } else if (keyEvent.isAltPressed()) {
-                    switch (keyEvent.getKey().getValue()) {
-                        case 'd':
-                            if (m_hOwn->iMode == EWW_MODE_OBJECT && !m_hOwn->vObjectsPicked.empty()) {
-                                m_hOwn->SetTool(EWW_TOOL_DUPLICATE);
-                            }
-                            break;
-                        case Key::LEFT_ALT:
-                        case Key::RIGHT_ALT:
-                            if (m_hOwn->iActiveTool == EWW_TOOL_ZOOM) {
-                                GV->SetCursor(ZOOM_OUT);
-                            }
-                            lastPressedWasAlt = true;
-                            break;
-                    }
-                }
-                break;
+                    break;
             }
+
+            for (cWindow *win : m_hOwn->hWindows) {
+                win->Close();
+            }
+
+            if (m_hOwn->MDI->GetActiveDocIt() == -1 && m_hOwn->MDI->GetDocsCount()) {
+                m_hOwn->MDI->BackToLastActive();
+            }
+            break;
+        }
+        case Key::F11:
+            m_hOwn->ToggleFullscreen();
+            break;
+        case Key::SPACE: {
+            float mx, my;
+            hge->Input_GetMousePos(&mx, &my);
+            if (!m_hOwn->bDragSelection && !m_hOwn->bDragDropScroll && !m_hOwn->tilContext->isVisible()
+                && !m_hOwn->objContext->isVisible() && m_hOwn->conMain->getWidgetAt(mx, my) == m_hOwn->vPort->GetWidget()) {
+                GV->SetCursor(HAND);
+                m_hOwn->vObjectsHL.clear();
+            }
+            break;
+        } default: {
+            if (keyEvent.isControlPressed()) {
+                switch (keyEvent.getKey().getValue()) {
+                case 'd':
+                    if (m_hOwn->iMode == EWW_MODE_OBJECT && !m_hOwn->vObjectsPicked.empty() && m_hOwn->iActiveTool == EWW_TOOL_NONE) {
+                        for (auto it = m_hOwn->vObjectsPicked.begin(); it != m_hOwn->vObjectsPicked.end(); ++it) {
+                            if (*it == m_hOwn->hStartingPosObj) {
+                                it = m_hOwn->vObjectsPicked.erase(it);
+                                if (it == m_hOwn->vObjectsPicked.end()) break;
+                                continue;
+                            }
+                            auto object = new WWD::Object(*it);
+                            object->SetUserData(new cObjUserData(object));
+                            m_hOwn->plMain->AddObjectAndCalcID(object);
+                            GetUserDataFromObj(object)->SyncToObj();
+                            m_hOwn->hPlaneData[m_hOwn->GetActivePlaneID()]->ObjectData.hQuadTree->UpdateObject(
+                                    object);
+                        }
+
+                        if (m_hOwn->vObjectsPicked.empty()) {
+                            m_hOwn->vObjectsPicked.emplace_back(m_hOwn->hStartingPosObj);
+                            return;
+                        }
+
+                        m_hOwn->SetTool(EWW_TOOL_MOVEOBJECT);
+                        m_hOwn->bEditObjDelete = true;
+                        m_hOwn->iMoveRelX = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationX);
+                        m_hOwn->iMoveRelY = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationY);
+
+                        float mx, my;
+                        hge->Input_GetMousePos(&mx, &my);
+                        int wmx = m_hOwn->Scr2WrdX(m_hOwn->GetActivePlane(), mx),
+                            wmy = m_hOwn->Scr2WrdY(m_hOwn->GetActivePlane(), my);
+
+                        for (auto &object : m_hOwn->vObjectsPicked) {
+                            GetUserDataFromObj(object)->SetPos(object->GetX() + wmx - m_hOwn->iMoveRelX,
+                                                                object->GetY() + wmy - m_hOwn->iMoveRelY);
+                        }
+                        m_hOwn->vPort->MarkToRedraw();
+                    }
+                    break;
+                case 'n':
+                    m_hOwn->hwinNewMap->Open();
+                    break;
+                case 'o':
+                    m_hOwn->OpenDocuments();
+                    break;
+                case 's':
+                    if (!m_hOwn->MDI->GetActiveDoc()) return;
+                    if (keyEvent.isShiftPressed()) {
+                        m_hOwn->SaveAs();
+                    } else {
+                        m_hOwn->MDI->SaveCurrent();
+                    }
+                    break;
+                case 'w':
+                    if (m_hOwn->MDI->GetActiveDoc()) {
+                        m_hOwn->MDI->CloseDocByIt(m_hOwn->MDI->GetActiveDocIt());
+                    }
+                    break;
+                case 't':
+                    if (keyEvent.isShiftPressed()) {
+                        if (m_hOwn->MDI->GetCachedClosedDocsCount() > 0) {
+                            GV->editState->vstrMapsToLoad.emplace_back(m_hOwn->MDI->GetMostRecentlyClosedDoc());
+                        }
+                    }
+                    break;
+                case 'r':
+                    m_hOwn->hRulers->SetVisible(!m_hOwn->hRulers->IsVisible());
+                    break;
+                case 'v':
+                    if (m_hOwn->iMode == EWW_MODE_OBJECT && m_hOwn->iActiveTool == EWW_TOOL_NONE && !m_hOwn->vObjectClipboard.empty()) {
+                        float mx, my;
+                        hge->Input_GetMousePos(&mx, &my);
+                        if (m_hOwn->conMain->getWidgetAt(mx, my) == m_hOwn->vPort->GetWidget()) {
+                            m_hOwn->contextX = mx;
+                            m_hOwn->contextY = my;
+                            m_hOwn->objContext->EmulateClickID(OBJMENU_PASTE);
+                        }
+                    }
+                    break;
+                }
+            } else if (keyEvent.isAltPressed()) {
+                switch (keyEvent.getKey().getValue()) {
+                case 'd':
+                    if (m_hOwn->iMode == EWW_MODE_OBJECT && !m_hOwn->vObjectsPicked.empty()) {
+                        m_hOwn->SetTool(EWW_TOOL_DUPLICATE);
+                    }
+                    break;
+                case 'g':
+                    m_hOwn->hwinGoToCoords->Open();
+                    break;
+                case Key::LEFT_ALT:
+                case Key::RIGHT_ALT:
+                    if (m_hOwn->iActiveTool == EWW_TOOL_ZOOM) {
+                        GV->SetCursor(ZOOM_OUT);
+                    }
+                    lastPressedWasAlt = true;
+                    break;
+                }
+            }
+            break;
+        }
         }
     }
 

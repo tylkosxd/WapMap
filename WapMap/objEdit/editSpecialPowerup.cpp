@@ -9,6 +9,7 @@ extern HGE *hge;
 
 namespace ObjEdit {
     static const int iSpecialPowerupID[] = {55, 54, 53, 22, 56, 57, 58, 23};
+    static const int nOfItems = sizeof(iSpecialPowerupID)/sizeof(iSpecialPowerupID[0]);
 
     cEditObjSpecialPowerup::cEditObjSpecialPowerup(WWD::Object *obj, State::EditingWW *st) : cObjEdit(obj, st) {
         iType = ObjEdit::enHealth;
@@ -26,8 +27,9 @@ namespace ObjEdit {
         char tmp[32];
         sprintf(tmp, "%p", this);
 
-        for (int i = 0; i < 8; i++) {
-            int x = i % 4, y = i / 4;
+        for (int i = 0; i < nOfItems; i++) {
+            int columns = 4;
+            int x = i % columns, y = i / columns;
             rbType[i] = new SHR::RadBut(GV->hGfxInterface, "", tmp,
                                         !strcmp(hTempObj->GetImageSet(),
                                                 hState->hInvCtrl->GetItemByID(iSpecialPowerupID[i]).first.c_str()));
@@ -36,16 +38,18 @@ namespace ObjEdit {
             win->add(rbType[i], 5 + x * 71, 5 + y * 60 + 30 - rbType[i]->getHeight() / 2);
         }
 
-        bool bAny = 0;
-        for (int i = 0; i < 11; i++)
+        int bWhich = -1;
+        for (int i = 0; i < nOfItems; i++) {
             if (rbType[i]->isSelected()) {
-                bAny = 1;
+                bWhich = i;
                 break;
             }
-        if (!bAny) {
+        }
+        if (bWhich == -1) {
             rbType[0]->setSelected(1);
-            hTempObj->SetLogic("HealthPowerup");
+            hTempObj->SetLogic("SpecialPowerup");
             hTempObj->SetImageSet(hState->hInvCtrl->GetItemByID(iSpecialPowerupID[0]).first.c_str());
+            bWhich = 0;
         }
 
         labTime = new SHR::Lab(GETL2S("EditObj_SpecialPowerup", "Time"));
@@ -57,7 +61,7 @@ namespace ObjEdit {
         tfTime->setDimension(gcn::Rectangle(0, 0, 90, 20));
         tfTime->SetNumerical(1, 0);
         win->add(tfTime, 10 + labTime->getWidth(), 5 + 120 + 29 + 5);
-        tfTime->setEnabled(!strcmp(hTempObj->GetLogic(), "HealthPowerup"));
+        tfTime->setEnabled(bWhich != 0); // disable time only for the "extra life" pickup
 
         cbDontDisappear = new SHR::CBox(GV->hGfxInterface, GETL2S("EditObj_SpecialPowerup", "DontDisappear"));
         cbDontDisappear->adjustSize();
@@ -74,7 +78,7 @@ namespace ObjEdit {
     }
 
     cEditObjSpecialPowerup::~cEditObjSpecialPowerup() {
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < nOfItems; i++)
             delete rbType[i];
         delete labTime;
         delete tfTime;
@@ -93,17 +97,18 @@ namespace ObjEdit {
             bKill = 1;
             return;
         }
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < nOfItems; i++) {
             if (actionEvent.getSource() == rbType[i]) {
                 if (i == 3 || i == 7)
                     hTempObj->SetLogic("HealthPowerup");
                 else
                     hTempObj->SetLogic("SpecialPowerup");
-                tfTime->setEnabled(i == 3 || i == 7);
+                tfTime->setEnabled(i != 0);
                 cbDontDisappear->setEnabled(i == 4 || i == 5 || i == 6);
                 hTempObj->SetImageSet(hState->hInvCtrl->GetItemByID(iSpecialPowerupID[i]).first.c_str());
                 hState->vPort->MarkToRedraw();
             }
+        }
     }
 
     void cEditObjSpecialPowerup::Draw() {
@@ -124,16 +129,17 @@ namespace ObjEdit {
                                 GV->colLineDark);
 
         int picked = -1;
-        for (int i = 0; i < 11; i++)
+        for (int i = 0; i < nOfItems; i++) {
             if (rbType[i]->isSelected()) {
                 picked = i;
                 break;
             }
+        }
 
         float mx, my;
         hge->Input_GetMousePos(&mx, &my);
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < nOfItems; i++) {
             int x = i % 4, y = i / 4;
             cSprBankAsset *asset = hState->SprBank->GetAssetByID(
                     hState->hInvCtrl->GetItemByID(iSpecialPowerupID[i]).first.c_str());

@@ -52,7 +52,8 @@ namespace ObjEdit {
         enAmbient,
         enEnemy,
         enText,
-        enFloorSpike
+        enFloorSpike,
+        enLavaHand
     };
 
     class EditingWW;

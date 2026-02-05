@@ -230,6 +230,7 @@ add_executable(WapMap
 	${PROJECT_SOURCE_DIR}/WapMap/objedit/editTreasure.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/objedit/editWallCannon.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/objedit/editWarp.cpp
+	${PROJECT_SOURCE_DIR}/WapMap/objedit/editLavaHand.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/objedit/procPickRect.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/objEdit/procPickXYLockable.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/objedit/winInventoryPickbox.cpp
@@ -259,6 +260,8 @@ add_executable(WapMap
 	${PROJECT_SOURCE_DIR}/WapMap/vpFocusWidg.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/about.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/imgsetBrowser.cpp
+	${PROJECT_SOURCE_DIR}/WapMap/windows/goToCoords.cpp
+	${PROJECT_SOURCE_DIR}/WapMap/windows/goToLocation.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/newMap.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/options.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/tileBrowser.cpp

@@ -66,6 +66,12 @@ struct stGuideLine {
     bool bOrient;
 };
 
+struct stLocation {
+    char Name[64] = {0};
+    unsigned int X;
+    unsigned int Y;
+};
+
 struct DocumentData {
     cBankImageSet *hSprBank;
     cBankSound *hSndBank;
@@ -86,6 +92,8 @@ struct DocumentData {
     std::vector<State::PlaneData *> hPlaneData;
     WWD::Object *hStartingPosObj;
     float fCamX, fCamY;
+    float fPrevWarpX = 0.0f;
+    float fPrevWarpY = 0.0f;
     int iSelectedPlane;
     bool bSaved;
     std::vector<WWD::Object *> vObjectsPicked;
@@ -94,6 +102,7 @@ struct DocumentData {
 
     //meta
     std::vector<stGuideLine> vGuides;
+    std::vector<stLocation> vFavLocations;
     int iWapMapBuild, iMapBuild;
     std::string strWapMapVersion, strMapVersion, strMapDescription;
 };
