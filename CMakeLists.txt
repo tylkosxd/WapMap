@@ -242,6 +242,7 @@ add_executable(WapMap
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/lmListModel.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/modeObject.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/modeTile.cpp
+	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/navigation.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/procHotkeysHandle.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/rendering.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/vpCallback.cpp

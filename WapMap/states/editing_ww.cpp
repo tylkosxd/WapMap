@@ -1956,8 +1956,7 @@ void State::EditingWW::SynchronizeWithParser() {
         SetMode(cbutActiveMode->getSelectedEntryID() ? EWW_MODE_OBJECT : EWW_MODE_TILE);
     hmbActive->SetEnabled(1);
 
-    fCamX = hParser->GetStartX() - (vPort->GetWidth() / 2 / fZoom);
-    fCamY = hParser->GetStartY() - (vPort->GetHeight() / 2 / fZoom);
+    NavigateToStartLocation();
 }
 
 void State::EditingWW::SwitchActiveModeMenuBar(cModeMenuBar *n) {

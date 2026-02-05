@@ -588,6 +588,18 @@
     <ClCompile Include="windows\paletteBrowser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="windows\goToCoords.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\goToLocation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="objEdit\editLavaHand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="states\editing_ww\navigation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bodyQuadTree.h">
@@ -1029,6 +1041,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="windows\paletteBrowser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\goToLocation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\goToCoords.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="objEdit\editLavaHand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

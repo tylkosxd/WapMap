@@ -328,6 +328,7 @@
     <ClCompile Include="objedit\editCrumblingPeg.cpp" />
     <ClCompile Include="objedit\editCurse.cpp" />
     <ClCompile Include="objEdit\editFloorSpike.cpp" />
+    <ClCompile Include="objEdit\editLavaHand.cpp" />
     <ClCompile Include="objedit\editSoundTrigger.cpp" />
     <ClCompile Include="objedit\editElevator.cpp" />
     <ClCompile Include="objedit\editElevPath.cpp" />
@@ -358,6 +359,7 @@
     <ClCompile Include="states\editing_ww\lmListModel.cpp" />
     <ClCompile Include="states\editing_ww\modeObject.cpp" />
     <ClCompile Include="states\editing_ww\modeTile.cpp" />
+    <ClCompile Include="states\editing_ww\navigation.cpp" />
     <ClCompile Include="states\editing_ww\procHotkeysHandle.cpp" />
     <ClCompile Include="states\editing_ww\rendering.cpp" />
     <ClCompile Include="states\editing_ww\vpCallback.cpp" />
@@ -374,6 +376,8 @@
     <ClCompile Include="states\stats.cpp" />
     <ClCompile Include="vpFocusWidg.cpp" />
     <ClCompile Include="windows\about.cpp" />
+    <ClCompile Include="windows\goToCoords.cpp" />
+    <ClCompile Include="windows\goToLocation.cpp" />
     <ClCompile Include="windows\imgsetBrowser.cpp" />
     <ClCompile Include="windows\newMap.cpp" />
     <ClCompile Include="windows\options.cpp" />
@@ -486,6 +490,7 @@
     <ClInclude Include="objedit\editCrumblingPeg.h" />
     <ClInclude Include="objedit\editCurse.h" />
     <ClInclude Include="objEdit\editFloorSpike.h" />
+    <ClInclude Include="objEdit\editLavaHand.h" />
     <ClInclude Include="objedit\editSoundTrigger.h" />
     <ClInclude Include="objedit\editElevator.h" />
     <ClInclude Include="objedit\editElevPath.h" />
@@ -523,6 +528,8 @@
     <ClInclude Include="version.h" />
     <ClInclude Include="vpFocusWidg.h" />
     <ClInclude Include="windows\about.h" />
+    <ClInclude Include="windows\goToCoords.h" />
+    <ClInclude Include="windows\goToLocation.h" />
     <ClInclude Include="windows\imgsetBrowser.h" />
     <ClInclude Include="windows\options.h" />
     <ClInclude Include="windows\paletteBrowser.h" />

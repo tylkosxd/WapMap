@@ -29,9 +29,10 @@
 #define APPMEN_VIEW_GUIDELINES 4
 
 #define APPMEN_GO_SPAWN         1
-#define APPMEN_GO_PREV_WARP     2
-#define APPMEN_GO_LOCATION      3
-#define APPMEN_GO_COORDS        4
+#define APPMEN_GO_END           2
+#define APPMEN_GO_PREV_WARP     3
+#define APPMEN_GO_LOCATION      4
+#define APPMEN_GO_COORDS        5
 
 #define APPMEN_PLANEVIS_BORDER  1
 #define APPMEN_PLANEVIS_GRID    2

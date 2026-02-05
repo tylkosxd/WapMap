@@ -130,22 +130,9 @@ void State::EditingWW::HandleHotkeys() {
         vPort->MarkToRedraw();
         MarkUnsaved();
     } else if (bFocus && hge->Input_KeyDown(HGEK_HOME)) {
-        fCamX = hParser->GetStartX() - (vPort->GetWidth() / 2 / fZoom);
-        fCamY = hParser->GetStartY() - (vPort->GetHeight() / 2 / fZoom);
+        NavigateToStartLocation();
     } else if (bFocus && hParser && hge->Input_KeyDown(HGEK_END)) {
-        for (int i = 0; i < hParser->GetMainPlane()->GetObjectsCount(); ++i) {
-            auto object = hParser->GetMainPlane()->GetObjectByIterator(i);
-
-            if (!strcmp(object->GetLogic(), "BossStager") || !strcmp(object->GetLogic(), "EndOfLevelPowerup")
-                || (!strcmp(object->GetLogic(), "SpecialPowerup")
-                    && (!strcmp(object->GetImageSet(), "GAME_MAPPIECE")
-                        || !strcmp(object->GetImageSet(), "LEVEL_GEM")))) {
-                fCamX = object->GetX() - (vPort->GetWidth() / 2 / fZoom);
-                fCamY = object->GetY() - (vPort->GetHeight() / 2 / fZoom);
-
-                return;
-            }
-        }
+        NavigateToEndLocation();
     } else if (hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_M)) {
         cbutActiveMode->setSelectedEntryID(!cbutActiveMode->getSelectedEntryID(), 1);
     } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_G)) {

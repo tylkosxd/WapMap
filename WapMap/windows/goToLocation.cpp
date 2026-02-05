@@ -65,7 +65,7 @@ int LocationsList::renameLocation(int index, const std::string& newName) {
 }
 
 std::string LocationsList::getElementAt(int i) {
-    if (!v) return 0;
+    if (!v) return "";
     return (*v)[i].Name;
 }
 
