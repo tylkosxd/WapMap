@@ -70,6 +70,7 @@ struct stLocation {
     char Name[64] = {0};
     unsigned int X;
     unsigned int Y;
+    WWD::Object *Object = NULL;
 };
 
 struct DocumentData {

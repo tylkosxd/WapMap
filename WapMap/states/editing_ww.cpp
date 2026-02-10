@@ -3227,8 +3227,7 @@ void State::EditingWW::DocumentSwitched() {
         fCamX = MDI->GetActiveDoc()->fCamX;
         fCamY = MDI->GetActiveDoc()->fCamY;
     } else {
-        fCamX = hParser->GetStartX() - vPort->GetWidth() / 2 * fZoom;
-        fCamY = hParser->GetStartY() - vPort->GetHeight() / 2 * fZoom;
+        NavigateToStartLocation();
     }
     vPort->MarkToRedraw();
 

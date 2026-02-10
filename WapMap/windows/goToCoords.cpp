@@ -121,14 +121,8 @@ void winGoToCoords::goToCoords() {
         pickedX = std::stoi(strX.c_str());
         pickedY = std::stoi(strY.c_str());
     }
-
-    if (pickedX > mainPlane->GetPlaneWidthPx())
-        pickedX = mainPlane->GetPlaneWidthPx();
-    if (pickedY > mainPlane->GetPlaneHeightPx())
-        pickedY = mainPlane->GetPlaneHeightPx();
     
-    editState->fCamX = pickedX - editState->vPort->GetWidth() / 2 / editState->fZoom;
-    editState->fCamY = pickedY - editState->vPort->GetHeight() / 2 / editState->fZoom;
+    editState->NavigateToPoint(pickedX, pickedY);
 
     char temp[32];
 

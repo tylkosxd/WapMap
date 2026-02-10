@@ -2665,8 +2665,7 @@ void State::EditingWW::DrawObjSearch() {
                 WWD::Object *obj = GetActivePlane()->GetObjectByIterator(vObjSearchResults[i].first);
                 vObjectsPicked.clear();
                 vObjectsPicked.push_back(obj);
-                fCamX = obj->GetX() - vPort->GetWidth() / 2 * fZoom;
-                fCamY = obj->GetY() - vPort->GetHeight() / 2 * fZoom;
+                NavigateToPoint(obj->GetX(), obj->GetY());
                 vPort->MarkToRedraw();
             }
         } else {

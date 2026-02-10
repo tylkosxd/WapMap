@@ -522,7 +522,6 @@ namespace State {
 
         SHR::Container *conWriteID;
         SHR::TextField *tfWriteID;
-        
         cAutoUpdater *hAU;
 
 #ifdef WM_ADD_LUA_EXECUTER
@@ -1093,6 +1092,7 @@ namespace State {
 
 		void NavigateToStartLocation();
 		void NavigateToEndLocation();
+        void NavigateToPoint(int x, int y);
     };
 };
 

@@ -143,8 +143,8 @@ void State::EditingWW::HandleHotkeys() {
         vPort->MarkToRedraw();
     } else if (bFocus && iMode == EWW_MODE_OBJECT && vObjectsPicked.size() == 1) {
         if (hge->Input_KeyDown(HGEK_C)) {
-            fCamX = GetUserDataFromObj(vObjectsPicked[0])->GetX() - vPort->GetWidth() / 2 / fZoom;
-            fCamY = GetUserDataFromObj(vObjectsPicked[0])->GetY() - vPort->GetHeight() / 2 / fZoom;
+            auto* ud = GetUserDataFromObj(vObjectsPicked[0]);
+            NavigateToPoint(ud->GetX(), ud->GetY());
         } else if (hge->Input_KeyDown(HGEK_P)) {
             OpenObjectWindow(vObjectsPicked[0]);
         } else if (hge->Input_KeyDown(HGEK_E)) {

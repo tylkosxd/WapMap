@@ -16,11 +16,11 @@ class LocationsList : public gcn::ListModel {
 
         LocationsList() {};
 
-        int addLocation(const std::string& name, int x, int y);
+        int addLocation(const std::string& name, int x, int y, WWD::Object *linkedObject = NULL);
 
         void deleteLocation(int i);
 
-        stLocation getLocation(int i);
+        stLocation* getLocation(int i);
 
         int renameLocation(int index, const std::string& newName);
     

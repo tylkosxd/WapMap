@@ -690,8 +690,6 @@ namespace WWD {
 
         void SetObjectDeletionCallback(void (*nCB)(Object *obj, int i)) { m_hObjDeletionCB = nCB; };
 
-        void DeleteObjectFromList(Object *ptr);
-
         void DeleteObjectFromListByIterator(int piID);
 
         void DeleteObjectFromListByID(int piID);

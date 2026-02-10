@@ -11,16 +11,16 @@ enum LocNameRet {
     LocName_ErrorEmpty,
     LocName_ErrorDuplicate,
     LocName_ErrorTooLong,
-    LocName_ErrorNoListModel
+    LocName_ErrorGeneric
 };
 
-int LocationsList::addLocation(const std::string& name, int x, int y) {
+int LocationsList::addLocation(const std::string& name, int x, int y, WWD::Object *object) {
     if (!v)
-        return LocName_ErrorNoListModel;
+        return LocName_ErrorGeneric;
     if (name.empty())
         return LocName_ErrorEmpty;
     for (unsigned int i = 0; i < v->size(); ++i) {
-        if (name == getLocation(i).Name)
+        if (name == getLocation(i)->Name)
             return LocName_ErrorDuplicate;
     }
     int len = name.length();
@@ -30,6 +30,7 @@ int LocationsList::addLocation(const std::string& name, int x, int y) {
     strncpy(loc.Name, name.c_str(), len + 1);
     loc.X = x;
     loc.Y = y;
+    loc.Object = object;
     v->push_back(loc);
     return LocName_Success;
 }
@@ -39,28 +40,40 @@ void LocationsList::deleteLocation(int i) {
     v->erase(v->begin() + i);
 }
 
-stLocation LocationsList::getLocation(int i) {
-    if (!v) {
-        stLocation empty;
-        return empty;
+stLocation* LocationsList::getLocation(int i) {
+    if (!v) return NULL;
+    return &((*v)[i]);
+}
+
+bool validateObjectPtr(WWD::Object* object) {
+    auto* mainPlane = GV->editState->hParser->GetMainPlane();
+    for (int i = 0; i < mainPlane->GetObjectsCount(); i++) {
+        if (mainPlane->GetObjectByIterator(i) == object)
+            return 1;
     }
-    return (*v)[i];
+    return 0;
 }
 
 int LocationsList::renameLocation(int index, const std::string& newName) {
     if (!v)
-        return LocName_ErrorNoListModel;
+        return LocName_ErrorGeneric;
     if (newName.empty())
         return LocName_ErrorEmpty;
     for (unsigned int i = 0; i < v->size(); ++i) {
-        if (getLocation(i).Name == newName)
+        if (getLocation(i)->Name == newName)
             return LocName_ErrorDuplicate;
     }
     int len = newName.length();
     if (len > 63)
         return LocName_ErrorTooLong;
-    memset((*v)[index].Name, 0, 64);
-    strncpy((*v)[index].Name, newName.c_str(), len + 1);
+    auto* location = getLocation(index);
+    if (location->Object) {
+        if (!validateObjectPtr(location->Object))
+            return LocName_ErrorGeneric;
+        location->Object->SetName(newName.c_str());
+    }
+    memset(location->Name, 0, 64);
+    strncpy(location->Name, newName.c_str(), len + 1);
     return LocName_Success;
 }
 
@@ -69,7 +82,7 @@ std::string LocationsList::getElementAt(int i) {
     return (*v)[i].Name;
 }
 
-const char* getStr(const wchar_t* wstr) {
+inline const char* getStr(const wchar_t* wstr) {
     return GETL2SV("Win_GoToLocations", wstr);
 }
 
@@ -79,7 +92,7 @@ winLocationsBrowser::winLocationsBrowser() : cWindow(getStr(L"WinCaption"), 250,
     tabarLocs = new SHR::TabbedArea();
     tabarLocs->addActionListener(this);
     tabarLocs->setDimension(gcn::Rectangle(0, 0, 230, 25));
-    myWin.add(tabarLocs, 8, 15);
+    myWin.add(tabarLocs, 8, y);
 
     for (int i = 0; i < Locs::COUNT; i++) {
         lmLocs[i] = new LocationsList();
@@ -156,33 +169,45 @@ void winLocationsBrowser::RefreshLists() {
     for (int i = 0; i < mainPlane->GetObjectsCount(); i++) {
         auto *obj =  mainPlane->GetObjectByIterator(i);
         const char* logic = obj->GetLogic();
+        const char *name = obj->GetName();
         // mapping checkpoints
         if (strstr(logic, "Checkpoint")) {
-            char tmp[64];
-            int count = lmLocs[Locs::Checkpoints]->getNumberOfElements() + 1;
-            // check the first character only (FirstSuperCheckpoint, SecondSuperCheckpoint or Checkpoint):
-            const char* str = logic[0] == 'F' ? strSCp1 : logic[0] == 'S' ? strSCp2 : strCp;
-            sprintf(tmp, str, count);
-            lmLocs[Locs::Checkpoints]->addLocation(tmp, obj->GetX(), obj->GetY());
+            if (name && name[0]) {
+                lmLocs[Locs::Checkpoints]->addLocation(name, obj->GetX(), obj->GetY(), obj);
+            } else {
+                char tmp[64];
+                int count = lmLocs[Locs::Checkpoints]->getNumberOfElements() + 1;
+                // check the first character only (FirstSuperCheckpoint, SecondSuperCheckpoint or Checkpoint):
+                sprintf(tmp, (logic[0] == 'F' ? strSCp1 : logic[0] == 'S' ? strSCp2 : strCp), count);
+                lmLocs[Locs::Checkpoints]->addLocation(tmp, obj->GetX(), obj->GetY(), obj);
+            }
             continue;
         }
         // mapping warps
         if (obj->GetParam(WWD::Param_SpeedX) <= 0 && obj->GetParam(WWD::Param_SpeedY) <= 0)
             continue;
-        auto* imageset = obj->GetImageSet();
+        const char* imageset = obj->GetImageSet();
         if (!strcmp(logic, "SpecialPowerup") &&
                 (!strcmp(imageset, "GAME_WARP") || !strcmp(imageset, "GAME_VERTWARP"))) {
-            char tmp[64];
-            int count = (lmLocs[Locs::Warps]->getNumberOfElements() + 1);
-            sprintf(tmp, strWarp, count);
-            lmLocs[Locs::Warps]->addLocation(tmp, obj->GetX(), obj->GetY());
+            if (name && name[0]) {
+                lmLocs[Locs::Warps]->addLocation(name, obj->GetX(), obj->GetY(), obj);
+            } else {
+                char tmp[64];
+                int count = (lmLocs[Locs::Warps]->getNumberOfElements() + 1);
+                sprintf(tmp, strWarp, count);
+                lmLocs[Locs::Warps]->addLocation(tmp, obj->GetX(), obj->GetY(), obj);
+            }
             continue;
         }
         if (!strcmp(logic, "BossWarp")) {
-            char tmp[64];
-            int count = (lmLocs[Locs::Warps]->getNumberOfElements() + 1);
-            sprintf(tmp, strBossWarp, count);
-            lmLocs[Locs::Warps]->addLocation(tmp, obj->GetX(), obj->GetY());
+            if (name && name[0]) {
+                lmLocs[Locs::Warps]->addLocation(name, obj->GetX(), obj->GetY(), obj);
+            } else {
+                char tmp[64];
+                int count = (lmLocs[Locs::Warps]->getNumberOfElements() + 1);
+                sprintf(tmp, strBossWarp, count);
+                lmLocs[Locs::Warps]->addLocation(tmp, obj->GetX(), obj->GetY(), obj);
+            }
         }
     }
 }
@@ -210,34 +235,30 @@ void winLocationsBrowser::action(const ActionEvent &actionEvent) {
     int i = lbLocs->getSelected();
     if (i < 0 || i >= lmLocs[m_selectedTab]->getNumberOfElements())
         return;
-    stLocation location = lmLocs[m_selectedTab]->getLocation(i);
+    auto* location = lmLocs[m_selectedTab]->getLocation(i);
 
     if (actionEvent.getSource() == lbLocs) {
-        auto* ES = GV->editState;
-        ES->fCamX = location.X - ES->vPort->GetWidth() / 2 / ES->fZoom;
-        ES->fCamY = location.Y - ES->vPort->GetHeight() / 2 / ES->fZoom;
+        GV->editState->NavigateToPoint(location->X, location->Y);
         return;
     }
-
-    if (m_selectedTab != Locs::Favourites)
-        return;
     
-    if (actionEvent.getSource() == butDelete) {
+    if (m_selectedTab == Locs::Favourites && actionEvent.getSource() == butDelete) {
         lmLocs[Locs::Favourites]->deleteLocation(i);
         GV->editState->MarkUnsaved();
         return;
     }
 
     if (actionEvent.getSource() == butEdit) {
-        const auto& ret = State::InputDialog(GETL(Lang_WM), getStr(L"DialogInputName"), ST_DIALOG_BUT_OKCANCEL, location.Name);
-        if (ret.value == RETURN_OK && location.Name != ret.data) {
-            int rr = lmLocs[Locs::Favourites]->renameLocation(i, ret.data);
+        const auto& ret = State::InputDialog(GETL(Lang_WM), getStr(L"DialogInputName"), ST_DIALOG_BUT_OKCANCEL, location->Name);
+        if (ret.value == RETURN_OK && location->Name != ret.data) {
+            int rr = lmLocs[m_selectedTab]->renameLocation(i, ret.data);
             if (rr == LocName_Success) {
                 GV->editState->MarkUnsaved();
             } else {
                 wchar_t temp[32];
                 wsprintfW(temp, L"DialogInputNameError_%d", rr);
                 State::MessageBox(GETL(Lang_Error), getStr(temp), ST_DIALOG_ICON_ERROR);
+                RefreshLists();
             }
         }
         return;
@@ -250,8 +271,8 @@ void winLocationsBrowser::Think() {
         lbLocs->setListModel(lmLocs[i]);
         m_selectedTab = i;
     }
-    bool isEditable = m_selectedTab == Locs::Favourites && lbLocs->getSelected() >= 0;
-    butDelete->setEnabled(isEditable);
-    butEdit->setEnabled(isEditable);
+    bool anySelected = lbLocs->getSelected() >= 0;
+    butDelete->setEnabled(m_selectedTab == Locs::Favourites && anySelected);
+    butEdit->setEnabled(anySelected);
     butRefresh->setEnabled(m_selectedTab != Locs::Favourites);
 }

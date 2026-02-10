@@ -865,8 +865,7 @@ namespace State {
                 if (m_hOwn->advcon_Warp->GetSelectedID() == OBJMENU_ADV_WARP_GOTO) {
                     int destX = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_SpeedX),
                         destY = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_SpeedY);
-                    m_hOwn->fCamX = destX - m_hOwn->vPort->GetWidth() / 2 / m_hOwn->fZoom;
-                    m_hOwn->fCamY = destY - m_hOwn->vPort->GetHeight() / 2 / m_hOwn->fZoom;
+                    m_hOwn->NavigateToPoint(destX, destY);
                     m_hOwn->MDI->GetActiveDoc()->fPrevWarpX = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationX),
                     m_hOwn->MDI->GetActiveDoc()->fPrevWarpY = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationY);
                     m_hOwn->objContext->setVisible(false);
