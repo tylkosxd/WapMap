@@ -386,6 +386,23 @@ namespace State {
         bool change = 0;
 
         valtmp = atoi(tfadvID->getText().c_str());
+
+        /* check for ID collision */
+        if (GV->editState->hParser->GetMainPlane()->GetObjectByObjectID(valtmp)) {
+            int r = State::MessageBox(PRODUCT_NAME, GETL2S("ObjectProperties", "IDDuplicate"),
+                                            ST_DIALOG_ICON_WARNING, ST_DIALOG_BUT_YESNO);
+            if (r == RETURN_YES) {
+                int uniqueID = 0;
+                while (true) {
+                    if (!GV->editState->hParser->GetMainPlane()->GetObjectByObjectID(uniqueID)) 
+                        break;
+                    else
+                        uniqueID++;
+                }
+                valtmp = uniqueID;
+            }
+        }
+
         if (valtmp != hObj->GetParam(WWD::Param_ID)) {
             hObj->SetParam(WWD::Param_ID, valtmp);
             change = 1;
