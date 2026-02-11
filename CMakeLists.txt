@@ -239,6 +239,7 @@ add_executable(WapMap
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/alActionListener.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/cLayerRenderBuffer.cpp
+	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/clipboards.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/lmListModel.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/modeObject.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/states/editing_ww/modeTile.cpp

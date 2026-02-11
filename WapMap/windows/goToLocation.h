@@ -64,7 +64,7 @@ class winLocationsBrowser : public cWindow {
 
         void AddFavLocation(int x, int y);
 
-        void Open();
+        void Open() override;
 
         void OnDocumentChange() override;
 

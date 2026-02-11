@@ -23,7 +23,7 @@ private:
 public:
     winGoToCoords();
 
-    void Open();
+    void Open() override;
 
     void action(const ActionEvent &actionEvent) override;
 };

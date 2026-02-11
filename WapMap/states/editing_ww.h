@@ -522,6 +522,7 @@ namespace State {
 
         SHR::Container *conWriteID;
         SHR::TextField *tfWriteID;
+
         cAutoUpdater *hAU;
 
 #ifdef WM_ADD_LUA_EXECUTER
@@ -942,6 +943,10 @@ namespace State {
         std::vector<WWD::Object *> vObjectsPicked, vObjectsHL, vObjectClipboard, vObjectsBrushCB;
 		WWD::Object *selectionKeyObject;
 
+        WWD::Tile *hTileClipboard = NULL;
+        int iTileCBw = 0, iTileCBh = 0;
+        char *hTileClipboardImageSet;
+
         void SwitchActiveModeMenuBar(cModeMenuBar *n);
 
         void CreateObjectWithEasyEdit(gcn::Widget *widg);
@@ -1093,6 +1098,14 @@ namespace State {
 		void NavigateToStartLocation();
 		void NavigateToEndLocation();
         void NavigateToPoint(int x, int y);
+
+        void CopyTiles();
+        void CutTiles();
+        void PasteTiles();
+
+        void CopyObjects();
+        void CutObjects();
+        void PasteObjects();
     };
 };
 

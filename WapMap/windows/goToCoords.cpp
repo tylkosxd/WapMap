@@ -56,7 +56,9 @@ void winGoToCoords::createCoordsInput(const char* label, int i, int offsetY) {
 
 void winGoToCoords::Open() {
     setCurCamPos();
-    cWindow::Open();
+    myWin.setPosition(240, 160);
+    myWin.setVisible(true);
+    myWin.getParent()->moveToTop(&myWin);
 }
 
 void winGoToCoords::action(const ActionEvent &actionEvent) {

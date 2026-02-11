@@ -572,74 +572,16 @@ namespace State {
 
                 m_hOwn->SetTool(EWW_TOOL_NONE);
             } else if (actionEvent.getSource() == m_hOwn->butcamSetToSpawn) {
-                m_hOwn->fCamX = m_hOwn->hParser->GetStartX() - (m_hOwn->vPort->GetWidth() / 2 / m_hOwn->fZoom);
-                m_hOwn->fCamY = m_hOwn->hParser->GetStartY() - (m_hOwn->vPort->GetHeight() / 2 / m_hOwn->fZoom);
+                m_hOwn->NavigateToStartLocation();
             } else if (actionEvent.getSource() == m_hOwn->butcamSetTo) {
-                m_hOwn->fCamX =
-                        atoi(m_hOwn->tfcamSetToX->getText().c_str()) - (m_hOwn->vPort->GetWidth() / 2 / m_hOwn->fZoom);
-                m_hOwn->fCamY =
-                        atoi(m_hOwn->tfcamSetToY->getText().c_str()) - (m_hOwn->vPort->GetHeight() / 2 / m_hOwn->fZoom);
+                m_hOwn->NavigateToPoint(atoi(m_hOwn->tfcamSetToX->getText().c_str()), atoi(m_hOwn->tfcamSetToY->getText().c_str()));
             } else if (actionEvent.getSource() == m_hOwn->tilContext) {
-                if (m_hOwn->tilContext->GetSelectedID() == TILMENU_COPY ||
-                        m_hOwn->tilContext->GetSelectedID() == TILMENU_CUT) {
-                    if (m_hOwn->MDI->GetActiveDoc()->hTileClipboard != NULL) {
-                        delete[] m_hOwn->MDI->GetActiveDoc()->hTileClipboard;
-                        delete[] m_hOwn->MDI->GetActiveDoc()->hTileClipboardImageSet;
-                    }
-
-                    m_hOwn->MDI->GetActiveDoc()->hTileClipboardImageSet = new char[
-                    strlen(m_hOwn->GetActivePlane()->GetImageSet(0)) + 1];
-                    strcpy(m_hOwn->MDI->GetActiveDoc()->hTileClipboardImageSet,
-                           m_hOwn->GetActivePlane()->GetImageSet(0));
-
-                    if (m_hOwn->iTileSelectX2 >= m_hOwn->GetActivePlane()->GetPlaneWidth()) {
-                        m_hOwn->iTileSelectX2 = m_hOwn->GetActivePlane()->GetPlaneWidth() - 1;
-                    }
-                    if (m_hOwn->iTileSelectY2 >= m_hOwn->GetActivePlane()->GetPlaneHeight()) {
-                        m_hOwn->iTileSelectY2 = m_hOwn->GetActivePlane()->GetPlaneHeight() - 1;
-                    }
-
-                    m_hOwn->MDI->GetActiveDoc()->iTileCBw = m_hOwn->iTileSelectX2 - m_hOwn->iTileSelectX1 + 1;
-                    m_hOwn->MDI->GetActiveDoc()->iTileCBh = m_hOwn->iTileSelectY2 - m_hOwn->iTileSelectY1 + 1;
-
-                    m_hOwn->MDI->GetActiveDoc()->hTileClipboard = new WWD::Tile[m_hOwn->MDI->GetActiveDoc()->iTileCBw *
-                                                                                m_hOwn->MDI->GetActiveDoc()->iTileCBh];
-
-                    for (int i = 0, y = m_hOwn->iTileSelectY1; y <= m_hOwn->iTileSelectY2; y++)
-                        for (int x = m_hOwn->iTileSelectX1; x <= m_hOwn->iTileSelectX2; x++, i++)
-                            m_hOwn->MDI->GetActiveDoc()->hTileClipboard[i] = *m_hOwn->GetActivePlane()->GetTile(x, y);
-
-                    if (m_hOwn->tilContext->GetSelectedID() == TILMENU_CUT) {
-                        bool bChanges = false;
-                        for (int x = m_hOwn->iTileSelectX1; x <= m_hOwn->iTileSelectX2; x++)
-                            for (int y = m_hOwn->iTileSelectY1; y <= m_hOwn->iTileSelectY2; y++) {
-                                WWD::Tile *tile = m_hOwn->GetActivePlane()->GetTile(x, y);
-                                if (!tile->IsInvisible()) {
-                                    bChanges = true;
-                                    tile->SetInvisible(true);
-                                }
-                            }
-                        if (bChanges) {
-                            m_hOwn->vPort->MarkToRedraw();
-                            m_hOwn->MarkUnsaved();
-                        }
-                    }
+                if (m_hOwn->tilContext->GetSelectedID() == TILMENU_COPY) {
+                    m_hOwn->CopyTiles();
+                } else if (m_hOwn->tilContext->GetSelectedID() == TILMENU_CUT) {
+                    m_hOwn->CutTiles();
                 } else if (m_hOwn->tilContext->GetSelectedID() == TILMENU_PASTE) {
-                    bool bChanges = false;
-                    int tx = m_hOwn->Scr2WrdX(m_hOwn->GetActivePlane(), m_hOwn->contextX) / m_hOwn->GetActivePlane()->GetTileWidth(),
-                        ty = m_hOwn->Scr2WrdY(m_hOwn->GetActivePlane(), m_hOwn->contextY) / m_hOwn->GetActivePlane()->GetTileHeight();
-                    for (int i = 0, y = ty; y < ty + m_hOwn->MDI->GetActiveDoc()->iTileCBh; ++y)
-                        for (int x = tx; x < tx + m_hOwn->MDI->GetActiveDoc()->iTileCBw; ++x, ++i) {
-                            WWD::Tile *tile = m_hOwn->GetActivePlane()->GetTile(x, y);
-                            if (tile && *tile != m_hOwn->MDI->GetActiveDoc()->hTileClipboard[i]) {
-                                bChanges = true;
-                                *tile = m_hOwn->MDI->GetActiveDoc()->hTileClipboard[i];
-                            }
-                        }
-                    if (bChanges) {
-                        m_hOwn->vPort->MarkToRedraw();
-                        m_hOwn->MarkUnsaved();
-                    }
+                    m_hOwn->PasteTiles();
                 } else if (m_hOwn->tilContext->GetSelectedID() == TILMENU_DELETE) {
                     bool bChanges = false;
                     for (int x = m_hOwn->iTileSelectX1; x <= m_hOwn->iTileSelectX2; x++)
@@ -724,61 +666,12 @@ namespace State {
                     }
                     m_hOwn->vPort->MarkToRedraw();
                     m_hOwn->MarkUnsaved();
-                } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_COPY
-                           || m_hOwn->objContext->GetSelectedID() == OBJMENU_CUT) {
-                    bool deleting = m_hOwn->objContext->GetSelectedID() == OBJMENU_CUT;
-                    for (auto object : m_hOwn->vObjectClipboard) {
-                        delete object;
-                    }
-                    m_hOwn->vObjectClipboard.clear();
-                    auto selectedObjects = m_hOwn->vObjectsPicked;
-                    for (auto object : selectedObjects) {
-                        if (object != m_hOwn->hStartingPosObj) {
-                            auto nObject = new WWD::Object(object);
-                            if (deleting) {
-                                m_hOwn->GetActivePlane()->DeleteObject(object);
-                            }
-                            m_hOwn->vObjectClipboard.push_back(nObject);
-                        }
-                    }
-                    if (deleting) {
-                        m_hOwn->vObjectsPicked.clear();
-                        m_hOwn->vPort->MarkToRedraw();
-                        m_hOwn->MarkUnsaved();
-                    }
+                } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_COPY) {
+                    m_hOwn->CopyObjects();
+                } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_CUT) {
+                    m_hOwn->CutObjects();
                 } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_PASTE) {
-                    if (m_hOwn->vObjectClipboard.empty()) return;
-                    m_hOwn->vObjectsPicked.clear();
-                    float x = int(m_hOwn->fCamX * (m_hOwn->GetActivePlane()->GetMoveModX() / 100.0f) * m_hOwn->fZoom) +
-                              m_hOwn->contextX - m_hOwn->vPort->GetX();
-                    float y = int(m_hOwn->fCamY * (m_hOwn->GetActivePlane()->GetMoveModY() / 100.0f) * m_hOwn->fZoom) +
-                              m_hOwn->contextY - m_hOwn->vPort->GetY();
-
-                    x = x / m_hOwn->fZoom;
-                    y = y / m_hOwn->fZoom;
-
-                    for (auto &clipboardObject : m_hOwn->vObjectClipboard) {
-                        float diffX = clipboardObject->GetX() - m_hOwn->vObjectClipboard[0]->GetX(),
-                              diffY = clipboardObject->GetY() - m_hOwn->vObjectClipboard[0]->GetY();
-
-                        auto *object = new WWD::Object(clipboardObject);
-                        m_hOwn->GetActivePlane()->AddObjectAndCalcID(object);
-                        object->SetUserData(new cObjUserData(object));
-                        //m_hOwn->hPlaneData[m_hOwn->GetActivePlaneID()]->ObjectData.hQuadTree->UpdateObject(object);
-                        m_hOwn->vObjectsPicked.push_back(object);
-                        GetUserDataFromObj(object)->SetPos(x + diffX, y + diffY);
-                    }
-
-                    m_hOwn->vPort->MarkToRedraw();
-                    if (m_hOwn->UpdateMovedObjectWithRects(m_hOwn->vObjectsPicked)) {
-                        m_hOwn->MarkUnsaved();
-                        m_hOwn->vPort->MarkToRedraw();
-                    } else {
-                        std::vector<WWD::Object *> tmp = m_hOwn->vObjectsPicked;
-                        for (auto &i : tmp) {
-                            m_hOwn->GetActivePlane()->DeleteObject(i);
-                        }
-                    }
+                    m_hOwn->PasteObjects();
                 } else if (m_hOwn->objContext->GetSelectedID() == OBJMENU_USEASBRUSH) {
                     for (int i = 0; i < m_hOwn->vObjectsPicked.size(); i++)
                         if (m_hOwn->vObjectsPicked[i] == m_hOwn->hStartingPosObj)
@@ -1807,8 +1700,8 @@ namespace State {
                 ty = int(Scr2WrdY(GetActivePlane(), my) / GetActivePlane()->GetTileHeight());
                 if (iTileSelectX1 != -1 && tx >= iTileSelectX1 && tx <= iTileSelectX2 && ty >= iTileSelectY1 && ty <= iTileSelectY2) {
                     tilContext->SetModel(conmodTilesSelected);
-                } else if (MDI->GetActiveDoc()->hTileClipboard != NULL &&
-                           !strcmp(MDI->GetActiveDoc()->hTileClipboardImageSet, GetActivePlane()->GetImageSet(0))) {
+                } else if (hTileClipboard != NULL &&
+                           !strcmp(hTileClipboardImageSet, GetActivePlane()->GetImageSet(0))) {
                     tilContext->SetModel(conmodTilesPaste);
                 } else return;
                 contextX = mx;

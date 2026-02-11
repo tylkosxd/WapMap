@@ -681,7 +681,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                         uint16_t id = tile->GetID();
                         cTile *tileImg = hTileset->GetTile(plane->GetImageSet(0), id);
                         if (!tileImg) {
-                            GV->sprTile->RenderEx(posX, posY, 0, fZoom);
+                            GV->sprUnknownTile->RenderEx(posX, posY, 0, fZoom);
                             char tmp[32];
                             sprintf(tmp, "ID#%d", plane->GetTile(x, y)->GetID());
                             GV->fntMyriad16->SetColor(0x99FFFFFF);
@@ -2960,8 +2960,9 @@ void State::EditingWW::RenderCloudTip(int x, int y, int w, int h, int ax, int ay
 }
 
 void State::EditingWW::RenderTileClipboardPreview() {
-    if (MDI->GetActiveDoc() == NULL) return;
-    if (MDI->GetActiveDoc()->hTileClipboard == NULL) {
+    if (MDI->GetActiveDoc() == NULL)
+        return;
+    if (hTileClipboard == NULL) {
         int len = GV->fntMyriad16->GetStringWidth(GETL2S("ClipboardPreview", "TileClipboardEmpty"));
         RenderCloudTip(10, hge->System_GetState(HGE_SCREENHEIGHT) - 70, len + 20, 20, butMicroTileCB->getX() + 12,
                        butMicroTileCB->getY() - 3);
@@ -2969,30 +2970,33 @@ void State::EditingWW::RenderTileClipboardPreview() {
                                 GETL2S("ClipboardPreview", "TileClipboardEmpty"), 0);
         return;
     }
-    int cbw = MDI->GetActiveDoc()->iTileCBw,
-        cbh = MDI->GetActiveDoc()->iTileCBh;
+
     int tileW = 64, tileH = 64;
-    if (tileW * cbw > 400 || tileW * cbh > 400) {
-        tileW = 400 / (cbw > cbh ? cbw : cbh);
-        tileH = 400 / (cbw > cbh ? cbw : cbh);
+    if (tileW * iTileCBw > 400 || tileW * iTileCBh > 400) {
+        tileW = 400 / (iTileCBw > iTileCBh ? iTileCBw : iTileCBh);
+        tileH = 400 / (iTileCBw > iTileCBh ? iTileCBw : iTileCBh);
     }
-    int px = 20, py = hge->System_GetState(HGE_SCREENHEIGHT) - (tileH * cbh + 20 + 50) + 10;
-    RenderCloudTip(px - 10, py - 10, tileW * cbw + 20, tileH * cbh + 20, butMicroTileCB->getX() + 12,
+    int px = 20, py = hge->System_GetState(HGE_SCREENHEIGHT) - (tileH * iTileCBh + 20 + 50) + 10;
+    RenderCloudTip(px - 10, py - 10, tileW * iTileCBw + 20, tileH * iTileCBh + 20, butMicroTileCB->getX() + 12,
                    butMicroTileCB->getY() - 3);
-    for (int i = 0, y = 0; y < cbh; y++)
-        for (int x = 0; x < cbw; x++, i++) {
-            WWD::Tile* tile = &MDI->GetActiveDoc()->hTileClipboard[i];
-            if (!tile->IsInvisible() && !tile->IsFilled()) {
-                //uint16_t imgSetIndex = tile->GetID() >> 16;
-                uint16_t id = tile->GetID();
-                hgeSprite *spr = hTileset->GetTile(MDI->GetActiveDoc()->hTileClipboardImageSet,
-                                                   id)->GetImage();
+    for (int i = 0, y = 0; y < iTileCBh; y++) {
+        for (int x = 0; x < iTileCBw; x++, i++) {
+            WWD::Tile* tile = &hTileClipboard[i];
+            if (tile->IsInvisible() || tile->IsFilled())
+                continue;
+            uint16_t id = tile->GetID();
+            cTile *tileImg = hTileset->GetTile(hTileClipboardImageSet, id);
+            if (!tileImg) {
+                GV->sprUnknownTile->RenderStretch(px + tileW * x, py + tileH * y, px + tileW * (x + 1), py + tileH * (y + 1));
+            } else {
+                hgeSprite *spr = tileImg->GetImage();
                 spr->SetColor(0xFFFFFFFF);
                 spr->SetFlip(0, 0);
                 spr->SetHotSpot(0, 0);
                 spr->RenderStretch(px + tileW * x, py + tileH * y, px + tileW * (x + 1), py + tileH * (y + 1));
             }
         }
+    }
 }
 
 void State::EditingWW::RenderObjectClipboardPreview() {

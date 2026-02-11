@@ -81,9 +81,6 @@ struct DocumentData {
     cBankLogic *hCustomLogicBank;
     cBankMeta* hMetaBank;
     cBankPalettes* hPalettesBank;
-    char *hTileClipboardImageSet;
-    int iTileCBw, iTileCBh;
-    WWD::Tile *hTileClipboard;
     cDataController *hDataCtrl;
 
     cTabMDI *hTab;
