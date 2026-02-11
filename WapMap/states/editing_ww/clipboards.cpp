@@ -9,9 +9,6 @@ void State::EditingWW::CopyTiles() {
 
     auto* plane = GetActivePlane();
 
-    hTileClipboardImageSet = new char[strlen(plane->GetImageSet(0)) + 1];
-    strcpy(hTileClipboardImageSet, plane->GetImageSet(0));
-
     if (iTileSelectX2 >= plane->GetPlaneWidth()) {
         iTileSelectX2 = plane->GetPlaneWidth() - 1;
     }
@@ -22,11 +19,24 @@ void State::EditingWW::CopyTiles() {
     iTileCBw = iTileSelectX2 - iTileSelectX1 + 1;
     iTileCBh = iTileSelectY2 - iTileSelectY1 + 1;
 
+    if (iTileCBw <= 0 || iTileCBh <= 0) {
+    // safeguard - happens when copying from outside of a plane boundaries (with X/Y wrappings planes)
+        iTileCBw = 0;
+        iTileCBh = 0;
+        hTileClipboard = NULL;
+        hTileClipboardImageSet = NULL;
+        return;
+    }
+
+    hTileClipboardImageSet = new char[strlen(plane->GetImageSet(0)) + 1];
+    strcpy(hTileClipboardImageSet, plane->GetImageSet(0));
+
     hTileClipboard = new WWD::Tile[iTileCBw*iTileCBh];
 
     for (int i = 0, y = iTileSelectY1; y <= iTileSelectY2; y++)
         for (int x = iTileSelectX1; x <= iTileSelectX2; x++, i++)
             hTileClipboard[i] = *plane->GetTile(x, y);
+
 }
 
 void State::EditingWW::CutTiles() {
