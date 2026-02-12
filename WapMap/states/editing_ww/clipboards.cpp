@@ -9,24 +9,15 @@ void State::EditingWW::CopyTiles() {
 
     auto* plane = GetActivePlane();
 
-    if (iTileSelectX2 >= plane->GetPlaneWidth()) {
+    if (iTileSelectX2 >= plane->GetPlaneWidth() && !plane->GetFlag(WWD::Flag_p_XWrapping)) {
         iTileSelectX2 = plane->GetPlaneWidth() - 1;
     }
-    if (iTileSelectY2 >= plane->GetPlaneHeight()) {
+    if (iTileSelectY2 >= plane->GetPlaneHeight() && !plane->GetFlag(WWD::Flag_p_YWrapping)) {
         iTileSelectY2 = plane->GetPlaneHeight() - 1;
     }
 
-    iTileCBw = iTileSelectX2 - iTileSelectX1 + 1;
-    iTileCBh = iTileSelectY2 - iTileSelectY1 + 1;
-
-    if (iTileCBw <= 0 || iTileCBh <= 0) {
-    // safeguard - happens when copying from outside of a plane boundaries (with X/Y wrappings planes)
-        iTileCBw = 0;
-        iTileCBh = 0;
-        hTileClipboard = NULL;
-        hTileClipboardImageSet = NULL;
-        return;
-    }
+    iTileCBw = std::abs(iTileSelectX2 - iTileSelectX1) + 1;
+    iTileCBh = std::abs(iTileSelectY2 - iTileSelectY1) + 1;
 
     hTileClipboardImageSet = new char[strlen(plane->GetImageSet(0)) + 1];
     strcpy(hTileClipboardImageSet, plane->GetImageSet(0));
@@ -87,8 +78,7 @@ void State::EditingWW::CopyObjects() {
     vObjectClipboard.clear();
     for (auto object : vObjectsPicked) {
         if (object != hStartingPosObj) {
-            auto nObject = new WWD::Object(object);
-            vObjectClipboard.push_back(nObject);
+            vObjectClipboard.push_back(new WWD::Object(object));
         }
     }
 }
