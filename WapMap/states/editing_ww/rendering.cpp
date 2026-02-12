@@ -527,29 +527,31 @@ void State::EditingWW::DrawTileProperties() {
 int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
     int rcount = 0;
 
-    int psx = std::max(Wrd2ScrXrb(hParser->GetMainPlane(), 0), 0),
-        psy = std::max(Wrd2ScrYrb(hParser->GetMainPlane(), 0), 0);
+    {
+        auto plMain = hParser->GetMainPlane();
 
-    hge->Gfx_SetClipping(psx - 1, psy - 1, std::min(Wrd2ScrXrb(hParser->GetMainPlane(), hParser->GetMainPlane()->GetPlaneWidthPx()), vPort->GetWidth()) - psx + 2,
-                         std::min(Wrd2ScrYrb(hParser->GetMainPlane(), hParser->GetMainPlane()->GetPlaneHeightPx()), vPort->GetHeight()) - psy + 2);
+        int psx = std::max(Wrd2ScrXrb(plMain, 0), 0);
+        int psy = std::max(Wrd2ScrYrb(plMain, 0), 0);
+
+        hge->Gfx_SetClipping(psx - 1, psy - 1,
+                std::min(Wrd2ScrXrb(plMain, plMain->GetPlaneWidthPx()), vPort->GetWidth()) - psx + 2,
+                std::min(Wrd2ScrYrb(plMain, plMain->GetPlaneHeightPx()), vPort->GetHeight()) - psy + 2);
+    }
 
     float cammx = fCamX * fZoom,
           cammy = fCamY * fZoom;
 
     if (!plane->GetFlag(WWD::Flag_p_MainPlane)) {
-        cammx *= (plane->GetMoveModX() / 100.0f);
-        cammy *= (plane->GetMoveModY() / 100.0f);
-
-        if (plane->GetFlag(WWD::Flag_p_XWrapping)) {
-            cammx -= vPort->GetWidth() / 2.f * (1.0f - (plane->GetMoveModX() / 100.0f));
-        } else if (cammx < 0) {
-            cammx = -psx;
+        int iMoveX = plane->GetMoveModX();
+        if (iMoveX != 100) {
+            cammx *= (iMoveX / 100.0f);
+            cammx -= vPort->GetWidth() / 2.f * (1.0f - (iMoveX / 100.0f));
         }
 
-        if (plane->GetFlag(WWD::Flag_p_YWrapping)) {
-            cammy -= vPort->GetHeight() / 2.f * (1.0f - (plane->GetMoveModY() / 100.0f));
-        } else if (cammy < 0) {
-            cammy = -psy;
+        int iMoveY = plane->GetMoveModY();
+        if (iMoveY != 100) {
+            cammy *= (iMoveY / 100.0f);
+            cammy -= vPort->GetHeight() / 2.f * (1.0f - (iMoveY / 100.0f));
         }
     }
 
@@ -557,6 +559,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
         sy = floor(cammy / (plane->GetTileHeight() * fZoom)),
         ex = sx + vPort->GetWidth() / (plane->GetTileWidth() * fZoom) + 2,
         ey = sy + vPort->GetHeight() / (plane->GetTileHeight() * fZoom) + 2;
+    /* s - start, e - end */
 
     if (!plane->GetFlag(WWD::Flag_p_XWrapping)) {
         if (sx < 0) sx = 0;
@@ -614,7 +617,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
           posY = floor(sy * th - cammy);
 
     bool pickerHighlight = false;
-    if (!bUsingBuffer || ghosting)
+    if (!bUsingBuffer || ghosting) {
         for (int y = sy; y < ey; y++, posY += th) {
             float posX = floor(sx * tw - cammx);
             for (int x = sx; x < ex; x++, posX += tw) {
@@ -670,38 +673,38 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                 }
 
                 //if (!bUsingBuffer)
-                    if (tile->IsFilled()) {
-                        SHR::SetQuad(&q, SETA(hDataCtrl->GetPalette()->GetColor(plane->GetFillColor()), GETA(col)),
-                                     posX, posY, ceil(posX + tw), ceil(posY + th));
-                        hge->Gfx_RenderQuad(&q);
-                        rcount++;
-                    } else if (!tile->IsInvisible()) {
-                        hgeSprite *spr;
-                        //uint16_t imgSetIndex = tile->GetID() >> 16;
-                        uint16_t id = tile->GetID();
-                        cTile *tileImg = hTileset->GetTile(plane->GetImageSet(0), id);
-                        if (!tileImg) {
-                            GV->sprUnknownTile->RenderEx(posX, posY, 0, fZoom);
-                            char tmp[32];
-                            sprintf(tmp, "ID#%d", plane->GetTile(x, y)->GetID());
-                            GV->fntMyriad16->SetColor(0x99FFFFFF);
-                            GV->fntMyriad16->Render(posX + plane->GetTileWidth() / 2 * fZoom,
-                                                    posY + plane->GetTileHeight() * 0.75 * fZoom - 10,
-                                                    HGETEXT_CENTER,
-                                                    tmp, 0);
-                        } else {
-                            spr = tileImg->GetImage();
-                            spr->SetColor(col);
-                            spr->SetFlip(0, 0);
-                            spr->SetHotSpot(0, 0);
-                            spr->RenderEx(posX, posY, 0, fZoom + 0.0001);
-                        }
-
-                        if (bDrawTileProperties && pl == GetActivePlaneID()) {
-                            DrawTileAttributes(tile->GetID(), posX, posY, fZoom + 0.0001, fZoom);
-                        }
-                        rcount++;
+                if (tile->IsFilled()) {
+                    SHR::SetQuad(&q, SETA(hDataCtrl->GetPalette()->GetColor(plane->GetFillColor()), GETA(col)),
+                                    posX, posY, ceil(posX + tw), ceil(posY + th));
+                    hge->Gfx_RenderQuad(&q);
+                    rcount++;
+                } else if (!tile->IsInvisible()) {
+                    hgeSprite *spr;
+                    //uint16_t imgSetIndex = tile->GetID() >> 16;
+                    uint16_t id = tile->GetID();
+                    cTile *tileImg = hTileset->GetTile(plane->GetImageSet(0), id);
+                    if (!tileImg) {
+                        GV->sprUnknownTile->RenderEx(posX, posY, 0, fZoom);
+                        char tmp[32];
+                        sprintf(tmp, "ID#%d", plane->GetTile(x, y)->GetID());
+                        GV->fntMyriad16->SetColor(0x99FFFFFF);
+                        GV->fntMyriad16->Render(posX + plane->GetTileWidth() / 2 * fZoom,
+                                                posY + plane->GetTileHeight() * 0.75 * fZoom - 10,
+                                                HGETEXT_CENTER,
+                                                tmp, 0);
+                    } else {
+                        spr = tileImg->GetImage();
+                        spr->SetColor(col);
+                        spr->SetFlip(0, 0);
+                        spr->SetHotSpot(0, 0);
+                        spr->RenderEx(posX, posY, 0, fZoom + 0.0001);
                     }
+
+                    if (bDrawTileProperties && pl == GetActivePlaneID()) {
+                        DrawTileAttributes(tile->GetID(), posX, posY, fZoom + 0.0001, fZoom);
+                    }
+                    rcount++;
+                }
 
                 //if (bUsingBuffer) continue;
 
@@ -740,6 +743,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                 tgIterator = vTileGhosting.begin();
             }
         }
+    }
 
     if (pickerHighlight) {
         for (auto & highlight : vTileGhosting) {
