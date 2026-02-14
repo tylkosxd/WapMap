@@ -51,7 +51,7 @@ void State::EditingWW::HandleHotkeys() {
     } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_X) && iMode == EWW_MODE_TILE &&
                iTileSelectX1 != -1 && iTileSelectX2 != -1 && iTileSelectY1 != -1 && iTileSelectY2 != -1) {
         tilContext->EmulateClickID(TILMENU_CUT);
-    } else if (bFocus && iMode == EWW_MODE_TILE && hTileClipboard != NULL &&
+    } else if (bFocus && iMode == EWW_MODE_TILE && iCurTileCbE != CLIPBOARD_IS_EMPTY &&
                ((hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_V)) ||
                 (bFocus && hge->Input_GetKeyState(HGEK_ALT) && hge->Input_KeyDown(HGEK_LBUTTON)))) {
         float mx, my;

@@ -290,6 +290,10 @@ enum OBJMENU {
 
 #define HINT_TIME 5
 
+#define TILE_CLIPBOARD_CAPACITY 10
+#define OBJ_CLIPBOARD_CAPACITY 10
+#define CLIPBOARD_IS_EMPTY -1
+
 //forward declarations
 class cAppMenu;
 
@@ -484,6 +488,23 @@ namespace State {
         bool updatedPosition = false;
     };
 
+    class cTileClipboardEntry {
+    public:
+        cTileClipboardEntry(int w, int h, const char* _imageset) {
+            imageset = new char[strlen(_imageset) + 1];
+            strcpy(imageset, _imageset);
+            tiles = new WWD::Tile[w*h];
+            width = w; height = h;
+        }
+
+        ~cTileClipboardEntry() { delete[] tiles; delete[] imageset; }
+
+        WWD::Tile *tiles;
+        int width;
+        int height;
+        char* imageset;
+    };
+
 	class EditingWW : public SHR::cState, gcn::MouseListener {
     public:
         void mouseMoved(MouseEvent& mouseEvent) override;
@@ -636,7 +657,7 @@ namespace State {
         SHR::But *butmeasClear;
         SHR::CBox *cbmeasAbsoluteDistance;
 
-        SHR::But *butMicroTileCB, *butMicroObjectCB;
+        SHR::But *butMicroTileCB, *butMicroObjectCB, *butMicroCBPrev, *butMicroCBNext;
 
         bool bObjBrushDrawing;
 
@@ -862,12 +883,6 @@ namespace State {
 
         void RenderCloudTip(int x, int y, int w, int h, int ax, int ay);
 
-        bool bForceTileClipbPreview, bForceObjectClipbPreview;
-
-        void RenderTileClipboardPreview();
-
-        void RenderObjectClipboardPreview();
-
         void UpdateSearchResults();
         void UpdateSearchResultsWindow();
 
@@ -940,12 +955,8 @@ namespace State {
         void OpenObjectEdit(WWD::Object *obj);
 
         bool sameObjectClicked;
-        std::vector<WWD::Object *> vObjectsPicked, vObjectsHL, vObjectClipboard, vObjectsBrushCB;
+        std::vector<WWD::Object *> vObjectsPicked, vObjectsHL, vObjectsBrushCB;
 		WWD::Object *selectionKeyObject;
-
-        WWD::Tile *hTileClipboard = NULL;
-        int iTileCBw = 0, iTileCBh = 0;
-        char *hTileClipboardImageSet;
 
         void SwitchActiveModeMenuBar(cModeMenuBar *n);
 
@@ -1099,9 +1110,25 @@ namespace State {
 		void NavigateToEndLocation();
         void NavigateToPoint(int x, int y);
 
+        cTileClipboardEntry *arTileClipboard[TILE_CLIPBOARD_CAPACITY] = {NULL};
+        int iCurTileCbE = CLIPBOARD_IS_EMPTY;
+        bool bShowTileCb;
+
+        int GetTileClipboardSize();
+
+        void RenderTileClipboardPreview();
+
         void CopyTiles();
         void CutTiles();
         void PasteTiles();
+
+        std::vector<WWD::Object *> *arvObjectClipboard[OBJ_CLIPBOARD_CAPACITY] = {NULL};
+        int iCurObjCbE = CLIPBOARD_IS_EMPTY;
+        bool bShowObjCb;
+
+        int GetObjClipboardSize();
+
+        void RenderObjClipboardPreview();
 
         void CopyObjects();
         void CutObjects();

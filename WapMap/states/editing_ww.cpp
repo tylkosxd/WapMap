@@ -122,7 +122,7 @@ void State::EditingWW::Init() {
     hTempAttrib = nullptr;
     lastbrushx = lastbrushy = 0;
 
-    bForceObjectClipbPreview = bForceTileClipbPreview = false;
+    bShowObjCb = bShowTileCb = false;
 
     bDrawTileProperties = false;
     bConstRedraw = false;
@@ -229,6 +229,16 @@ void State::EditingWW::Init() {
     butMicroObjectCB->addActionListener(mainListener);
     butMicroObjectCB->SetTooltip(GETL2S("ClipboardPreview", "ObjectClipboard"));
     conMain->add(butMicroObjectCB, 0, 0);
+
+    butMicroCBPrev = new SHR::But(GV->hGfxInterface, GV->sprIcons16[Icon16_Left]);
+    butMicroCBPrev->setDimension(gcn::Rectangle(0, 0, 26, 24));
+    butMicroCBPrev->addActionListener(mainListener);
+    conMain->add(butMicroCBPrev, 0, 0);
+
+    butMicroCBNext = new SHR::But(GV->hGfxInterface, GV->sprIcons16[Icon16_Right]);
+    butMicroCBNext->setDimension(gcn::Rectangle(0, 0, 26, 24));
+    butMicroCBNext->addActionListener(mainListener);
+    conMain->add(butMicroCBNext, 0, 0);
 
     sliZoom = new SHR::Slider(-5, 5);
     sliZoom->setDimension(gcn::Rectangle(0, 0, 150, 20));
@@ -1926,6 +1936,8 @@ void State::EditingWW::InitEmpty() {
     sliHor->setVisible(0);
     sliZoom->setVisible(0);
     butMicroTileCB->setVisible(0);
+    butMicroCBPrev->setVisible(0);
+    butMicroCBNext->setVisible(0);
     butMicroObjectCB->setVisible(0);
 
     cbutActiveMode->setVisible(0);
@@ -2369,6 +2381,13 @@ bool State::EditingWW::Think() {
     if (bConstRedraw)
         vPort->MarkToRedraw();
 
+    bool tCB = bShowTileCb && iCurTileCbE != CLIPBOARD_IS_EMPTY;
+    bool oCB = bShowObjCb && iCurObjCbE != CLIPBOARD_IS_EMPTY;
+    butMicroCBPrev->setVisible(tCB || oCB);
+    butMicroCBNext->setVisible(tCB || oCB);
+    butMicroCBPrev->setEnabled((tCB && iCurTileCbE > 0) || (oCB && iCurObjCbE > 0));
+    butMicroCBNext->setEnabled((tCB && iCurTileCbE < GetTileClipboardSize() - 1) || (oCB && iCurObjCbE < GetObjClipboardSize() - 1));
+
     return false;
 }
 
@@ -2626,14 +2645,18 @@ void State::EditingWW::MaximizeWindows() {
 }
 
 void State::EditingWW::FreeResources() {
-    for (auto object : vObjectClipboard) {
-        delete object;
+    for (int i = 0; i < OBJ_CLIPBOARD_CAPACITY; i++) {
+        if (arvObjectClipboard[i] == NULL)
+            continue;
+        for (auto object : *(arvObjectClipboard[i])) {
+            delete object;
+        }
+        delete arvObjectClipboard[i];
+        arvObjectClipboard[i] = NULL;
     }
-    vObjectClipboard.clear();
     vObjectsBrushCB.clear();
     vObjectsHL.clear();
     vObjectsPicked.clear();
-    //delete hStartingPosObj;
 }
 
 void State::EditingWW::MarkUnsaved(WWD::Parser* context) {
@@ -2903,6 +2926,8 @@ void State::EditingWW::FixInterfacePositions() {
     UpdateScrollBars();
     butMicroTileCB->setPosition(4, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H + 3);
     butMicroObjectCB->setPosition(32, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H + 3);
+    butMicroCBPrev->setPosition(12, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H - 60);
+    butMicroCBNext->setPosition(72, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H - 60);
     GV->Console->FixPos();
 }
 
@@ -3144,6 +3169,8 @@ void State::EditingWW::DocumentSwitched() {
     sliZoom->setVisible(MDI->GetActiveDoc() != NULL);
     butMicroTileCB->setVisible(MDI->GetActiveDoc() != NULL);
     butMicroObjectCB->setVisible(MDI->GetActiveDoc() != NULL);
+    butMicroCBPrev->setVisible(MDI->GetActiveDoc() != NULL && (bShowTileCb || bShowObjCb));
+    butMicroCBNext->setVisible(MDI->GetActiveDoc() != NULL && (bShowTileCb || bShowObjCb));
     if (MDI->GetActiveDoc() == NULL) {
         winLogicBrowser->setVisible(false);
         if (conCrashRetrieve != NULL) {
@@ -3701,13 +3728,13 @@ void State::EditingWW::showObjectModeContextMenu(MouseEvent& mouseEvent) {
         bool canTestFromPos = hNativeController->IsValid() &&
                               hNativeController->IsCrazyHookAvailable() &&
                               strlen(hParser->GetFilePath()) > 0;
-        if (vObjectClipboard.empty()) {
+        if (iCurObjCbE == CLIPBOARD_IS_EMPTY) {
             conmodAtEmpty->GetElementByID(OBJMENU_TESTFROMHERE)->SetEnabled(canTestFromPos);
             objContext->SetModel(conmodAtEmpty);
         } else {
             char ncap[256];
-            if (vObjectClipboard.size() == 1)
-                sprintf(ncap, "%s: ~y~%s~l~", GETL(Lang_Paste), vObjectClipboard[0]->GetLogic());
+            if (arvObjectClipboard[iCurObjCbE]->size() == 1)
+                sprintf(ncap, "%s: ~y~%s~l~", GETL(Lang_Paste), arvObjectClipboard[iCurObjCbE]->front()->GetLogic());
             else
                 sprintf(ncap, "%s: ~y~%s~l~", GETL(Lang_Paste), GETL(Lang_ManyObjects));
             conmodAtEmptyPaste->GetElementByID(OBJMENU_PASTE)->SetCaption(ncap);

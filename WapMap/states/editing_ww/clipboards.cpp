@@ -1,12 +1,17 @@
 #include "../editing_ww.h"
 #include "../../cObjectUserData.h"
 
-void State::EditingWW::CopyTiles() {
-    if (hTileClipboard != NULL) {
-        delete[] hTileClipboard;
-        delete[] hTileClipboardImageSet;
+int State::EditingWW::GetTileClipboardSize() {
+    if (iCurTileCbE == CLIPBOARD_IS_EMPTY)
+        return 0;
+    for (int i = 0; i < TILE_CLIPBOARD_CAPACITY; i++) {
+        if (arTileClipboard[i] == NULL)
+            return i;
     }
+    return TILE_CLIPBOARD_CAPACITY;
+}
 
+void State::EditingWW::CopyTiles() {
     auto* plane = GetActivePlane();
 
     if (iTileSelectX2 >= plane->GetPlaneWidth() && !plane->GetFlag(WWD::Flag_p_XWrapping)) {
@@ -16,18 +21,25 @@ void State::EditingWW::CopyTiles() {
         iTileSelectY2 = plane->GetPlaneHeight() - 1;
     }
 
-    iTileCBw = std::abs(iTileSelectX2 - iTileSelectX1) + 1;
-    iTileCBh = std::abs(iTileSelectY2 - iTileSelectY1) + 1;
+    int w = std::abs(iTileSelectX2 - iTileSelectX1) + 1;
+    int h = std::abs(iTileSelectY2 - iTileSelectY1) + 1;
 
-    hTileClipboardImageSet = new char[strlen(plane->GetImageSet(0)) + 1];
-    strcpy(hTileClipboardImageSet, plane->GetImageSet(0));
+    int last = TILE_CLIPBOARD_CAPACITY - 1;
 
-    hTileClipboard = new WWD::Tile[iTileCBw*iTileCBh];
+    if (arTileClipboard[last] != NULL) {
+        delete arTileClipboard[last];
+    }
+
+    for (int i = last-1; i >= 0; i--)
+        arTileClipboard[i+1] = arTileClipboard[i];
+ 
+    iCurTileCbE = 0;
+
+    arTileClipboard[0] = new cTileClipboardEntry(w, h, plane->GetImageSet(0));
 
     for (int i = 0, y = iTileSelectY1; y <= iTileSelectY2; y++)
         for (int x = iTileSelectX1; x <= iTileSelectX2; x++, i++)
-            hTileClipboard[i] = *plane->GetTile(x, y);
-
+            arTileClipboard[0]->tiles[i] = *plane->GetTile(x, y);
 }
 
 void State::EditingWW::CutTiles() {
@@ -49,19 +61,29 @@ void State::EditingWW::CutTiles() {
 }
 
 void State::EditingWW::PasteTiles() {
-    if (!hTileClipboard)
+    if (iCurTileCbE == CLIPBOARD_IS_EMPTY)
         return;
     bool bChanges = false;
     auto* plane = GetActivePlane();
     int tx = Scr2WrdX(plane, contextX) / plane->GetTileWidth(),
         ty = Scr2WrdY(plane, contextY) / plane->GetTileHeight();
 
-    for (int i = 0, y = ty; y < ty + iTileCBh; ++y) {
-        for (int x = tx; x < tx + iTileCBw; ++x, ++i) {
+    auto cbEntry = arTileClipboard[iCurTileCbE];
+
+    if (cbEntry == NULL) {
+        if (iCurTileCbE == 0)
+            iCurTileCbE = CLIPBOARD_IS_EMPTY;
+        else
+            iCurTileCbE = 0;
+        return;
+    }
+
+    for (int i = 0, y = ty; y < ty + cbEntry->height; ++y) {
+        for (int x = tx; x < tx + cbEntry->width; ++x, ++i) {
             WWD::Tile *tile = plane->GetTile(x, y);
-            if (tile && *tile != hTileClipboard[i]) {
+            if (tile && *tile != cbEntry->tiles[i]) {
                 bChanges = true;
-                *tile = hTileClipboard[i];
+                *tile = cbEntry->tiles[i];
             }
         }
     }
@@ -71,14 +93,38 @@ void State::EditingWW::PasteTiles() {
     }
 }
 
-void State::EditingWW::CopyObjects() {
-    for (auto object : vObjectClipboard) {
-        delete object;
+int State::EditingWW::GetObjClipboardSize() {
+    if (iCurObjCbE == CLIPBOARD_IS_EMPTY)
+        return 0;
+    for (int i = 0; i < OBJ_CLIPBOARD_CAPACITY; i++) {
+        if (arvObjectClipboard[i] == NULL)
+            return i;
     }
-    vObjectClipboard.clear();
+    return OBJ_CLIPBOARD_CAPACITY;
+}
+
+void State::EditingWW::CopyObjects() {
+    if (vObjectsPicked.empty())
+        return;
+    int last = OBJ_CLIPBOARD_CAPACITY - 1;
+
+    if (arvObjectClipboard[last] != NULL) {
+        for (auto object : *(arvObjectClipboard[last])) {
+            delete object;
+        }
+        delete arvObjectClipboard[last];
+    }
+
+    for (int i = last-1; i >= 0; i--)
+        arvObjectClipboard[i+1] = arvObjectClipboard[i];
+ 
+    iCurObjCbE = 0;
+    
+    arvObjectClipboard[0] = new std::vector<WWD::Object*>;
+    arvObjectClipboard[0]->reserve(100); //arbitrary value
     for (auto object : vObjectsPicked) {
         if (object != hStartingPosObj) {
-            vObjectClipboard.push_back(new WWD::Object(object));
+            arvObjectClipboard[0]->push_back(new WWD::Object(object));
         }
     }
 }
@@ -88,9 +134,8 @@ void State::EditingWW::CutObjects() {
     auto plane = GetActivePlane();
     std::vector<WWD::Object*> temp = vObjectsPicked;
     for (auto &obj : temp) {
-        if (obj != hStartingPosObj) {
+        if (obj != hStartingPosObj)
             plane->DeleteObject(obj);
-        }
     }
     vObjectsPicked.clear();
     vPort->MarkToRedraw();
@@ -98,8 +143,13 @@ void State::EditingWW::CutObjects() {
 }
 
 void State::EditingWW::PasteObjects() {
-    if (vObjectClipboard.empty())
+    if (iCurObjCbE == CLIPBOARD_IS_EMPTY)
         return;
+    auto *cbEntry = arvObjectClipboard[iCurObjCbE];
+    if (cbEntry == NULL) {
+        iCurObjCbE = 0;
+        return;
+    }
     vObjectsPicked.clear();
     float x = int(fCamX * (GetActivePlane()->GetMoveModX() / 100.0f) * fZoom) + contextX - vPort->GetX();
     float y = int(fCamY * (GetActivePlane()->GetMoveModY() / 100.0f) * fZoom) + contextY - vPort->GetY();
@@ -107,9 +157,9 @@ void State::EditingWW::PasteObjects() {
     x = x / fZoom;
     y = y / fZoom;
 
-    for (auto &clipboardObject : vObjectClipboard) {
-        float diffX = clipboardObject->GetX() - vObjectClipboard[0]->GetX();
-        float diffY = clipboardObject->GetY() - vObjectClipboard[0]->GetY();
+    for (const auto &clipboardObject : *cbEntry) {
+        float diffX = clipboardObject->GetX() - (*cbEntry)[0]->GetX();
+        float diffY = clipboardObject->GetY() - (*cbEntry)[0]->GetY();
 
         auto *object = new WWD::Object(clipboardObject);
         GetActivePlane()->AddObjectAndCalcID(object);

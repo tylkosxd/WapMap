@@ -1045,14 +1045,24 @@ namespace State {
                 m_hOwn->fCamX += m_hOwn->GetActivePlane()->GetTileWidth() / m_hOwn->fZoom;
                 m_hOwn->fCamY += m_hOwn->GetActivePlane()->GetTileHeight() / m_hOwn->fZoom;
             } else if (actionEvent.getSource() == m_hOwn->butMicroTileCB) {
-                m_hOwn->bForceObjectClipbPreview = false;
-                m_hOwn->bForceTileClipbPreview = !m_hOwn->bForceTileClipbPreview;
-                m_hOwn->butMicroTileCB->setHighlight(m_hOwn->bForceTileClipbPreview);
+                m_hOwn->bShowObjCb = false;
+                m_hOwn->bShowTileCb = !m_hOwn->bShowTileCb;
+                m_hOwn->butMicroTileCB->setHighlight(m_hOwn->bShowTileCb);
                 m_hOwn->butMicroObjectCB->setHighlight(false);
+            } else if (actionEvent.getSource() == m_hOwn->butMicroCBPrev) {
+                if (m_hOwn->bShowTileCb && m_hOwn->iCurTileCbE > 0)
+                    m_hOwn->iCurTileCbE -= 1;
+                else if (m_hOwn->bShowObjCb && m_hOwn->iCurObjCbE > 0)
+                    m_hOwn->iCurObjCbE -= 1;
+            } else if (actionEvent.getSource() == m_hOwn->butMicroCBNext) {
+                if (m_hOwn->bShowTileCb && m_hOwn->iCurTileCbE < m_hOwn->GetTileClipboardSize() - 1)
+                    m_hOwn->iCurTileCbE += 1;
+                else if (m_hOwn->bShowObjCb && m_hOwn->iCurObjCbE < m_hOwn->GetObjClipboardSize() - 1)
+                    m_hOwn->iCurObjCbE += 1;
             } else if (actionEvent.getSource() == m_hOwn->butMicroObjectCB) {
-                m_hOwn->bForceTileClipbPreview = false;
-                m_hOwn->bForceObjectClipbPreview = !m_hOwn->bForceObjectClipbPreview;
-                m_hOwn->butMicroObjectCB->setHighlight(m_hOwn->bForceObjectClipbPreview);
+                m_hOwn->bShowTileCb = false;
+                m_hOwn->bShowObjCb = !m_hOwn->bShowObjCb;
+                m_hOwn->butMicroObjectCB->setHighlight(m_hOwn->bShowObjCb);
                 m_hOwn->butMicroTileCB->setHighlight(false);
             } else if (actionEvent.getSource() == m_hOwn->cbObjSearchCaseSensitive) {
                 m_hOwn->UpdateSearchResults();
@@ -1293,7 +1303,7 @@ namespace State {
                     m_hOwn->hRulers->SetVisible(!m_hOwn->hRulers->IsVisible());
                     break;
                 case 'v':
-                    if (m_hOwn->iMode == EWW_MODE_OBJECT && m_hOwn->iActiveTool == EWW_TOOL_NONE && !m_hOwn->vObjectClipboard.empty()) {
+                    if (m_hOwn->iMode == EWW_MODE_OBJECT && m_hOwn->iActiveTool == EWW_TOOL_NONE && m_hOwn->iCurObjCbE != CLIPBOARD_IS_EMPTY) {
                         float mx, my;
                         hge->Input_GetMousePos(&mx, &my);
                         if (m_hOwn->conMain->getWidgetAt(mx, my) == m_hOwn->vPort->GetWidget()) {
@@ -1653,7 +1663,7 @@ namespace State {
              if (iActiveTool == EWW_TOOL_NONE) {
                  if (mouseEvent.getButton() == MouseEvent::LEFT) {
                      if (mouseEvent.isAltPressed()) {
-                         if (!vObjectClipboard.empty()) {
+                         if (iCurObjCbE != CLIPBOARD_IS_EMPTY) {
                              contextX = mouseEvent.getX() + vPort->GetX();
                              contextY = mouseEvent.getY() + vPort->GetY();
                              objContext->EmulateClickID(OBJMENU_PASTE);
@@ -1700,8 +1710,7 @@ namespace State {
                 ty = int(Scr2WrdY(GetActivePlane(), my) / GetActivePlane()->GetTileHeight());
                 if (iTileSelectX1 != -1 && tx >= iTileSelectX1 && tx <= iTileSelectX2 && ty >= iTileSelectY1 && ty <= iTileSelectY2) {
                     tilContext->SetModel(conmodTilesSelected);
-                } else if (hTileClipboard != NULL &&
-                           !strcmp(hTileClipboardImageSet, GetActivePlane()->GetImageSet(0))) {
+                } else if (iCurTileCbE != CLIPBOARD_IS_EMPTY) {
                     tilContext->SetModel(conmodTilesPaste);
                 } else return;
                 contextX = mx;
