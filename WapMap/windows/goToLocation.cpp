@@ -214,7 +214,7 @@ void winLocationsBrowser::RefreshLists() {
 
 void winLocationsBrowser::Open() {
     RefreshLists();
-    myWin.setPosition(240, 160);
+    myWin.setPosition(160, LAY_VIEWPORT_Y + 40);
     myWin.setVisible(true);
     myWin.getParent()->moveToTop(&myWin);
 }
