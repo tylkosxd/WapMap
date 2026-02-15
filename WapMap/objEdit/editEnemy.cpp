@@ -19,7 +19,7 @@ namespace ObjEdit {
         win->addActionListener(hAL);
         win->add(vpAdv);
         win->setMovable(0);
-        st->conMain->add(win, st->vPort->GetX(), st->vPort->GetY() + st->vPort->GetHeight() - win->getHeight());
+        st->conMain->add(win, st->vPort->GetX(), LAY_VIEWPORT_Y);
 
         labType = new SHR::Lab(GETL2S("EditObj_Enemy", "Type"));
         labType->adjustSize();
@@ -31,10 +31,10 @@ namespace ObjEdit {
             bool diff = false;
             wchar_t tmp2[128];
             if (i > 0 && vstrpTypes[i].first == vstrpTypes[i - 1].first) {
-                wsprintfW(tmp2, L"Logic_%s2", vstrpTypes[i].first.c_str());
+                wsprintfW(tmp2, L"Logic_%hs2", vstrpTypes[i].first.c_str());
                 diff = true;
             } else {
-                wsprintfW(tmp2, L"Logic_%s", vstrpTypes[i].first.c_str());
+                wsprintfW(tmp2, L"Logic_%hs", vstrpTypes[i].first.c_str());
             }
 
             auto typeRB = new SHR::RadBut(GV->hGfxInterface, GETL2SV("EditObj_Enemy", tmp2), tmp,
@@ -181,8 +181,7 @@ namespace ObjEdit {
         win->add(_butSave, 150, 15);
 
         hInventory = new cInvPickbox();
-        hInventory->SetPosition(hState->vPort->GetX() + hState->vPort->GetWidth() - hInventory->GetWidth(),
-                                hState->vPort->GetY() + hState->vPort->GetHeight() - hInventory->GetHeight());
+        hInventory->SetPosition(win->getX() + win->getWidth() + 10, LAY_VIEWPORT_Y);
 
         bPickSpeedXY = 0;
 
