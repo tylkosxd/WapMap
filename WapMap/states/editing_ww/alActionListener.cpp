@@ -985,11 +985,30 @@ namespace State {
                        actionEvent.getSource() == m_hOwn->tftpY1 ||
                        actionEvent.getSource() == m_hOwn->tftpX2 ||
                        actionEvent.getSource() == m_hOwn->tftpY2) {
-                ((WWD::DoubleTileAttrib *) m_hOwn->hTempAttrib)->setMask(
-                        atoi(m_hOwn->tftpX1->getText().c_str()),
-                        atoi(m_hOwn->tftpY1->getText().c_str()),
-                        atoi(m_hOwn->tftpX2->getText().c_str()),
-                        atoi(m_hOwn->tftpY2->getText().c_str()));
+                int x1 = atoi(m_hOwn->tftpX1->getText().c_str()),
+                    y1 = atoi(m_hOwn->tftpY1->getText().c_str()),
+                    x2 = atoi(m_hOwn->tftpX2->getText().c_str()),
+                    y2 = atoi(m_hOwn->tftpY2->getText().c_str()),
+                    w = atoi(m_hOwn->tftpW->getText().c_str()),
+                    h = atoi(m_hOwn->tftpH->getText().c_str());
+                if (w <= x1) {
+                    x1 = w - 1;
+                    m_hOwn->tftpX1->setText(std::to_string(x1));
+                }
+                if (h <= y1) {
+                    y1 = h - 1;
+                    m_hOwn->tftpY1->setText(std::to_string(y1));
+                }
+                if (w <= x2) {
+                    x2 = w - 1;
+                    m_hOwn->tftpX2->setText(std::to_string(x2));
+                }
+                if (h <= y2) {
+                    y2 = h - 1;
+                    m_hOwn->tftpY2->setText(std::to_string(y2));
+                }
+                ((WWD::DoubleTileAttrib *) m_hOwn->hTempAttrib)->setMask(x1, y1, x2, y2);
+    
             } else if (actionEvent.getSource() == m_hOwn->buttpShow) {
                 m_hOwn->hAppMenu->GetContext(AppMenu_View)->EmulateClickID(APPMEN_VIEW_TILEPROP);
             } else if (actionEvent.getSource() == m_hOwn->hmbObject->butIconSearchObject) {

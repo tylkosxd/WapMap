@@ -30,6 +30,7 @@ winNewMap::winNewMap()
     tfName.setDimension(gcn::Rectangle(0, 0, tfWidth, 20));
     tfName.addActionListener(this);
     tfName.setMarkedInvalid(true);
+    tfName.setMaxLength(58);
     myWin.add(&tfName, x + labsWidthMax, y - 1);
 
     y += 25;
@@ -39,6 +40,7 @@ winNewMap::winNewMap()
     tfAuthor.setDimension(gcn::Rectangle(0, 0, tfWidth, 20));
     tfAuthor.addActionListener(this);
     tfAuthor.setMarkedInvalid(true);
+    tfAuthor.setMaxLength(63);
     myWin.add(&tfAuthor, x + labsWidthMax, y - 1);
 
     y += 25;
@@ -47,14 +49,16 @@ winNewMap::winNewMap()
 
     int subW = (tfWidth - 20) / 2;
 
-    tfPlaneWidth.SetNumerical(true);
+    tfPlaneWidth.SetNumerical(1, 0);
+    tfPlaneWidth.setMaxLength(5);
     tfPlaneWidth.setDimension(gcn::Rectangle(0, 0, subW, 20));
     myWin.add(&tfPlaneWidth, x + labsWidthMax, y - 1);
 
     labX.adjustSize();
     myWin.add(&labX, x + labsWidthMax + subW + 7, y);
 
-    tfPlaneHeight.SetNumerical(true);
+    tfPlaneHeight.SetNumerical(1, 0);
+    tfPlaneHeight.setMaxLength(5);
     tfPlaneHeight.setDimension(gcn::Rectangle(0, 0, subW, 20));
     myWin.add(&tfPlaneHeight, x + labsWidthMax + tfWidth - subW, y - 1);
 
@@ -166,9 +170,9 @@ void winNewMap::action(const ActionEvent &actionEvent) {
         int baseLevel = element->GetParent()->GetIndexOf(element) + 1;
         char name[64], author[64];
         char *fixname = GV->editState->FixLevelName(baseLevel, tfName.getText().c_str());
-        strncpy(name, fixname, 64);
+        strcpy(name, fixname);
         delete[] fixname;
-        strncpy(author, tfAuthor.getText().c_str(), 64);
+        strcpy(author, tfAuthor.getText().c_str());
 
         if (game == WWD::Game_Claw) {
             int size;

@@ -271,11 +271,6 @@ void State::EditingWW::SavePlaneProperties() {
                 new State::Dialog(PRODUCT_NAME, GETL2S("PlaneProperties", "NoPlaneName"), ST_DIALOG_ICON_ERROR));
         return;
     }
-    if (tfpmName->getText().length() > 64) {
-        GV->StateMgr->Push(
-                new State::Dialog(PRODUCT_NAME, GETL2S("PlaneProperties", "PlaneNameTooLong"), ST_DIALOG_ICON_ERROR));
-        return;
-    }
     if (atoi(tfpmPlaneSizeX->getText().c_str()) <= 0 || atoi(tfpmPlaneSizeY->getText().c_str()) <= 0) {
         GV->StateMgr->Push(
                 new State::Dialog(PRODUCT_NAME, GETL2S("PlaneProperties", "InvalidPlaneSize"), ST_DIALOG_ICON_ERROR));
