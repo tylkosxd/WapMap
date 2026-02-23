@@ -51,7 +51,7 @@ void State::EditingWW::HandleHotkeys() {
     } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_X) && iMode == EWW_MODE_TILE &&
                iTileSelectX1 != -1 && iTileSelectX2 != -1 && iTileSelectY1 != -1 && iTileSelectY2 != -1) {
         tilContext->EmulateClickID(TILMENU_CUT);
-    } else if (bFocus && iMode == EWW_MODE_TILE && MDI->GetActiveDoc()->hTileClipboard != NULL &&
+    } else if (bFocus && iMode == EWW_MODE_TILE && iCurTileCbE != CLIPBOARD_IS_EMPTY &&
                ((hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_V)) ||
                 (bFocus && hge->Input_GetKeyState(HGEK_ALT) && hge->Input_KeyDown(HGEK_LBUTTON)))) {
         float mx, my;
@@ -143,8 +143,8 @@ void State::EditingWW::HandleHotkeys() {
         vPort->MarkToRedraw();
     } else if (bFocus && iMode == EWW_MODE_OBJECT && vObjectsPicked.size() == 1) {
         if (hge->Input_KeyDown(HGEK_C)) {
-            fCamX = GetUserDataFromObj(vObjectsPicked[0])->GetX() - vPort->GetWidth() / 2 / fZoom;
-            fCamY = GetUserDataFromObj(vObjectsPicked[0])->GetY() - vPort->GetHeight() / 2 / fZoom;
+            auto* ud = GetUserDataFromObj(vObjectsPicked[0]);
+            NavigateToPoint(ud->GetX(), ud->GetY());
         } else if (hge->Input_KeyDown(HGEK_P)) {
             OpenObjectWindow(vObjectsPicked[0]);
         } else if (hge->Input_KeyDown(HGEK_E)) {

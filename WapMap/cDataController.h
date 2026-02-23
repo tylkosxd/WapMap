@@ -113,10 +113,6 @@ public:
 
     T *GetAssetByIterator(int iIT) { return m_vAssets[iIT]; }
 
-    std::string getElementAt(int i) override { return m_vAssets[i]->GetName(); }
-
-    int getNumberOfElements() override { return m_vAssets.size(); }
-
     virtual void DeleteAsset(T *hAsset) = 0;
 
     virtual const std::string& GetFolderName() = 0;
@@ -136,6 +132,12 @@ public:
     int GetModCounterChanged() { return _iModChange; };
 
     int GetModCounterDeleted() { return _iModDel; };
+
+    // inherited from gcn::ListModel:
+
+    std::string getElementAt(int i) override { return (m_vAssets.size() > 0 ? m_vAssets[i]->GetName() : ""); }
+
+    int getNumberOfElements() override { return m_vAssets.size(); }
 };
 
 class cAssetPackage {

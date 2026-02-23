@@ -662,8 +662,8 @@ void cGlobals::Init() {
         sprGamesSmall[i] = new hgeSprite(texMain, 16 * i, 0, 16, 16);
     }
 
-    sprTile = new hgeSprite(texMain, 672, 128, 64, 64);
-    sprTile->SetColor(0x99FFFFFF);
+    sprUnknownTile = new hgeSprite(texMain, 672, 128, 64, 64);
+    sprUnknownTile->SetColor(0x99FFFFFF);
 
     sprContextCascadeArrow = new hgeSprite(texMain, 905, 756, 10, 12);
     sprTabCloseButton = new hgeSprite(texMain, 917, 756, 9, 9);

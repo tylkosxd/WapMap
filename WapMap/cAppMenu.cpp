@@ -630,10 +630,8 @@ void cAppMenu::action(const gcn::ActionEvent &actionEvent) {
         } else if (id == APPMEN_GO_PREV_WARP) {
             int warpX = GV->editState->MDI->GetActiveDoc()->fPrevWarpX;
             int warpY = GV->editState->MDI->GetActiveDoc()->fPrevWarpY;
-            if (warpX > 0 && warpY > 0) {
-                GV->editState->fCamX = warpX - GV->editState->vPort->GetWidth() / 2 / GV->editState->fZoom;
-                GV->editState->fCamY = warpY - GV->editState->vPort->GetHeight() / 2 / GV->editState->fZoom;
-            }
+            if (warpX > 0 && warpY > 0)
+                GV->editState->NavigateToPoint(warpX, warpY);
             iOpened = AppMenu_Navigation;
         }
     } else if (actionEvent.getSource() == conPlanesVisibilityList) {

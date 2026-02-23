@@ -122,7 +122,7 @@ void State::EditingWW::Init() {
     hTempAttrib = nullptr;
     lastbrushx = lastbrushy = 0;
 
-    bForceObjectClipbPreview = bForceTileClipbPreview = false;
+    bShowObjCb = bShowTileCb = false;
 
     bDrawTileProperties = false;
     bConstRedraw = false;
@@ -229,6 +229,16 @@ void State::EditingWW::Init() {
     butMicroObjectCB->addActionListener(mainListener);
     butMicroObjectCB->SetTooltip(GETL2S("ClipboardPreview", "ObjectClipboard"));
     conMain->add(butMicroObjectCB, 0, 0);
+
+    butMicroCBPrev = new SHR::But(GV->hGfxInterface, GV->sprIcons16[Icon16_Left]);
+    butMicroCBPrev->setDimension(gcn::Rectangle(0, 0, 26, 24));
+    butMicroCBPrev->addActionListener(mainListener);
+    conMain->add(butMicroCBPrev, 0, 0);
+
+    butMicroCBNext = new SHR::But(GV->hGfxInterface, GV->sprIcons16[Icon16_Right]);
+    butMicroCBNext->setDimension(gcn::Rectangle(0, 0, 26, 24));
+    butMicroCBNext->addActionListener(mainListener);
+    conMain->add(butMicroCBNext, 0, 0);
 
     sliZoom = new SHR::Slider(-5, 5);
     sliZoom->setDimension(gcn::Rectangle(0, 0, 150, 20));
@@ -532,12 +542,16 @@ void State::EditingWW::Init() {
 
     tftpW = new SHR::TextField("0");
     tftpW->setDimension(gcn::Rectangle(0, 0, 35, 20));
+    tftpW->SetNumerical(1, 0);
+    tftpW->setMaxLength(4);
     tftpW->addActionListener(mainListener);
     winTileProp->add(tftpW, 220, 48);
 
     tftpH = new SHR::TextField("0");
     tftpH->setDimension(gcn::Rectangle(0, 0, 35, 20));
     tftpH->addActionListener(mainListener);
+    tftpH->SetNumerical(1, 0);
+    tftpH->setMaxLength(4);
     winTileProp->add(tftpH, 220, 73);
 
     buttpZoom = MakeButton(264, 60, Icon_Zoom, winTileProp, 1, 1);
@@ -586,18 +600,22 @@ void State::EditingWW::Init() {
 
     tftpX1 = new SHR::TextField("0");
     tftpX1->setDimension(gcn::Rectangle(0, 0, 35, 20));
+    tftpX1->SetNumerical(1, 0);
     tftpX1->addActionListener(mainListener);
     winTileProp->add(tftpX1, 110, 310);
     tftpY1 = new SHR::TextField("0");
     tftpY1->setDimension(gcn::Rectangle(0, 0, 35, 20));
+    tftpY1->SetNumerical(1, 0);
     tftpY1->addActionListener(mainListener);
     winTileProp->add(tftpY1, 160, 310);
     tftpX2 = new SHR::TextField("0");
     tftpX2->setDimension(gcn::Rectangle(0, 0, 35, 20));
+    tftpX2->SetNumerical(1, 0);
     tftpX2->addActionListener(mainListener);
     winTileProp->add(tftpX2, 210, 310);
     tftpY2 = new SHR::TextField("0");
     tftpY2->setDimension(gcn::Rectangle(0, 0, 35, 20));
+    tftpY2->SetNumerical(1, 0);
     tftpY2->addActionListener(mainListener);
     winTileProp->add(tftpY2, 260, 310);
 
@@ -1152,6 +1170,7 @@ void State::EditingWW::Init() {
     int labW = std::max(labpmName->getWidth(), labpmTileSet->getWidth());
 
     tfpmName = new SHR::TextField();
+    tfpmName->setMaxLength(63);
     tfpmName->setDimension(gcn::Rectangle(0, 0, (520 - (240 + labW)) - 45, 20));
     winpmMain->add(tfpmName, 240 + labW, 15);
 
@@ -1212,12 +1231,15 @@ void State::EditingWW::Init() {
     labW = std::max(labpmWidth->getWidth(), labpmHeight->getWidth());
 
     tfpmPlaneSizeX = new SHR::TextField("");
-    tfpmPlaneSizeX->SetNumerical(1);
+    tfpmPlaneSizeX->SetNumerical(1, 0);
+    tfpmPlaneSizeX->setMaxLength(5);
     tfpmPlaneSizeX->setDimension(gcn::Rectangle(0, 0, 120 - labW, 20));
     tfpmPlaneSizeX->addActionListener(mainListener);
     winpmMain->add(tfpmPlaneSizeX, 240 + labW, 140);
+
     tfpmPlaneSizeY = new SHR::TextField("");
-    tfpmPlaneSizeY->SetNumerical(1);
+    tfpmPlaneSizeY->SetNumerical(1, 0);
+    tfpmPlaneSizeY->setMaxLength(5);
     tfpmPlaneSizeY->setDimension(gcn::Rectangle(0, 0, 120 - labW, 20));
     tfpmPlaneSizeY->addActionListener(mainListener);
     winpmMain->add(tfpmPlaneSizeY, 240 + labW, 175);
@@ -1250,12 +1272,14 @@ void State::EditingWW::Init() {
     winpmMain->add(labpmTileSize_x, 676, 17);
 
     tfpmTileSizeX = new SHR::TextField("");
-    tfpmTileSizeX->SetNumerical(1);
+    tfpmTileSizeX->SetNumerical(1, 0);
+    tfpmTileSizeX->setMaxLength(4);
     tfpmTileSizeX->setDimension(gcn::Rectangle(0, 0, 35, 20));
     winpmMain->add(tfpmTileSizeX, 636, 15);
 
     tfpmTileSizeY = new SHR::TextField("");
-    tfpmTileSizeY->SetNumerical(1);
+    tfpmTileSizeY->SetNumerical(1, 0);
+    tfpmTileSizeY->setMaxLength(4);
     tfpmTileSizeY->setDimension(gcn::Rectangle(0, 0, 35, 20));
     winpmMain->add(tfpmTileSizeY, 689, 15);
 
@@ -1327,7 +1351,7 @@ void State::EditingWW::Init() {
     winpmMain->add(vppm, 0, 0);
 
     winWorld = new SHR::Win(&GV->gcnParts, GETL(Lang_MapProperties));
-    winWorld->setDimension(gcn::Rectangle(0, 0, 400, 290));
+    winWorld->setDimension(gcn::Rectangle(0, 0, 460, 290));
     winWorld->setVisible(false);
     winWorld->setClose(true);
     conMain->add(winWorld, hge->System_GetState(HGE_SCREENWIDTH) / 2 - winWorld->getWidth() / 2,
@@ -1339,7 +1363,7 @@ void State::EditingWW::Init() {
 
     labwpAuthor = new SHR::Lab(GETL(Lang_Author));
     labwpAuthor->adjustSize();
-    winWorld->add(labwpAuthor, 5, 40);
+    winWorld->add(labwpAuthor, 5, 40); 
 
     labwpDate = new SHR::Lab(GETL(Lang_Date));
     labwpDate->adjustSize();
@@ -1362,34 +1386,39 @@ void State::EditingWW::Init() {
     winWorld->add(labwpExe, 5, 175);
 
     tfwpName = new SHR::TextField("");
-    tfwpName->setDimension(gcn::Rectangle(0, 0, 240, 20));
+    tfwpName->setDimension(gcn::Rectangle(0, 0, 330, 20));
     tfwpName->setMaxLength(58);
-    winWorld->add(tfwpName, 150, 15);
+    winWorld->add(tfwpName, 120, 15);
 
     tfwpAuthor = new SHR::TextField("");
-    tfwpAuthor->setDimension(gcn::Rectangle(0, 0, 240, 20));
-    winWorld->add(tfwpAuthor, 150, 40);
+    tfwpAuthor->setDimension(gcn::Rectangle(0, 0, 330, 20));
+    tfwpAuthor->setMaxLength(63);
+    winWorld->add(tfwpAuthor, 120, 40);
 
     tfwpDate = new SHR::TextField("");
-    tfwpDate->setDimension(gcn::Rectangle(0, 0, 240, 20));
+    tfwpDate->setDimension(gcn::Rectangle(0, 0, 330, 20));
     tfwpDate->setEnabled(0);
-    winWorld->add(tfwpDate, 150, 65);
+    winWorld->add(tfwpDate, 120, 65);
 
     tfwpREZ = new SHR::TextField("");
-    tfwpREZ->setDimension(gcn::Rectangle(0, 0, 240, 20));
-    winWorld->add(tfwpREZ, 150, 100);
+    tfwpREZ->setDimension(gcn::Rectangle(0, 0, 330, 20));
+    tfwpREZ->setMaxLength(255);
+    winWorld->add(tfwpREZ, 120, 100);
 
     tfwpTiles = new SHR::TextField("");
-    tfwpTiles->setDimension(gcn::Rectangle(0, 0, 240, 20));
-    winWorld->add(tfwpTiles, 150, 125);
+    tfwpTiles->setDimension(gcn::Rectangle(0, 0, 330, 20));
+    tfwpTiles->setMaxLength(127);
+    winWorld->add(tfwpTiles, 120, 125);
 
     tfwpPalette = new SHR::TextField("");
-    tfwpPalette->setDimension(gcn::Rectangle(0, 0, 240, 20));
-    winWorld->add(tfwpPalette, 150, 150);
+    tfwpPalette->setDimension(gcn::Rectangle(0, 0, 330, 20));
+    tfwpPalette->setMaxLength(127);
+    winWorld->add(tfwpPalette, 120, 150);
 
     tfwpExe = new SHR::TextField("");
-    tfwpExe->setDimension(gcn::Rectangle(0, 0, 240, 20));
-    winWorld->add(tfwpExe, 150, 175);
+    tfwpExe->setDimension(gcn::Rectangle(0, 0, 330, 20));
+    tfwpExe->setMaxLength(127);
+    winWorld->add(tfwpExe, 120, 175);
 
     cbwpCompress = new SHR::CBox(GV->hGfxInterface, GETL(Lang_Compress));
     cbwpCompress->adjustSize();
@@ -1399,7 +1428,7 @@ void State::EditingWW::Init() {
     cbwpZCoord = new SHR::CBox(GV->hGfxInterface, GETL(Lang_ZCoord));
     cbwpZCoord->adjustSize();
     cbwpZCoord->addActionListener(mainListener);
-    winWorld->add(cbwpZCoord, 200, 210);
+    winWorld->add(cbwpZCoord, 250, 210);
 
     /*labwpMapBuild = new SHR::Lab(GETL2S("Win_MapProperties", "MapBuild"));
     labwpMapBuild->adjustSize();
@@ -1450,8 +1479,8 @@ void State::EditingWW::Init() {
     butwpCancel->setDimension(gcn::Rectangle(0, 0, 100, 33));
     butwpCancel->addActionListener(mainListener);
 
-    winWorld->add(butwpSave, 180, 235);
-    winWorld->add(butwpCancel, 290, 235);
+    winWorld->add(butwpSave, 240, 235);
+    winWorld->add(butwpCancel, 350, 235);
 
     vpWorld = new WIDG::Viewport(vp, VP_WORLD);
     winWorld->add(vpWorld, 0, 0);
@@ -1926,6 +1955,8 @@ void State::EditingWW::InitEmpty() {
     sliHor->setVisible(0);
     sliZoom->setVisible(0);
     butMicroTileCB->setVisible(0);
+    butMicroCBPrev->setVisible(0);
+    butMicroCBNext->setVisible(0);
     butMicroObjectCB->setVisible(0);
 
     cbutActiveMode->setVisible(0);
@@ -2369,6 +2400,13 @@ bool State::EditingWW::Think() {
     if (bConstRedraw)
         vPort->MarkToRedraw();
 
+    bool tCB = bShowTileCb && iCurTileCbE != CLIPBOARD_IS_EMPTY;
+    bool oCB = bShowObjCb && iCurObjCbE != CLIPBOARD_IS_EMPTY;
+    butMicroCBPrev->setVisible(tCB || oCB);
+    butMicroCBNext->setVisible(tCB || oCB);
+    butMicroCBPrev->setEnabled((tCB && iCurTileCbE > 0) || (oCB && iCurObjCbE > 0));
+    butMicroCBNext->setEnabled((tCB && iCurTileCbE < GetTileClipboardSize() - 1) || (oCB && iCurObjCbE < GetObjClipboardSize() - 1));
+
     return false;
 }
 
@@ -2626,14 +2664,18 @@ void State::EditingWW::MaximizeWindows() {
 }
 
 void State::EditingWW::FreeResources() {
-    for (auto object : vObjectClipboard) {
-        delete object;
+    for (int i = 0; i < OBJ_CLIPBOARD_CAPACITY; i++) {
+        if (arvObjectClipboard[i] == NULL)
+            continue;
+        for (auto object : *(arvObjectClipboard[i])) {
+            delete object;
+        }
+        delete arvObjectClipboard[i];
+        arvObjectClipboard[i] = NULL;
     }
-    vObjectClipboard.clear();
     vObjectsBrushCB.clear();
     vObjectsHL.clear();
     vObjectsPicked.clear();
-    //delete hStartingPosObj;
 }
 
 void State::EditingWW::MarkUnsaved(WWD::Parser* context) {
@@ -2903,6 +2945,8 @@ void State::EditingWW::FixInterfacePositions() {
     UpdateScrollBars();
     butMicroTileCB->setPosition(4, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H + 3);
     butMicroObjectCB->setPosition(32, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H + 3);
+    butMicroCBPrev->setPosition(12, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H - 60);
+    butMicroCBNext->setPosition(72, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H - 60);
     GV->Console->FixPos();
 }
 
@@ -3144,6 +3188,8 @@ void State::EditingWW::DocumentSwitched() {
     sliZoom->setVisible(MDI->GetActiveDoc() != NULL);
     butMicroTileCB->setVisible(MDI->GetActiveDoc() != NULL);
     butMicroObjectCB->setVisible(MDI->GetActiveDoc() != NULL);
+    butMicroCBPrev->setVisible(MDI->GetActiveDoc() != NULL && (bShowTileCb || bShowObjCb));
+    butMicroCBNext->setVisible(MDI->GetActiveDoc() != NULL && (bShowTileCb || bShowObjCb));
     if (MDI->GetActiveDoc() == NULL) {
         winLogicBrowser->setVisible(false);
         if (conCrashRetrieve != NULL) {
@@ -3227,8 +3273,7 @@ void State::EditingWW::DocumentSwitched() {
         fCamX = MDI->GetActiveDoc()->fCamX;
         fCamY = MDI->GetActiveDoc()->fCamY;
     } else {
-        fCamX = hParser->GetStartX() - vPort->GetWidth() / 2 * fZoom;
-        fCamY = hParser->GetStartY() - vPort->GetHeight() / 2 * fZoom;
+        NavigateToStartLocation();
     }
     vPort->MarkToRedraw();
 
@@ -3433,56 +3478,30 @@ void State::EditingWW::SaveWorldOptions() {
         GV->StateMgr->Push(
                 new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "NoName"), ST_DIALOG_ICON_ERROR, ST_DIALOG_BUT_OK));
         return;
-    } else if (strlen(tfwpName->getText().c_str()) > 64) {
-        GV->StateMgr->Push(new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "TooLongName"), ST_DIALOG_ICON_ERROR,
-                                             ST_DIALOG_BUT_OK));
-        return;
     }
     if (!strlen(tfwpAuthor->getText().c_str())) {
         GV->StateMgr->Push(
                 new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "NoAuthor"), ST_DIALOG_ICON_ERROR, ST_DIALOG_BUT_OK));
-        return;
-    } else if (strlen(tfwpAuthor->getText().c_str()) > 64) {
-        GV->StateMgr->Push(
-                new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "TooLongAuthor"), ST_DIALOG_ICON_ERROR,
-                                  ST_DIALOG_BUT_OK));
         return;
     }
     if (!strlen(tfwpREZ->getText().c_str())) {
         GV->StateMgr->Push(
                 new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "NoRez"), ST_DIALOG_ICON_ERROR, ST_DIALOG_BUT_OK));
         return;
-    } else if (strlen(tfwpREZ->getText().c_str()) > 256) {
-        GV->StateMgr->Push(new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "TooLongRez"), ST_DIALOG_ICON_ERROR,
-                                             ST_DIALOG_BUT_OK));
-        return;
     }
     if (!strlen(tfwpTiles->getText().c_str())) {
         GV->StateMgr->Push(
                 new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "NoTiles"), ST_DIALOG_ICON_ERROR, ST_DIALOG_BUT_OK));
-        return;
-    } else if (strlen(tfwpTiles->getText().c_str()) > 128) {
-        GV->StateMgr->Push(new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "TooLongTiles"), ST_DIALOG_ICON_ERROR,
-                                             ST_DIALOG_BUT_OK));
         return;
     }
     if (!strlen(tfwpPalette->getText().c_str())) {
         GV->StateMgr->Push(
                 new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "NoPalette"), ST_DIALOG_ICON_ERROR, ST_DIALOG_BUT_OK));
         return;
-    } else if (strlen(tfwpPalette->getText().c_str()) > 128) {
-        GV->StateMgr->Push(
-                new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "TooLongPalette"), ST_DIALOG_ICON_ERROR,
-                                  ST_DIALOG_BUT_OK));
-        return;
     }
     if (!strlen(tfwpExe->getText().c_str())) {
         GV->StateMgr->Push(
                 new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "NoExe"), ST_DIALOG_ICON_ERROR, ST_DIALOG_BUT_OK));
-        return;
-    } else if (strlen(tfwpExe->getText().c_str()) > 128) {
-        GV->StateMgr->Push(new State::Dialog(PRODUCT_NAME, GETL2S("MapProperties", "TooLongExe"), ST_DIALOG_ICON_ERROR,
-                                             ST_DIALOG_BUT_OK));
         return;
     }
     winWorld->setVisible(false);
@@ -3598,13 +3617,13 @@ void State::EditingWW::MruListUpdated() {
 bool State::EditingWW::ValidateLevelName(const char *name, bool bAllowNoNum) {
     bool bFoundNum = false;
     for (int i = 0; i < strlen(name); i++) {
-        if (name[i] >= 48 && name[i] <= 57) {
+        if (name[i] >= 0x30 && name[i] <= 0x39) {
             if (bFoundNum) return 0;
             bFoundNum = 1;
-            int v = name[i] - 48;
-            if (i + 1 < strlen(name) && name[i + 1] >= 48 && name[i + 1] <= 57) {
+            int v = name[i] - 0x30;
+            if (i + 1 < strlen(name) && name[i + 1] >= 0x30 && name[i + 1] <= 0x39) {
                 v *= 10;
-                v += name[i + 1] - 48;
+                v += name[i + 1] - 0x30;
                 i++;
             }
             if (v < 0 || v > 14) return 0;
@@ -3622,7 +3641,7 @@ char *State::EditingWW::FixLevelName(int iBaseLvl, const char *name) {
     char *t = new char[strlen(name) + 1 + 6];
     int offset = 0;
     for (int i = 0; i <= strlen(name); i++) {
-        if (name[i] >= 48 && name[i] <= 57) {
+        if (name[i] >= 0x30 && name[i] <= 0x39) {
             offset++;
             continue;
         }
@@ -3702,13 +3721,13 @@ void State::EditingWW::showObjectModeContextMenu(MouseEvent& mouseEvent) {
         bool canTestFromPos = hNativeController->IsValid() &&
                               hNativeController->IsCrazyHookAvailable() &&
                               strlen(hParser->GetFilePath()) > 0;
-        if (vObjectClipboard.empty()) {
+        if (iCurObjCbE == CLIPBOARD_IS_EMPTY) {
             conmodAtEmpty->GetElementByID(OBJMENU_TESTFROMHERE)->SetEnabled(canTestFromPos);
             objContext->SetModel(conmodAtEmpty);
         } else {
             char ncap[256];
-            if (vObjectClipboard.size() == 1)
-                sprintf(ncap, "%s: ~y~%s~l~", GETL(Lang_Paste), vObjectClipboard[0]->GetLogic());
+            if (arvObjectClipboard[iCurObjCbE]->size() == 1)
+                sprintf(ncap, "%s: ~y~%s~l~", GETL(Lang_Paste), arvObjectClipboard[iCurObjCbE]->front()->GetLogic());
             else
                 sprintf(ncap, "%s: ~y~%s~l~", GETL(Lang_Paste), GETL(Lang_ManyObjects));
             conmodAtEmptyPaste->GetElementByID(OBJMENU_PASTE)->SetCaption(ncap);

@@ -532,29 +532,31 @@ void State::EditingWW::DrawTileProperties() {
 int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
     int rcount = 0;
 
-    int psx = std::max(Wrd2ScrXrb(hParser->GetMainPlane(), 0), 0),
-        psy = std::max(Wrd2ScrYrb(hParser->GetMainPlane(), 0), 0);
+    {
+        auto plMain = hParser->GetMainPlane();
 
-    hge->Gfx_SetClipping(psx - 1, psy - 1, std::min(Wrd2ScrXrb(hParser->GetMainPlane(), hParser->GetMainPlane()->GetPlaneWidthPx()), vPort->GetWidth()) - psx + 2,
-                         std::min(Wrd2ScrYrb(hParser->GetMainPlane(), hParser->GetMainPlane()->GetPlaneHeightPx()), vPort->GetHeight()) - psy + 2);
+        int psx = std::max(Wrd2ScrXrb(plMain, 0), 0);
+        int psy = std::max(Wrd2ScrYrb(plMain, 0), 0);
+
+        hge->Gfx_SetClipping(psx - 1, psy - 1,
+                std::min(Wrd2ScrXrb(plMain, plMain->GetPlaneWidthPx()), vPort->GetWidth()) - psx + 2,
+                std::min(Wrd2ScrYrb(plMain, plMain->GetPlaneHeightPx()), vPort->GetHeight()) - psy + 2);
+    }
 
     float cammx = fCamX * fZoom,
           cammy = fCamY * fZoom;
 
     if (!plane->GetFlag(WWD::Flag_p_MainPlane)) {
-        cammx *= (plane->GetMoveModX() / 100.0f);
-        cammy *= (plane->GetMoveModY() / 100.0f);
-
-        if (plane->GetFlag(WWD::Flag_p_XWrapping)) {
-            cammx -= vPort->GetWidth() / 2.f * (1.0f - (plane->GetMoveModX() / 100.0f));
-        } else if (cammx < 0) {
-            cammx = -psx;
+        int iMoveX = plane->GetMoveModX();
+        if (iMoveX != 100) {
+            cammx *= (iMoveX / 100.0f);
+            cammx -= vPort->GetWidth() / 2.f * (1.0f - (iMoveX / 100.0f));
         }
 
-        if (plane->GetFlag(WWD::Flag_p_YWrapping)) {
-            cammy -= vPort->GetHeight() / 2.f * (1.0f - (plane->GetMoveModY() / 100.0f));
-        } else if (cammy < 0) {
-            cammy = -psy;
+        int iMoveY = plane->GetMoveModY();
+        if (iMoveY != 100) {
+            cammy *= (iMoveY / 100.0f);
+            cammy -= vPort->GetHeight() / 2.f * (1.0f - (iMoveY / 100.0f));
         }
     }
 
@@ -562,6 +564,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
         sy = floor(cammy / (plane->GetTileHeight() * fZoom)),
         ex = sx + vPort->GetWidth() / (plane->GetTileWidth() * fZoom) + 2,
         ey = sy + vPort->GetHeight() / (plane->GetTileHeight() * fZoom) + 2;
+    /* s - start, e - end */
 
     if (!plane->GetFlag(WWD::Flag_p_XWrapping)) {
         if (sx < 0) sx = 0;
@@ -619,7 +622,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
           posY = floor(sy * th - cammy);
 
     bool pickerHighlight = false;
-    if (!bUsingBuffer || ghosting)
+    if (!bUsingBuffer || ghosting) {
         for (int y = sy; y < ey; y++, posY += th) {
             float posX = floor(sx * tw - cammx);
             for (int x = sx; x < ex; x++, posX += tw) {
@@ -647,8 +650,12 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                             }
                         } else if (cy == tgIterator->y && cx == tgIterator->x && plane == tgIterator->pl) {
                             if (tgIterator->id >= 0 && tgIterator->id != tile->GetID()) {
+                                auto *tile = hTileset->GetSet(plane->GetImageSet(0))->GetTile(tgIterator->id);
                                 hgeSprite *spr;
-                                spr = hTileset->GetSet(plane->GetImageSet(0))->GetTile(tgIterator->id)->GetImage();
+                                if (!tile)
+                                    spr = GV->sprUnknownTile;
+                                else
+                                    spr = tile->GetImage();
                                 spr->SetColor(SETA(col, 160));
                                 spr->SetHotSpot(0, 0);
                                 spr->RenderEx(posX, posY, 0, fZoom);
@@ -675,38 +682,38 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                 }
 
                 //if (!bUsingBuffer)
-                    if (tile->IsFilled()) {
-                        SHR::SetQuad(&q, SETA(hDataCtrl->GetPalette()->GetColor(plane->GetFillColor()), GETA(col)),
-                                     posX, posY, ceil(posX + tw), ceil(posY + th));
-                        hge->Gfx_RenderQuad(&q);
-                        rcount++;
-                    } else if (!tile->IsInvisible()) {
-                        hgeSprite *spr;
-                        //uint16_t imgSetIndex = tile->GetID() >> 16;
-                        uint16_t id = tile->GetID();
-                        cTile *tileImg = hTileset->GetTile(plane->GetImageSet(0), id);
-                        if (!tileImg) {
-                            GV->sprTile->RenderEx(posX, posY, 0, fZoom);
-                            char tmp[32];
-                            sprintf(tmp, "ID#%d", plane->GetTile(x, y)->GetID());
-                            GV->fntMyriad16->SetColor(0x99FFFFFF);
-                            GV->fntMyriad16->Render(posX + plane->GetTileWidth() / 2 * fZoom,
-                                                    posY + plane->GetTileHeight() * 0.75 * fZoom - 10,
-                                                    HGETEXT_CENTER,
-                                                    tmp, 0);
-                        } else {
-                            spr = tileImg->GetImage();
-                            spr->SetColor(col);
-                            spr->SetFlip(0, 0);
-                            spr->SetHotSpot(0, 0);
-                            spr->RenderEx(posX, posY, 0, fZoom + 0.0001);
-                        }
-
-                        if (bDrawTileProperties && pl == GetActivePlaneID()) {
-                            DrawTileAttributes(tile->GetID(), posX, posY, fZoom + 0.0001, fZoom);
-                        }
-                        rcount++;
+                if (tile->IsFilled()) {
+                    SHR::SetQuad(&q, SETA(hDataCtrl->GetPalette()->GetColor(plane->GetFillColor()), GETA(col)),
+                                    posX, posY, ceil(posX + tw), ceil(posY + th));
+                    hge->Gfx_RenderQuad(&q);
+                    rcount++;
+                } else if (!tile->IsInvisible()) {
+                    hgeSprite *spr;
+                    //uint16_t imgSetIndex = tile->GetID() >> 16;
+                    uint16_t id = tile->GetID();
+                    cTile *tileImg = hTileset->GetTile(plane->GetImageSet(0), id);
+                    if (!tileImg) {
+                        GV->sprUnknownTile->RenderEx(posX, posY, 0, fZoom);
+                        char tmp[32];
+                        sprintf(tmp, "ID#%d", plane->GetTile(x, y)->GetID());
+                        GV->fntMyriad16->SetColor(0x99FFFFFF);
+                        GV->fntMyriad16->Render(posX + plane->GetTileWidth() / 2 * fZoom,
+                                                posY + plane->GetTileHeight() * 0.75 * fZoom - 10,
+                                                HGETEXT_CENTER,
+                                                tmp, 0);
+                    } else {
+                        spr = tileImg->GetImage();
+                        spr->SetColor(col);
+                        spr->SetFlip(0, 0);
+                        spr->SetHotSpot(0, 0);
+                        spr->RenderEx(posX, posY, 0, fZoom + 0.0001);
                     }
+
+                    if (bDrawTileProperties && pl == GetActivePlaneID()) {
+                        DrawTileAttributes(tile->GetID(), posX, posY, fZoom + 0.0001, fZoom);
+                    }
+                    rcount++;
+                }
 
                 //if (bUsingBuffer) continue;
 
@@ -745,6 +752,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                 tgIterator = vTileGhosting.begin();
             }
         }
+    }
 
     if (pickerHighlight) {
         for (auto & highlight : vTileGhosting) {
@@ -914,22 +922,22 @@ void State::EditingWW::DrawViewport() {
         //}
 
         if (iMode == EWW_MODE_OBJECT && iActiveTool == EWW_TOOL_NONE && hge->Input_GetKeyState(HGEK_ALT) &&
-            !vObjectClipboard.empty()) {
-            std::vector<WWD::Object *> rend = vObjectClipboard;
+                iCurObjCbE == CLIPBOARD_IS_EMPTY) {
+            auto *curCb = arvObjectClipboard[iCurObjCbE];
+            std::vector<WWD::Object *> vRend = *curCb;
 
-            sort(rend.begin(), rend.end(), ObjSortCoordZ);
+            sort(vRend.begin(), vRend.end(), ObjSortCoordZ);
             float mx, my;
             hge->Input_GetMousePos(&mx, &my);
             int diffx = Scr2WrdX(GetActivePlane(), mx), diffy = Scr2WrdY(GetActivePlane(), my);
-            diffx -= vObjectClipboard[0]->GetParam(WWD::Param_LocationX);
-            diffy -= vObjectClipboard[0]->GetParam(WWD::Param_LocationY);
-            for (int i = 0; i < rend.size(); i++) {
-                //if( (rend[i]->GetDrawFlags() & WWD::Flag_dr_NoDraw) && !cbdoNoDraw->isSelected() ) continue;
-                hgeSprite *spr = SprBank->GetObjectSprite(rend[i]);
+            diffx -= (*curCb)[0]->GetParam(WWD::Param_LocationX);
+            diffy -= (*curCb)[0]->GetParam(WWD::Param_LocationY);
+            for (int i = 0; i < vRend.size(); i++) {
+                hgeSprite *spr = SprBank->GetObjectSprite(vRend[i]);
                 spr->SetColor(0x77FFFFFF);
-                spr->SetFlip(rend[i]->GetFlipX(), rend[i]->GetFlipY(), 1);
-                int rx = Wrd2ScrX(GetActivePlane(), rend[i]->GetX() + diffx),
-                    ry = Wrd2ScrY(GetActivePlane(), rend[i]->GetY() + diffy);
+                spr->SetFlip(vRend[i]->GetFlipX(), vRend[i]->GetFlipY(), 1);
+                int rx = Wrd2ScrX(GetActivePlane(), vRend[i]->GetX() + diffx),
+                    ry = Wrd2ScrY(GetActivePlane(), vRend[i]->GetY() + diffy);
                 spr->RenderEx(rx, ry, 0, fZoom);
             }
         }
@@ -2437,10 +2445,10 @@ bool State::EditingWW::Render() {
         }*/
     } else {
         if (_isOnTop()) {
-            if (bForceTileClipbPreview)
+            if (bShowTileCb)
                 RenderTileClipboardPreview();
-            else if (bForceObjectClipbPreview)
-                RenderObjectClipboardPreview();
+            else if (bShowObjCb)
+                RenderObjClipboardPreview();
 
             hInvCtrl->DrawDraggedObject();
         } else {
@@ -2670,8 +2678,7 @@ void State::EditingWW::DrawObjSearch() {
                 WWD::Object *obj = GetActivePlane()->GetObjectByIterator(vObjSearchResults[i].first);
                 vObjectsPicked.clear();
                 vObjectsPicked.push_back(obj);
-                fCamX = obj->GetX() - vPort->GetWidth() / 2 * fZoom;
-                fCamY = obj->GetY() - vPort->GetHeight() / 2 * fZoom;
+                NavigateToPoint(obj->GetX(), obj->GetY());
                 vPort->MarkToRedraw();
             }
         } else {
@@ -2942,12 +2949,12 @@ void State::EditingWW::ViewportOverlay() {
 }
 
 void State::EditingWW::RenderCloudTip(int x, int y, int w, int h, int ax, int ay) {
-    SHR::SetQuad(&q, GV->colBase, x, y, x + w, y + h);
+    SHR::SetQuad(&q, GV->colBase & 0x7FFFFFFF, x, y, x + w, y + h);
     hge->Gfx_RenderQuad(&q);
     hgeTriple tr;
     tr.tex = 0;
     tr.blend = BLEND_DEFAULT;
-    tr.v[0].col = tr.v[1].col = tr.v[2].col = GV->colBase;
+    tr.v[0].col = tr.v[1].col = tr.v[2].col = GV->colBase & 0x7FFFFFFF;
     tr.v[0].z = tr.v[1].z = tr.v[2].z = 1.0f;
     tr.v[0].x = x + 25;
     tr.v[0].y = y + h;
@@ -2966,8 +2973,9 @@ void State::EditingWW::RenderCloudTip(int x, int y, int w, int h, int ax, int ay
 }
 
 void State::EditingWW::RenderTileClipboardPreview() {
-    if (MDI->GetActiveDoc() == NULL) return;
-    if (MDI->GetActiveDoc()->hTileClipboard == NULL) {
+    if (MDI->GetActiveDoc() == NULL)
+        return;
+    if (iCurTileCbE == CLIPBOARD_IS_EMPTY) {
         int len = GV->fntMyriad16->GetStringWidth(GETL2S("ClipboardPreview", "TileClipboardEmpty"));
         RenderCloudTip(10, hge->System_GetState(HGE_SCREENHEIGHT) - 70, len + 20, 20, butMicroTileCB->getX() + 12,
                        butMicroTileCB->getY() - 3);
@@ -2975,35 +2983,44 @@ void State::EditingWW::RenderTileClipboardPreview() {
                                 GETL2S("ClipboardPreview", "TileClipboardEmpty"), 0);
         return;
     }
-    int cbw = MDI->GetActiveDoc()->iTileCBw,
-        cbh = MDI->GetActiveDoc()->iTileCBh;
+
+    cTileClipboardEntry *cbEntry = arTileClipboard[iCurTileCbE];
+
     int tileW = 64, tileH = 64;
-    if (tileW * cbw > 400 || tileW * cbh > 400) {
-        tileW = 400 / (cbw > cbh ? cbw : cbh);
-        tileH = 400 / (cbw > cbh ? cbw : cbh);
+    if (tileW * cbEntry->width > 400 || tileW * cbEntry->height > 400) {
+        int bigger = cbEntry->width > cbEntry->height ? cbEntry->width : cbEntry->height;
+        tileW = 400 / bigger;
+        tileH = 400 / bigger;
     }
-    int px = 20, py = hge->System_GetState(HGE_SCREENHEIGHT) - (tileH * cbh + 20 + 50) + 10;
-    RenderCloudTip(px - 10, py - 10, tileW * cbw + 20, tileH * cbh + 20, butMicroTileCB->getX() + 12,
+    int px = 24, py = hge->System_GetState(HGE_SCREENHEIGHT) - (tileH * cbEntry->height) - 100;
+    RenderCloudTip(px - 14, py - 10, tileW * cbEntry->width + 28, tileH * cbEntry->height + 55, butMicroTileCB->getX() + 12,
                    butMicroTileCB->getY() - 3);
-    for (int i = 0, y = 0; y < cbh; y++)
-        for (int x = 0; x < cbw; x++, i++) {
-            WWD::Tile* tile = &MDI->GetActiveDoc()->hTileClipboard[i];
-            if (!tile->IsInvisible() && !tile->IsFilled()) {
-                //uint16_t imgSetIndex = tile->GetID() >> 16;
-                uint16_t id = tile->GetID();
-                hgeSprite *spr = hTileset->GetTile(MDI->GetActiveDoc()->hTileClipboardImageSet,
-                                                   id)->GetImage();
+    for (int i = 0, y = 0; y < cbEntry->height; y++) {
+        for (int x = 0; x < cbEntry->width; x++, i++) {
+            WWD::Tile* tile = &cbEntry->tiles[i];
+            if (tile->IsInvisible() || tile->IsFilled())
+                continue;
+            uint16_t id = tile->GetID();
+            cTile *tileImg = hTileset->GetTile(cbEntry->imageset, id);
+            if (!tileImg) {
+                GV->sprUnknownTile->RenderStretch(px + tileW * x, py + tileH * y, px + tileW * (x + 1), py + tileH * (y + 1));
+            } else {
+                hgeSprite *spr = tileImg->GetImage();
                 spr->SetColor(0xFFFFFFFF);
                 spr->SetFlip(0, 0);
                 spr->SetHotSpot(0, 0);
                 spr->RenderStretch(px + tileW * x, py + tileH * y, px + tileW * (x + 1), py + tileH * (y + 1));
             }
         }
+    }
+
+    GV->fntMyriad16->printf(54, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H - 56, HGETEXT_CENTER,
+            "%d/%d", 0, iCurTileCbE + 1, GetTileClipboardSize());
 }
 
-void State::EditingWW::RenderObjectClipboardPreview() {
+void State::EditingWW::RenderObjClipboardPreview() {
     if (MDI->GetActiveDoc() == NULL) return;
-    if (vObjectClipboard.empty()) {
+    if (iCurObjCbE == CLIPBOARD_IS_EMPTY) {
         int len = GV->fntMyriad16->GetStringWidth(GETL2S("ClipboardPreview", "ObjectClipboardEmpty"));
         RenderCloudTip(10, hge->System_GetState(HGE_SCREENHEIGHT) - 70, len + 20, 20, butMicroObjectCB->getX() + 12,
                        butMicroObjectCB->getY() - 3);
@@ -3011,25 +3028,34 @@ void State::EditingWW::RenderObjectClipboardPreview() {
                                 GETL2S("ClipboardPreview", "ObjectClipboardEmpty"), 0);
         return;
     }
-    if (vObjectClipboard.size() == 1) {
-        hgeSprite *spr = SprBank->GetObjectSprite(vObjectClipboard[0]);
-        spr->SetColor(0xFFFFFFFF);
-        spr->SetFlip(vObjectClipboard[0]->GetFlipX(), vObjectClipboard[0]->GetFlipY(), true);
-        int sizeX = spr->GetWidth();
-        int sizeY = spr->GetHeight();
-        int cx = 20, cy = hge->System_GetState(HGE_SCREENHEIGHT) - sizeY - 70;
-        RenderCloudTip(10, cy - 10, sizeX + 20, sizeY + 20, butMicroObjectCB->getX() + 12, butMicroObjectCB->getY() - 3);
-        float hX = 0, hY = 0;
-        SprBank->GetObjectSprite(vObjectClipboard[0])->GetHotSpot(&hX, &hY);
-        spr->Render(cx + hX, cy + hY);
+    auto *cbEntry = arvObjectClipboard[iCurObjCbE];
+    if (cbEntry == NULL)
+        return;
 
+    GV->fntMyriad16->printf(54, hge->System_GetState(HGE_SCREENHEIGHT) - LAY_STATUS_H - 56, HGETEXT_CENTER,
+            "%d/%d", 0, iCurObjCbE + 1, GetObjClipboardSize());
+
+    if (cbEntry->size() == 1) {
+        hgeSprite *spr = SprBank->GetObjectSprite((*cbEntry)[0]);
+        spr->SetColor(0xFFFFFFFF);
+        spr->SetFlip((*cbEntry)[0]->GetFlipX(), (*cbEntry)[0]->GetFlipY(), true);
+        int sizeX = spr->GetWidth() + 20;
+        bool xResize = sizeX < 92;
+        if (xResize)
+            sizeX = 92;
+        int sizeY = spr->GetHeight();
+        int cx = 20, cy = hge->System_GetState(HGE_SCREENHEIGHT) - sizeY - 100;
+        RenderCloudTip(10, cy - 10, sizeX, sizeY + 55, butMicroObjectCB->getX() + 12, butMicroObjectCB->getY() - 3);
+        float hX = 0, hY = 0;
+        SprBank->GetObjectSprite((*cbEntry)[0])->GetHotSpot(&hX, &hY);
+        spr->Render(xResize ? 56 : cx + hX, cy + hY);
         return;
     }
     int sizeX = 0, sizeY = 0;
     WWD::Object *horBase = NULL, *verBase = NULL;
     {
         int minX = -1, minY = -1, maxX = -1, maxY = -1;
-        for (auto & object : vObjectClipboard) {
+        for (auto & object : *cbEntry) {
             hgeSprite *spr = SprBank->GetObjectSprite(object);
             int minValX = object->GetParam(WWD::Param_LocationX) - spr->GetWidth() / 2,
                 minValY = object->GetParam(WWD::Param_LocationY) - spr->GetHeight() / 2;
@@ -3051,12 +3077,13 @@ void State::EditingWW::RenderObjectClipboardPreview() {
         fScale = 400.0f / float(sizeX > sizeY ? sizeX : sizeY);
     }
     sizeX *= fScale;
+    if (sizeX < 92) sizeX = 72;
     sizeY *= fScale;
-    int cx = 20, cy = hge->System_GetState(HGE_SCREENHEIGHT) - sizeY - 70;
-    RenderCloudTip(10, cy - 10, sizeX + 20, sizeY + 20, butMicroObjectCB->getX() + 12, butMicroObjectCB->getY() - 3);
+    int cx = 20, cy = hge->System_GetState(HGE_SCREENHEIGHT) - sizeY - 100;
+    RenderCloudTip(10, cy - 10, sizeX + 20, sizeY + 55, butMicroObjectCB->getX() + 12, butMicroObjectCB->getY() - 3);
     int baseX = horBase->GetParam(WWD::Param_LocationX) - SprBank->GetObjectSprite(horBase)->GetWidth() / 2,
         baseY = verBase->GetParam(WWD::Param_LocationY) - SprBank->GetObjectSprite(verBase)->GetHeight() / 2;
-    for (auto & object : vObjectClipboard) {
+    for (auto & object : *cbEntry) {
         hgeSprite *spr = SprBank->GetObjectSprite(object);
         int offX = object->GetParam(WWD::Param_LocationX) - baseX,
             offY = object->GetParam(WWD::Param_LocationY) - baseY;

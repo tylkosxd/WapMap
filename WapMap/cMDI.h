@@ -70,6 +70,7 @@ struct stLocation {
     char Name[64] = {0};
     unsigned int X;
     unsigned int Y;
+    WWD::Object *Object = NULL;
 };
 
 struct DocumentData {
@@ -80,9 +81,6 @@ struct DocumentData {
     cBankLogic *hCustomLogicBank;
     cBankMeta* hMetaBank;
     cBankPalettes* hPalettesBank;
-    char *hTileClipboardImageSet;
-    int iTileCBw, iTileCBh;
-    WWD::Tile *hTileClipboard;
     cDataController *hDataCtrl;
 
     cTabMDI *hTab;

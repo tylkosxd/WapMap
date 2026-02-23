@@ -386,6 +386,7 @@ namespace State {
         bool change = 0;
 
         valtmp = atoi(tfadvID->getText().c_str());
+
         if (valtmp != hObj->GetParam(WWD::Param_ID)) {
             hObj->SetParam(WWD::Param_ID, valtmp);
             change = 1;

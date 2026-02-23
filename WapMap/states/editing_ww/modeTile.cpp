@@ -47,34 +47,32 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
         }
     }
 
-    if (iActiveTool == EWW_TOOL_NONE) {
-        if (MDI->GetActiveDoc()->hTileClipboard != NULL &&
-            !strcmp(MDI->GetActiveDoc()->hTileClipboardImageSet, GetActivePlane()->GetImageSet(0))) {
-            if (hge->Input_GetKeyState(HGEK_ALT)) {
-                int tx = Scr2WrdX(GetActivePlane(), mx) / GetActivePlane()->GetTileWidth(),
-                    ty = Scr2WrdY(GetActivePlane(), my) / GetActivePlane()->GetTileHeight();
-                if (vTileGhosting.empty() || (!vTileGhosting.empty() && (tx != vTileGhosting[0].x || ty != vTileGhosting[0].y))) {
-                    vTileGhosting.clear();
-                    for (int i = 0, y = 0; y < MDI->GetActiveDoc()->iTileCBh; ++y)
-                        for (int x = 0; x < MDI->GetActiveDoc()->iTileCBw; ++x, ++i) {
-                            TileGhost tg;
-                            tg.x = tx + x;
-                            tg.y = ty + y;
-                            tg.pl = GetActivePlane();
-                            if (MDI->GetActiveDoc()->hTileClipboard[i].IsFilled())
-                                tg.id = EWW_TILE_FILL;
-                            else if (MDI->GetActiveDoc()->hTileClipboard[i].IsInvisible())
-                                tg.id = EWW_TILE_ERASE;
-                            else
-                                tg.id = MDI->GetActiveDoc()->hTileClipboard[i].GetID();
-                            vTileGhosting.push_back(tg);
-                        }
-                    vPort->MarkToRedraw();
-                }
-            } else if (!vTileGhosting.empty()) {
+    if (iActiveTool == EWW_TOOL_NONE && iCurTileCbE != CLIPBOARD_IS_EMPTY) {
+        if (hge->Input_GetKeyState(HGEK_ALT)) {
+            int tx = Scr2WrdX(GetActivePlane(), mx) / GetActivePlane()->GetTileWidth(),
+                ty = Scr2WrdY(GetActivePlane(), my) / GetActivePlane()->GetTileHeight();
+            if (vTileGhosting.empty() || (!vTileGhosting.empty() && (tx != vTileGhosting[0].x || ty != vTileGhosting[0].y))) {
                 vTileGhosting.clear();
+                cTileClipboardEntry *cbEntry = arTileClipboard[iCurTileCbE];
+                for (int i = 0, y = 0; y < cbEntry->height; ++y)
+                    for (int x = 0; x < cbEntry->width; ++x, ++i) {
+                        TileGhost tg;
+                        tg.x = tx + x;
+                        tg.y = ty + y;
+                        tg.pl = GetActivePlane();
+                        if (cbEntry->tiles[i].IsFilled())
+                            tg.id = EWW_TILE_FILL;
+                        else if (cbEntry->tiles[i].IsInvisible())
+                            tg.id = EWW_TILE_ERASE;
+                        else
+                            tg.id = cbEntry->tiles[i].GetID();
+                        vTileGhosting.push_back(tg);
+                    }
                 vPort->MarkToRedraw();
             }
+        } else if (!vTileGhosting.empty()) {
+            vTileGhosting.clear();
+            vPort->MarkToRedraw();
         }
     }
 

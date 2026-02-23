@@ -22,3 +22,14 @@ void State::EditingWW::NavigateToEndLocation()
         }
     }
 }
+
+void State::EditingWW::NavigateToPoint(int x, int y)
+{
+    auto* mainPlane = hParser->GetMainPlane();
+    if (x > mainPlane->GetPlaneWidthPx())
+        x = mainPlane->GetPlaneWidthPx();
+    if (y > mainPlane->GetPlaneHeightPx())
+        y = mainPlane->GetPlaneHeightPx();
+    fCamX = x - (vPort->GetWidth() / 2 / fZoom);
+    fCamY = y - (vPort->GetHeight() / 2 / fZoom);
+}

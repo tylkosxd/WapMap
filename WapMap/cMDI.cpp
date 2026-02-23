@@ -130,10 +130,6 @@ DocumentData *cMDI::AddDocument(DocumentData *dd) {
     dd->hTab->bFocused = 0;
     dd->hTab->fTimer = 0;
 
-    dd->hTileClipboardImageSet = NULL;
-    dd->hTileClipboard = NULL;
-    dd->iTileCBw = dd->iTileCBh = -1;
-
     dd->iTileSelectX1 = dd->iTileSelectY1 = dd->iTileSelectX2 = dd->iTileSelectY2 = -1;
 
     GV->editState->hPlaneData.clear();
@@ -306,12 +302,6 @@ void cMDI::DeleteDocByIt(int i) {
     delete dd->hAniBank;
     delete dd->hCustomLogicBank;
     delete dd->hDataCtrl;
-    if (dd->hTileClipboard != NULL) {
-        delete[] dd->hTileClipboard;
-        dd->hTileClipboard = NULL;
-        delete dd->hTileClipboardImageSet;
-        dd->hTileClipboardImageSet = NULL;
-    }
 
     for (int pl = 0; pl < dd->hParser->GetPlanesCount(); pl++) {
         if (!dd->hPlaneData[pl]->ObjectData.bEmpty) {

@@ -56,7 +56,9 @@ void winGoToCoords::createCoordsInput(const char* label, int i, int offsetY) {
 
 void winGoToCoords::Open() {
     setCurCamPos();
-    cWindow::Open();
+    myWin.setPosition(160, LAY_VIEWPORT_Y + 40);
+    myWin.setVisible(true);
+    myWin.getParent()->moveToTop(&myWin);
 }
 
 void winGoToCoords::action(const ActionEvent &actionEvent) {
@@ -121,14 +123,8 @@ void winGoToCoords::goToCoords() {
         pickedX = std::stoi(strX.c_str());
         pickedY = std::stoi(strY.c_str());
     }
-
-    if (pickedX > mainPlane->GetPlaneWidthPx())
-        pickedX = mainPlane->GetPlaneWidthPx();
-    if (pickedY > mainPlane->GetPlaneHeightPx())
-        pickedY = mainPlane->GetPlaneHeightPx();
     
-    editState->fCamX = pickedX - editState->vPort->GetWidth() / 2 / editState->fZoom;
-    editState->fCamY = pickedY - editState->vPort->GetHeight() / 2 / editState->fZoom;
+    editState->NavigateToPoint(pickedX, pickedY);
 
     char temp[32];
 

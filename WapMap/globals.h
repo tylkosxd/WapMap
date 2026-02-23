@@ -365,7 +365,7 @@ public:
     hgeSprite *sprHomepageBackButton;
     hgeSprite *sprSnowflake;
 
-    hgeSprite *sprTile;
+    hgeSprite *sprUnknownTile;
     hgeFont *fntMyriad16, *fntMyriad20, *fntMyriad80, *fntMinimal, *fntSystem17;
 
     gcn::HGEInput *gcnInput;

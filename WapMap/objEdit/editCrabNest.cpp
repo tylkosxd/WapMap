@@ -87,8 +87,7 @@ namespace ObjEdit {
         }
 
         hInventory = new cInvPickbox();
-        hInventory->SetPosition(hState->vPort->GetX() + hState->vPort->GetWidth() - hInventory->GetWidth(),
-                                hState->vPort->GetY() + hState->vPort->GetHeight() - hInventory->GetHeight());
+        hInventory->SetPosition(win->getX() + win->getWidth() + 10, hState->vPort->GetY() + hState->vPort->GetHeight() - hInventory->GetHeight());
         hInventory->SetVisible(1);
 
         if (!hTempObj->GetParam(WWD::Param_LocationZ)) {
