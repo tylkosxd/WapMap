@@ -65,17 +65,22 @@ namespace SHR {
         if (isEnabled()) {
             st = 2;
         }
+        unsigned char a = getAlpha();
+        hGfx->sprControl[0][st]->SetColor(SETA(0xFFFFFF, a));
         hGfx->sprControl[0][st]->Render(x, dy);
 
         if (isEnabled() && fTimer != 0) {
-            hGfx->sprControl[0][3]->SetColor(SETA(0xFFFFFF, (unsigned char) (fTimer * 10.0f * 255.0f)));
+            hGfx->sprControl[0][3]->SetColor(SETA(0xFFFFFF, (unsigned char) (fTimer * 10.0f * a)));
             hGfx->sprControl[0][3]->Render(x, dy);
         }
 
-        if (isSelected())
+        if (isSelected()) {
+            hGfx->sprControl[0][!isEnabled()]->SetColor(SETA(0xFFFFFF, a));
             hGfx->sprControl[0][!isEnabled()]->Render(x, dy);
+        }
 
         if (mKeyboardFocus) {
+            hGfx->sprControl[0][5]->SetColor(SETA(0xFFFFFF, a));
             hGfx->sprControl[0][5]->Render(x - 1, dy - 1);
         }
 

@@ -749,7 +749,7 @@ namespace State {
 
         void FloodFill(int x, int y, int tile);
 
-        void DrawTileAttributes(int tileId, float posX, float posY, float widthMod, float heightMod);
+        void DrawTileAttributes(int tileId, float posX, float posY, float widthMod, float heightMod, unsigned char a = 255);
 
         char *ExportObject(WWD::Object *obj);
 
@@ -798,7 +798,7 @@ namespace State {
 
         std::vector<std::pair<int, int> > m_vMeasurePoints;
 
-        void DrawTileAttributes(WWD::TileAttrib *attrib, float posX, float posY, float widthMod, float heightMod);
+        void DrawTileAttributes(WWD::TileAttrib *attrib, float posX, float posY, float widthMod, float heightMod, unsigned char a = 255);
 
         std::vector<WWD::Object *> GetObjectsInArea(WWD::Plane *plane, int x, int y, int w, int h);
 

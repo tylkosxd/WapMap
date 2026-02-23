@@ -39,34 +39,35 @@ bool State::ObjSortCoordZ(WWD::Object *a, WWD::Object *b) {
     return (z1 < z2);
 }
 
-#define SWITCH_FOR_TA_COLOR(a) switch (a) { \
+#define SWITCH_FOR_TA_COLOR(ta, alpha) switch (ta) { \
     case WWD::Attrib_Climb: \
-    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = COLOR_CLIMB; \
+    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = SETA(COLOR_CLIMB, alpha); \
     break; \
     case WWD::Attrib_Death: \
-    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = COLOR_DEATH; \
+    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = SETA(COLOR_DEATH, alpha); \
     break; \
     case WWD::Attrib_Ground: \
-    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = COLOR_GROUND; \
+    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = SETA(COLOR_GROUND, alpha); \
     break; \
     case WWD::Attrib_Solid: \
-    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = COLOR_SOLID; \
+    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = SETA(COLOR_SOLID, alpha); \
     break; \
     default: \
-    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = COLOR_UNKNOWN; \
+    q.v[0].col = q.v[1].col = q.v[2].col = q.v[3].col = SETA(COLOR_UNKNOWN, alpha); \
     break; \
 }
 
-void State::EditingWW::DrawTileAttributes(WWD::TileAttrib *attrib, float posX, float posY, float widthMod, float heightMod) {
+void State::EditingWW::DrawTileAttributes(WWD::TileAttrib *attrib, float posX, float posY, float widthMod, float heightMod, unsigned char alpha) {
 	if (!attrib) return;
     float w = attrib->getWidth() * widthMod;
     float h = attrib->getHeight() * heightMod;
+    alpha *= 0.47;
 
     if (attrib->getType() == WWD::AttribType_Single) {
         auto a = (WWD::SingleTileAttrib*)attrib;
         if (a->getAttrib() == WWD::Attrib_Clear) return;
 
-        SWITCH_FOR_TA_COLOR(a->getAttrib())
+        SWITCH_FOR_TA_COLOR(a->getAttrib(), alpha)
 
         q.v[0].z = q.v[1].z = q.v[2].z = q.v[3].z = 1.0f;
         q.v[0].x = posX;
@@ -86,7 +87,7 @@ void State::EditingWW::DrawTileAttributes(WWD::TileAttrib *attrib, float posX, f
         q.v[0].z = q.v[1].z = q.v[2].z = q.v[3].z = 1.0f;
 
         if (a->getInsideAttrib() != WWD::Attrib_Clear) {
-            SWITCH_FOR_TA_COLOR(a->getInsideAttrib())
+            SWITCH_FOR_TA_COLOR(a->getInsideAttrib(), alpha)
 
             q.v[0].x = posX + mask.x1 * widthMod;
             q.v[0].y = posY + mask.y1 * heightMod;
@@ -100,7 +101,7 @@ void State::EditingWW::DrawTileAttributes(WWD::TileAttrib *attrib, float posX, f
         }
 
         if (a->getOutsideAttrib() != WWD::Attrib_Clear) {
-            SWITCH_FOR_TA_COLOR(a->getOutsideAttrib())
+            SWITCH_FOR_TA_COLOR(a->getOutsideAttrib(), alpha)
 
             //upper
             q.v[0].x = posX;
@@ -169,7 +170,7 @@ void State::EditingWW::DrawTileAttributes(WWD::TileAttrib *attrib, float posX, f
                 }
 
                 if (attrib) {
-                    SWITCH_FOR_TA_COLOR(attrib);
+                    SWITCH_FOR_TA_COLOR(attrib, alpha);
 
                     q.v[0].z = q.v[1].z = q.v[2].z = q.v[3].z = 1.0f;
                     q.v[0].x = posX;
@@ -190,8 +191,8 @@ void State::EditingWW::DrawTileAttributes(WWD::TileAttrib *attrib, float posX, f
     }
 }
 
-void State::EditingWW::DrawTileAttributes(int tileId, float posX, float posY, float widthMod, float heightMod) {
-    DrawTileAttributes(hParser->GetTileAttribs(tileId), posX, posY, widthMod, heightMod);
+void State::EditingWW::DrawTileAttributes(int tileId, float posX, float posY, float widthMod, float heightMod, unsigned char a) {
+    DrawTileAttributes(hParser->GetTileAttribs(tileId), posX, posY, widthMod, heightMod, a);
 }
 
 void State::EditingWW::DrawDB() {
@@ -387,37 +388,41 @@ void State::EditingWW::DrawTileProperties() {
     int dx, dy;
     winTileProp->getAbsolutePosition(dx, dy);
 
-    hge->Gfx_RenderLine(dx - 2, dy + 58, dx + 302, dy + 58, GV->colLineDark);
-    hge->Gfx_RenderLine(dx - 2, dy + 59, dx + 302, dy + 59, GV->colLineBright);
+    unsigned char a = winTileProp->getAlpha();
+    DWORD colLineDark = SETA(GV->colLineDark, a);
+    DWORD colLineBright = SETA(GV->colLineBright, a);
 
-    hge->Gfx_RenderLine(dx - 2, dy + 202, dx + 302, dy + 202, GV->colLineDark);
-    hge->Gfx_RenderLine(dx - 2, dy + 203, dx + 302, dy + 203, GV->colLineBright);
+    hge->Gfx_RenderLine(dx - 2, dy + 58, dx + 302, dy + 58, colLineDark);
+    hge->Gfx_RenderLine(dx - 2, dy + 59, dx + 302, dy + 59, colLineBright);
+
+    hge->Gfx_RenderLine(dx - 2, dy + 202, dx + 302, dy + 202, colLineDark);
+    hge->Gfx_RenderLine(dx - 2, dy + 203, dx + 302, dy + 203, colLineBright);
 
     if (rbtpDouble->isSelected()) {
-        hge->Gfx_RenderLine(dx - 2, dy + 259, dx + 302, dy + 259, GV->colLineDark);
-        hge->Gfx_RenderLine(dx - 2, dy + 260, dx + 302, dy + 260, GV->colLineBright);
+        hge->Gfx_RenderLine(dx - 2, dy + 259, dx + 302, dy + 259, colLineDark);
+        hge->Gfx_RenderLine(dx - 2, dy + 260, dx + 302, dy + 260, colLineBright);
 
-        hge->Gfx_RenderLine(dx - 2, dy + 320, dx + 302, dy + 320, GV->colLineDark);
-        hge->Gfx_RenderLine(dx - 2, dy + 321, dx + 302, dy + 321, GV->colLineBright);
+        hge->Gfx_RenderLine(dx - 2, dy + 320, dx + 302, dy + 320, colLineDark);
+        hge->Gfx_RenderLine(dx - 2, dy + 321, dx + 302, dy + 321, colLineBright);
     }
 
     hge->Gfx_RenderLine(dx + 8 + !btpZoomTile * 32, dy + 64 + !btpZoomTile * 32, dx + 75 + btpZoomTile * 32 + 32,
-                        dy + 64 + !btpZoomTile * 32, GV->colLineDark);
+                        dy + 64 + !btpZoomTile * 32, colLineDark);
     hge->Gfx_RenderLine(dx + 9 + !btpZoomTile * 32, dy + 63 + !btpZoomTile * 32, dx + 9 + !btpZoomTile * 32,
-                        dy + 131 + btpZoomTile * 32 + 32, GV->colLineDark);
+                        dy + 131 + btpZoomTile * 32 + 32, colLineDark);
     hge->Gfx_RenderLine(dx + 76 + btpZoomTile * 32 + 32, dy + 63 + !btpZoomTile * 32, dx + 76 + btpZoomTile * 32 + 32,
-                        dy + 131 + btpZoomTile * 32 + 32, GV->colLineDark);
+                        dy + 131 + btpZoomTile * 32 + 32, colLineDark);
     hge->Gfx_RenderLine(dx + 8 + !btpZoomTile * 32, dy + 131 + btpZoomTile * 32 + 32, dx + 75 + btpZoomTile * 32 + 32,
-                        dy + 131 + btpZoomTile * 32 + 32, GV->colLineDark);
+                        dy + 131 + btpZoomTile * 32 + 32, colLineDark);
 
     hge->Gfx_RenderLine(dx + 9 + !btpZoomTile * 32, dy + 65 + !btpZoomTile * 32, dx + 74 + btpZoomTile * 32 + 32,
-                        dy + 65 + !btpZoomTile * 32, GV->colLineBright);
+                        dy + 65 + !btpZoomTile * 32, colLineBright);
     hge->Gfx_RenderLine(dx + 10 + !btpZoomTile * 32, dy + 64 + !btpZoomTile * 32, dx + 10 + !btpZoomTile * 32,
-                        dy + 130 + btpZoomTile * 32 + 32, GV->colLineBright);
+                        dy + 130 + btpZoomTile * 32 + 32, colLineBright);
     hge->Gfx_RenderLine(dx + 75 + btpZoomTile * 32 + 32, dy + 64 + !btpZoomTile * 32, dx + 75 + btpZoomTile * 32 + 32,
-                        dy + 130 + btpZoomTile * 32 + 32, GV->colLineBright);
+                        dy + 130 + btpZoomTile * 32 + 32, colLineBright);
     hge->Gfx_RenderLine(dx + 9 + !btpZoomTile * 32, dy + 130 + btpZoomTile * 32 + 32, dx + 75 + btpZoomTile * 32 + 32,
-                        dy + 130 + btpZoomTile * 32 + 32, GV->colLineBright);
+                        dy + 130 + btpZoomTile * 32 + 32, colLineBright);
 
     GV->fntMyriad16->Render(dx + 145, dy + 66, HGETEXT_LEFT, (std::string(GETL(Lang_Width)) + ':').c_str(), 0);
     GV->fntMyriad16->Render(dx + 145, dy + 91, HGETEXT_LEFT, (std::string(GETL(Lang_Height)) + ':').c_str(), 0);
@@ -514,11 +519,11 @@ void State::EditingWW::DrawTileProperties() {
             }
         }
 
-        tile->GetImage()->SetColor(0xffffffff);
+        tile->GetImage()->SetColor(SETA(0xffffffff, a));
         tile->GetImage()->SetFlip(0, 0);
         tile->GetImage()->SetHotSpot(0, 0);
         tile->GetImage()->RenderEx(dx + 10, dy + 65, 0, widthMod, heightMod);
-        DrawTileAttributes(hTempAttrib, dx + 10, dy + 65, widthMod, heightMod);
+        DrawTileAttributes(hTempAttrib, dx + 10, dy + 65, widthMod, heightMod, a);
     } else {
 
     }
