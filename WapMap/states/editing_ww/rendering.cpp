@@ -922,7 +922,7 @@ void State::EditingWW::DrawViewport() {
         //}
 
         if (iMode == EWW_MODE_OBJECT && iActiveTool == EWW_TOOL_NONE && hge->Input_GetKeyState(HGEK_ALT) &&
-                iCurObjCbE == CLIPBOARD_IS_EMPTY) {
+                iCurObjCbE != CLIPBOARD_IS_EMPTY) {
             auto *curCb = arvObjectClipboard[iCurObjCbE];
             std::vector<WWD::Object *> vRend = *curCb;
 
