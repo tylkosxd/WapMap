@@ -600,6 +600,9 @@
     <ClCompile Include="states\editing_ww\navigation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="states\editing_ww\clipboards.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bodyQuadTree.h">

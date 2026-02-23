@@ -356,6 +356,7 @@
     <ClCompile Include="states\editing_ww.cpp" />
     <ClCompile Include="states\editing_ww\alActionListener.cpp" />
     <ClCompile Include="states\editing_ww\cLayerRenderBuffer.cpp" />
+    <ClCompile Include="states\editing_ww\clipboards.cpp" />
     <ClCompile Include="states\editing_ww\lmListModel.cpp" />
     <ClCompile Include="states\editing_ww\modeObject.cpp" />
     <ClCompile Include="states\editing_ww\modeTile.cpp" />
