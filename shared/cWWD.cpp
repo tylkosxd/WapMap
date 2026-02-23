@@ -1385,7 +1385,7 @@ void WWD::Plane::Resize(int nw, int nh, int ox, int oy, bool creating) {
         int i = 0, y = 0;
         while (oy > 0) {
             for (int x = 0; x < nw; ++x, ++i) {
-                newt[i].SetInvisible(1);
+                newt[i].SetInvisible();
             }
             --oy;
             ++y;
@@ -1401,7 +1401,7 @@ void WWD::Plane::Resize(int nw, int nh, int ox, int oy, bool creating) {
             int rx = ox;
 
             while (rx > 0) {
-                newt[i].SetInvisible(1);
+                newt[i].SetInvisible();
                 ++x;
                 ++i;
                 --rx;
@@ -1414,13 +1414,13 @@ void WWD::Plane::Resize(int nw, int nh, int ox, int oy, bool creating) {
             }
 
             for (; x < nw; ++x, ++i) {
-                newt[i].SetInvisible(1);
+                newt[i].SetInvisible();
             }
         }
 
         for (; y < nh; ++y) {
             for (int x = 0; x < nw; ++x, ++i) {
-                newt[i].SetInvisible(1);
+                newt[i].SetInvisible();
             }
         }
     
@@ -1429,7 +1429,7 @@ void WWD::Plane::Resize(int nw, int nh, int ox, int oy, bool creating) {
     }
     else {
         for (int i = 0; i < s; ++i) {
-            newt[i].SetInvisible(1);
+            newt[i].SetInvisible();
         }
     }
 

@@ -51,7 +51,7 @@ void State::EditingWW::CutTiles() {
             WWD::Tile *tile = plane->GetTile(x, y);
             if (!tile->IsInvisible()) {
                 bChanges = true;
-                tile->SetInvisible(true);
+                tile->SetInvisible();
             }
         }
     if (bChanges) {

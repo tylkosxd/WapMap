@@ -223,9 +223,9 @@ int wmPlaceTile(lua_State *L) {
     }
 
     if (tile == BRUSH_EMPTY)
-        t->SetInvisible(1);
+        t->SetInvisible();
     else if (tile == BRUSH_FILLED)
-        t->SetFilled(1);
+        t->SetFilled();
     else
         t->SetID(tile);
     GV_BRUSH_bChanges = 1;

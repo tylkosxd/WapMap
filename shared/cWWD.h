@@ -257,20 +257,16 @@ namespace WWD {
             m_bInvisible = m_bFilled = 0;
         };
 
-        void SetInvisible(bool bP) {
-            m_bInvisible = bP;
-            if (bP) {
-                m_bFilled = 0;
-                m_iID = -1;
-            }
+        void SetInvisible() {
+            m_bInvisible = 1;
+            m_bFilled = 0;
+            m_iID = -1;
         };
 
-        void SetFilled(bool bP) {
-            m_bFilled = bP;
-            if (bP) {
-                m_bInvisible = 0;
-                m_iID = -1;
-            }
+        void SetFilled() {
+            m_bFilled = 1;
+            m_bInvisible = 0;
+            m_iID = -1;
         };
 
         Tile &operator=(const Tile &src);

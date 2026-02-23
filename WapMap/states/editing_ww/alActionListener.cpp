@@ -589,7 +589,7 @@ namespace State {
                             WWD::Tile *tile = m_hOwn->GetActivePlane()->GetTile(x, y);
                             if (tile && !tile->IsInvisible()) {
                                 bChanges = 1;
-                                tile->SetInvisible(true);
+                                tile->SetInvisible();
                             }
                         }
                     if (bChanges) {

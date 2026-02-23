@@ -433,13 +433,13 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
                         if (tl) {
                             if (t.id == EWW_TILE_ERASE) {
                                 if (!tl->IsInvisible()) {
-                                    tl->SetInvisible(true);
+                                    tl->SetInvisible();
                                     changes = true;
                                 }
                             }
                             else if (t.id == EWW_TILE_FILL) {
                                 if (!tl->IsFilled()) {
-                                    tl->SetFilled(true);
+                                    tl->SetFilled();
                                     changes = true;
                                 }
                             }
@@ -584,9 +584,9 @@ void State::EditingWW::FloodFill(int x, int y, int tile) {
 
     std::function < void() > fillTile;
     if (tile == EWW_TILE_ERASE) {
-        fillTile = [&t]() { t->SetInvisible(true); };
+        fillTile = [&t]() { t->SetInvisible(); };
     } else if (tile == EWW_TILE_FILL) {
-        fillTile = [&t]() { t->SetFilled(true); };
+        fillTile = [&t]() { t->SetFilled(); };
     } else {
         // imgSet
         int id = hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetTileByIterator(tile)->GetID();

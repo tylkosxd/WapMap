@@ -3664,14 +3664,14 @@ void State::EditingWW::TextEditMoveToNextTile(bool saving) {
         const char* text = tfWriteID->getText().c_str();
         if (text[0] == 'f' || text[0] == 'F') {
             if (!tile->IsFilled()) {
-                tile->SetFilled(true);
+                tile->SetFilled();
                 MarkUnsaved();
             }
         } else {
             int tid = atoi(text);
             if (tid == 0) {
                 if (!tile->IsInvisible()) {
-                    tile->SetInvisible(true);
+                    tile->SetInvisible();
                     MarkUnsaved();
                 }
             } else if (tile->GetID() != tid) {
