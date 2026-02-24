@@ -1622,7 +1622,7 @@ bool State::ObjProp::Render() {
     return false;
 }
 
-void State::ObjProp::GainFocus(ReturnCode<void> code, bool bFlipped) {
+void State::ObjProp::GainFocus(const ReturnCode& code, bool bFlipped) {
     if (bFlipped) {
         if (code.type == ReturnCodeType::ObjPropSelectedValues) {
             if (code.value != 0) {

@@ -209,7 +209,7 @@ namespace State {
         return 0;
     }
 
-    void ImageImport::GainFocus(ReturnCode<void> code, bool bFlipped) {
+    void ImageImport::GainFocus(const ReturnCode& code, bool bFlipped) {
 
     }
 

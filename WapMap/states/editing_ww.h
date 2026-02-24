@@ -710,7 +710,7 @@ namespace State {
 
         virtual bool Render();
 
-        virtual void GainFocus(ReturnCode<void> code, bool bFlipped);
+        virtual void GainFocus(const ReturnCode& code, bool bFlipped);
 
         void ToggleFullscreen();
 

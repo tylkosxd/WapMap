@@ -2410,7 +2410,7 @@ bool State::EditingWW::Think() {
     return false;
 }
 
-void State::EditingWW::GainFocus(ReturnCode<void> code, bool bFlipped) {
+void State::EditingWW::GainFocus(const ReturnCode& code, bool bFlipped) {
     switch (code.type) {
         case ReturnCodeType::LoadMap:
             if (code.value != 0) {

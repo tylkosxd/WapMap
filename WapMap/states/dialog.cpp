@@ -9,22 +9,21 @@ extern HGE *hge;
 
 namespace State {
     int MessageBox(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons) {
-        return ShowDialog<void>(pszTitle, pszErrorString, piIcon, piButtons).value;
+        return ShowDialog(pszTitle, pszErrorString, piIcon, piButtons);
     }
 
     int InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons, const char* textFieldInitValue) {
-        return ShowDialog<void>(pszTitle, pszErrorString, 0, piButtons | ST_DIALOG_TEXT_FIELD, textFieldInitValue).value;
+        return ShowDialog(pszTitle, pszErrorString, 0, piButtons | ST_DIALOG_TEXT_FIELD, textFieldInitValue);
     }
 
-    template <class RC>
-    const ReturnCode<RC>& ShowDialog(const char* pszTitle, const char* pszErrorString, int piIcon, int piButtons, const char* textFieldInitValue) {
+    const ReturnCode& ShowDialog(const char* pszTitle, const char* pszErrorString, int piIcon, int piButtons, const char* textFieldInitValue) {
         auto dialog = new Dialog(pszTitle, pszErrorString, piIcon, piButtons, textFieldInitValue);
         dialog->Init();
         GV->StateMgr->Push(dialog);
         do {
             hge->System_DoManualMainLoop();
         } while (GV->StateMgr->GetState() == dialog);
-        return GV->StateMgr->GetReturnCode<RC>();
+        return GV->StateMgr->GetReturnCode();
     }
 }
 
@@ -224,7 +223,7 @@ bool State::Dialog::Render() {
     return false;
 }
 
-void State::Dialog::GainFocus(ReturnCode<void> code, bool bFlipped) {
+void State::Dialog::GainFocus(const ReturnCode& code, bool bFlipped) {
 
 }
 

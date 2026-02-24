@@ -15,11 +15,10 @@ namespace SHR {
         std::vector<cState *> m_hStateStack;
         bool m_bFocused;
         bool m_bPush, m_bPop, m_bReplace, m_bFlip;
-        BiggestReturnCode m_ReturnCode;
+        ReturnCode m_ReturnCode;
         cState *m_hNew;
 
-        template <class RC>
-        bool Flip(ReturnCode<RC> code) {
+        bool Flip(const ReturnCode& code) {
             if (m_hStateStack.size() < 2) return false;
             if (m_bPop) m_bPop = false;
             m_bFlip = true;
@@ -27,8 +26,7 @@ namespace SHR {
             return true;
         }
 
-        template <class RC>
-        void Pop(ReturnCode<RC> code) {
+        void Pop(const ReturnCode& code) {
             if (m_bFlip) m_bFlip = false;
             m_bPop = true;
             m_ReturnCode = code;
@@ -86,8 +84,7 @@ namespace SHR {
 
         void OS_Notify();
 
-        template <class RC>
-        const ReturnCode<RC>& GetReturnCode() { return *(ReturnCode<RC>*)(&m_ReturnCode); }
+        const ReturnCode& GetReturnCode() const { return m_ReturnCode; }
 
         void OnResize();
     };
@@ -111,7 +108,7 @@ namespace SHR {
 
         virtual bool Render() { return false; };
 
-        virtual void GainFocus(ReturnCode<void> code, bool bFlipped) {};
+        virtual void GainFocus(const ReturnCode& code, bool bFlipped) {};
 
         virtual void PreRender() {};
 
@@ -131,22 +128,12 @@ namespace SHR {
 
         virtual void OnResize() {};
 
-        template <class RC>
-        bool _flipMe(ReturnCode<RC> code) {
+        bool _flipMe(const ReturnCode& code) {
             return _hOwner->Flip(code);
         }
 
-        bool _flipMe(ReturnCode<void> code) {
-            return _hOwner->Flip<void>(code);
-        }
-
-        template <class RC>
-        void _popMe(ReturnCode<RC> code) {
+        void _popMe(const ReturnCode& code) {
             _hOwner->Pop(code);
-        }
-
-        void _popMe(ReturnCode<void> code) {
-            _hOwner->Pop<void>(code);
         }
 
         void _replaceFor(cState* phState);

@@ -31,8 +31,7 @@
 #define RETURN_SKIP             5
 
 namespace State {
-    template <class RC>
-    const ReturnCode<RC>& ShowDialog(const char* pszTitle, const char* pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0);
+    const ReturnCode& ShowDialog(const char* pszTitle, const char* pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0);
 
     int MessageBox(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK);
 
@@ -50,7 +49,7 @@ namespace State {
 
         bool Render() override;
 
-        void GainFocus(ReturnCode<void> code, bool bFlipped) override;
+        void GainFocus(const ReturnCode& code, bool bFlipped) override;
 
         void action(const gcn::ActionEvent &actionEvent) override;
 

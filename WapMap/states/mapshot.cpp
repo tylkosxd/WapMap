@@ -290,6 +290,6 @@ bool State::MapShot::Render() {
     return 0;
 }
 
-void State::MapShot::GainFocus(ReturnCode<void> code, bool bFlipped) {
+void State::MapShot::GainFocus(const ReturnCode& code, bool bFlipped) {
     _popMe({ ReturnCodeType::MapShot, 0 });
 }

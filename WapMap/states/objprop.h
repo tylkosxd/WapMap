@@ -170,7 +170,7 @@ namespace State {
 
         bool Render() override;
 
-        void GainFocus(ReturnCode<void> code, bool bFlipped) override;
+        void GainFocus(const ReturnCode& code, bool bFlipped) override;
 
         void OnResize() override;
 

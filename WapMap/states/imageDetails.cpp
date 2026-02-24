@@ -106,7 +106,7 @@ namespace State {
         return false;
     }
 
-    void ImageDetails::GainFocus(ReturnCode<void> code, bool bFlipped) {
+    void ImageDetails::GainFocus(const ReturnCode& code, bool bFlipped) {
 
     }
 
