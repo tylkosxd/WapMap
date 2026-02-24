@@ -8,13 +8,12 @@
 extern HGE *hge;
 
 namespace State {
-    int MessageBox(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons)
-    {
+    int MessageBox(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons) {
         return ShowDialog<void>(pszTitle, pszErrorString, piIcon, piButtons).value;
     }
 
-    const TextReturnCode& InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons, const char* textFieldInitValue) {
-        return ShowDialog<std::string>(pszTitle, pszErrorString, 0, piButtons | ST_DIALOG_TEXT_FIELD, textFieldInitValue);
+    int InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons, const char* textFieldInitValue) {
+        return ShowDialog<void>(pszTitle, pszErrorString, 0, piButtons | ST_DIALOG_TEXT_FIELD, textFieldInitValue).value;
     }
 
     template <class RC>
@@ -246,10 +245,9 @@ void State::Dialog::action(const gcn::ActionEvent &actionEvent) {
     }
 
     if (iButtons & ST_DIALOG_TEXT_FIELD) {
-        _popMe(TextReturnCode{ ReturnCodeType::DialogState, value, textField->getText() });
-    } else {
-        _popMe({ ReturnCodeType::DialogState, value });
+        GV->szLastInputDialogText = textField->getText();
     }
+    _popMe({ ReturnCodeType::DialogState, value });
 }
 
 void State::Dialog::keyReleased(KeyEvent &keyEvent) {

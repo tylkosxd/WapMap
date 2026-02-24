@@ -433,6 +433,8 @@ public:
 
     bool anyMapLoaded = false;
 
+    std::string szLastInputDialogText;
+
 #ifdef SHOWMEMUSAGE
     char szMemUsage[64];
     CRITICAL_SECTION csMemUsage;

@@ -27,7 +27,7 @@ int LocationsList::addLocation(const std::string& name, int x, int y, WWD::Objec
     if (len > 63)
         return LocName_ErrorTooLong;
     stLocation loc;
-    strncpy(loc.Name, name.c_str(), len + 1);
+    strcpy(loc.Name, name.c_str());
     loc.X = x;
     loc.Y = y;
     loc.Object = object;
@@ -41,8 +41,8 @@ void LocationsList::deleteLocation(int i) {
 }
 
 stLocation* LocationsList::getLocation(int i) {
-    if (!v) return NULL;
-    return &((*v)[i]);
+    if (!v || i >= (int)(v->size())) return NULL;
+    return &(v->at(i));
 }
 
 bool validateObjectPtr(WWD::Object* object) {
@@ -57,8 +57,15 @@ bool validateObjectPtr(WWD::Object* object) {
 int LocationsList::renameLocation(int index, const std::string& newName) {
     if (!v)
         return LocName_ErrorGeneric;
+    auto* location = getLocation(index);
+    bool hasLinkedObject = location->Object && validateObjectPtr(location->Object);
+
     if (newName.empty())
-        return LocName_ErrorEmpty;
+        if (hasLinkedObject){
+            location->Object->SetName("");
+            return LocName_Success;
+        } else
+            return LocName_ErrorEmpty;
     for (unsigned int i = 0; i < v->size(); ++i) {
         if (getLocation(i)->Name == newName)
             return LocName_ErrorDuplicate;
@@ -66,20 +73,15 @@ int LocationsList::renameLocation(int index, const std::string& newName) {
     int len = newName.length();
     if (len > 63)
         return LocName_ErrorTooLong;
-    auto* location = getLocation(index);
-    if (location->Object) {
-        if (!validateObjectPtr(location->Object))
-            return LocName_ErrorGeneric;
+    if (hasLinkedObject)
         location->Object->SetName(newName.c_str());
-    }
-    memset(location->Name, 0, 64);
-    strncpy(location->Name, newName.c_str(), len + 1);
+    sprintf(location->Name, "%s", newName.c_str());
     return LocName_Success;
 }
 
 std::string LocationsList::getElementAt(int i) {
-    if (!v) return "";
-    return (*v)[i].Name;
+    if (!v || i >= (int)(v->size())) return ":/";
+    return v->at(i).Name;
 }
 
 inline const char* getStr(const wchar_t* wstr) {
@@ -140,10 +142,10 @@ winLocationsBrowser::winLocationsBrowser() : cWindow(getStr(L"WinCaption"), 250,
 }
 
 void winLocationsBrowser::AddFavLocation(int x, int y) {
-    const auto& ret = State::InputDialog(GETL(Lang_WM), getStr(L"DialogInputName"), ST_DIALOG_BUT_OKCANCEL, NULL);
-    if (ret.value != RETURN_OK)
+    int ret = State::InputDialog(GETL(Lang_WM), getStr(L"DialogInputName"), ST_DIALOG_BUT_OKCANCEL, NULL);
+    if (ret != RETURN_OK)
         return;
-    int rr = lmLocs[Locs::Favourites]->addLocation(ret.data, x, y);
+    int rr = lmLocs[Locs::Favourites]->addLocation(GV->szLastInputDialogText, x, y);
     if (rr == LocName_Success) {
         GV->editState->MarkUnsaved();
     } else {
@@ -249,17 +251,17 @@ void winLocationsBrowser::action(const ActionEvent &actionEvent) {
     }
 
     if (actionEvent.getSource() == butEdit) {
-        const auto& ret = State::InputDialog(GETL(Lang_WM), getStr(L"DialogInputName"), ST_DIALOG_BUT_OKCANCEL, location->Name);
-        if (ret.value == RETURN_OK && location->Name != ret.data) {
-            int rr = lmLocs[m_selectedTab]->renameLocation(i, ret.data);
+        int ret = State::InputDialog(GETL(Lang_WM), getStr(L"DialogInputName"), ST_DIALOG_BUT_OKCANCEL, location->Name);
+        if (ret == RETURN_OK && location->Name != GV->szLastInputDialogText) {
+            int rr = lmLocs[m_selectedTab]->renameLocation(i, GV->szLastInputDialogText);
             if (rr == LocName_Success) {
                 GV->editState->MarkUnsaved();
             } else {
                 wchar_t temp[32];
                 wsprintfW(temp, L"DialogInputNameError_%d", rr);
                 State::MessageBox(GETL(Lang_Error), getStr(temp), ST_DIALOG_ICON_ERROR);
-                RefreshLists();
             }
+            RefreshLists();
         }
         return;
     }

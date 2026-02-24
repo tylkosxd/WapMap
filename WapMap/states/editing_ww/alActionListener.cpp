@@ -27,13 +27,13 @@ namespace State {
             //m_hOwn->SyncLogicBrowser();
         } else if (actionEvent.getSource() == m_hOwn->butbrlRename) {
             cCustomLogic *logic = m_hOwn->hCustomLogics->GetAssetByIterator(m_hOwn->lbbrlLogicList->getSelected());
-            const auto& ret = State::InputDialog(PRODUCT_NAME, GETL2S("Win_LogicBrowser", "DialogInputName"), ST_DIALOG_BUT_OKCANCEL, logic->GetName().c_str());
-            if (ret.value == RETURN_OK) {
-                if (ret.data.empty()) {
+            int ret = State::InputDialog(PRODUCT_NAME, GETL2S("Win_LogicBrowser", "DialogInputName"), ST_DIALOG_BUT_OKCANCEL, logic->GetName().c_str());
+            if (ret == RETURN_OK) {
+                if (GV->szLastInputDialogText.empty()) {
                     State::MessageBox(PRODUCT_NAME, GETL2S("Win_LogicBrowser", "DialogInputNameErrorEmpty"), ST_DIALOG_ICON_ERROR);
-                } else if (logic->GetName() != ret.data) {
+                } else if (logic->GetName() != GV->szLastInputDialogText) {
                     const std::string strOldName(logic->GetName());
-                    if (m_hOwn->hCustomLogics->RenameLogic(logic, ret.data)) {
+                    if (m_hOwn->hCustomLogics->RenameLogic(logic, GV->szLastInputDialogText)) {
                         m_hOwn->SyncLogicBrowser();
                         bool bObjFnd = false;
                         for (int i = 0; i < m_hOwn->plMain->GetObjectsCount(); i++)
@@ -47,7 +47,7 @@ namespace State {
                             for (int i = 0; i < m_hOwn->plMain->GetObjectsCount(); i++)
                                 if (!strcmp(m_hOwn->plMain->GetObjectByIterator(i)->GetLogic(), "CustomLogic") &&
                                     !strcmp(m_hOwn->plMain->GetObjectByIterator(i)->GetName(), strOldName.c_str())) {
-                                    m_hOwn->plMain->GetObjectByIterator(i)->SetName(ret.data.c_str());
+                                    m_hOwn->plMain->GetObjectByIterator(i)->SetName(GV->szLastInputDialogText.c_str());
                                 }
                             m_hOwn->MarkUnsaved();
                         }
@@ -66,16 +66,16 @@ namespace State {
                 State::MessageBox(PRODUCT_NAME, GETL2S("Win_LogicBrowser", "NewLogicDocumentSave"),
                                   ST_DIALOG_ICON_ERROR, ST_DIALOG_BUT_OK);
             } else {
-                const auto& ret = State::InputDialog(PRODUCT_NAME, GETL2S("Win_LogicBrowser", "DialogInputName"), ST_DIALOG_BUT_OKCANCEL);
-                if (ret.value == RETURN_OK) {
-                    if (ret.data.empty()) {
+                int ret = State::InputDialog(PRODUCT_NAME, GETL2S("Win_LogicBrowser", "DialogInputName"), ST_DIALOG_BUT_OKCANCEL);
+                if (ret == RETURN_OK) {
+                    if (GV->szLastInputDialogText.empty()) {
                         State::MessageBox(PRODUCT_NAME, GETL2S("Win_LogicBrowser", "DialogInputNameErrorEmpty"), ST_DIALOG_ICON_ERROR);
                     } else {
-                        if (ret.data == "main" || m_hOwn->hCustomLogics->GetLogicByName(ret.data.c_str())) {
+                        if (GV->szLastInputDialogText == "main" || m_hOwn->hCustomLogics->GetLogicByName(GV->szLastInputDialogText.c_str())) {
                             State::MessageBox(PRODUCT_NAME, GETL2S("Win_LogicBrowser", "DialogInputNameErrorExists"), ST_DIALOG_ICON_ERROR);
                         } else {
                             GV->editState->hCustomLogics->SelectWhenAddingNextLogic();
-                            GV->editState->hDataCtrl->OpenCodeEditor(ret.data, true);
+                            GV->editState->hDataCtrl->OpenCodeEditor(GV->szLastInputDialogText, true);
                         }
                     }
                 }
