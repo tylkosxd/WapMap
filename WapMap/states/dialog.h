@@ -36,7 +36,7 @@ namespace State {
 
     int MessageBox(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK);
 
-    const TextReturnCode& InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0);
+    int InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0);
 
     class Dialog : public SHR::cState, gcn::KeyListener, gcn::ActionListener {
     public:
