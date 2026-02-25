@@ -33,6 +33,15 @@ namespace ObjEdit {
         virtual void Action(const gcn::ActionEvent &actionEvent);
 
         virtual void Draw();
+
+        void HandleEscape() override {
+            for (int i = 0; i < 2; i++) if (hPickArea[i]->IsPicking()) {
+                hPickArea[i]->getPickButton()->simulatePress();
+                return;
+            }
+
+            cObjEdit::HandleEscape();
+        }
     };
 
 }

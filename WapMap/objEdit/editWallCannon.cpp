@@ -109,7 +109,7 @@ namespace ObjEdit {
         sprintf(tmp, "%d", iAngle);
         tfAngle = new SHR::TextField(tmp);
         tfAngle->setDimension(gcn::Rectangle(0, 0, 50, 20));
-        tfAngle->SetNumerical(1, 0);
+        tfAngle->SetNumerical(1, 1);
         tfAngle->addActionListener(hAL);
         win->add(tfAngle, 150, 110);
 
@@ -123,7 +123,7 @@ namespace ObjEdit {
     }
 
     int cEditObjWallCannon::CalcAngle(int iX, int iY, bool bOr) {
-        if (!iY) return (iX < 0 ? 180 : 0);
+        if (!iY) return ((bOr ? iX : -iX) < 0 ? 180 : 0);
         hgeVector vec(iX, iY);
         float ret = vec.Angle() * 57.2957795;
         if (bOr) {
@@ -161,36 +161,75 @@ namespace ObjEdit {
         State::EditingWW *mn = GV->editState;
         if (mn->conMain->getWidgetAt(mx, my) != mn->vPort->GetWidget() || bConsumed) return;
         int objwx = GetUserDataFromObj(hTempObj)->GetX(),
-                objwy = GetUserDataFromObj(hTempObj)->GetY();
+            objwy = GetUserDataFromObj(hTempObj)->GetY();
         int objx = mn->Wrd2ScrX(mn->GetActivePlane(), objwx),
-                objy = mn->Wrd2ScrY(mn->GetActivePlane(), objwy);
+            objy = mn->Wrd2ScrY(mn->GetActivePlane(), objwy);
         hgeVector vecDest(iRealSpeedX, iSpeedY);
         //vecDest.Clamp(200);
         if (bDraggingArrow) {
             if (!hge->Input_GetKeyState(HGEK_LBUTTON)) {
                 bDraggingArrow = 0;
                 bAllowDragging = 1;
+
+                char tmp[50];
+                sprintf(tmp, "%d", iSpeedX);
+                tfSpeedX->setText(tmp);
+                sprintf(tmp, "%d", iSpeedY);
+                tfSpeedY->setText(tmp);
+
+                UpdateAngleInput();
+                UpdateLinearSpeed();
                 return;
             }
             int wmx = mn->Scr2WrdX(mn->GetActivePlane(), mx),
-                    wmy = mn->Scr2WrdY(mn->GetActivePlane(), my);
-            iSpeedY = wmy - objwy;
-            if (bOrient) iSpeedX = wmx - objwx;
-            else iSpeedX = objwx - wmx;
+                wmy = mn->Scr2WrdY(mn->GetActivePlane(), my);
+            int diffX = wmx - objwx, diffY = wmy - objwy;
+            if (hge->Input_GetKeyState(HGEK_SHIFT)) {
+                float ratio;
+                if (diffY != 0) ratio = float(diffX) / float(diffY);
+                else ratio = 2;
+                if (ratio >= -0.50f && ratio <= 0.50)
+                    diffX = 0;
+                else if (ratio > 1.5f || ratio < -1.5f)
+                    diffY = 0;
+                else {
+                    int diff = std::min(abs(diffX), abs(diffY));
+                    if (diffY < 0) {
+                        if (ratio < -0.5f && ratio > -1.5f) {
+                            diffX = diff;
+                            diffY = -diff;
+                        }
+                        else if (ratio > 0.5f && ratio < 1.5f) //upleft
+                        {
+                            diffX = -diff;
+                            diffY = -diff;
+                        }
+                    } else {
+                        if (ratio < -0.5f && ratio > -1.5f) //downleft
+                        {
+                            diffX = -diff;
+                            diffY = diff;
+                        }
+                        else if (ratio > 0.5f && ratio < 1.5f) //downright
+                        {
+                            diffX = diff;
+                            diffY = diff;
+                        }
+                    }
+                }
+            }
+            iSpeedX = diffX;
+            iSpeedY = diffY;
             iRealSpeedX = iSpeedX;
-            if (!bOrient) iRealSpeedX *= -1;
-            char tmp[50];
-            sprintf(tmp, "%d", iSpeedX);
-            tfSpeedX->setText(tmp);
-            sprintf(tmp, "%d", iSpeedY);
-            tfSpeedY->setText(tmp);
+            if (!bOrient) {
+                iSpeedX *= -1;
+            }
             iAngle = CalcAngle(iRealSpeedX, iSpeedY, bOrient);
             iLinearSpeed = sqrt(pow(iSpeedX, 2) + pow(iSpeedY, 2));
-            UpdateAngleInput();
-            UpdateLinearSpeed();
         }
-        if (mx > objx + vecDest.x - 15 && mx < objx + vecDest.x + 15 &&
-            my > objy + vecDest.y - 15 && my < objy + vecDest.y + 15) {
+        float z = GV->editState->fZoom;
+        if (mx > objx + (vecDest.x - 30) * z  && mx < objx + (vecDest.x + 30) * z &&
+            my > objy + (vecDest.y - 30) * z && my < objy + (vecDest.y + 30) * z) {
             if (hge->Input_KeyDown(HGEK_LBUTTON)) {
                 _bDragging = 0;
                 bAllowDragging = 0;
@@ -243,21 +282,20 @@ namespace ObjEdit {
             }
         } else if (actionEvent.getSource() == tfAngle) {
             int v = atoi(tfAngle->getText().c_str());
-            tfAngle->setMarkedInvalid(v > 360);
-            if (v <= 360) {
-                hgeVector vec(iSpeedX, 0);
-                vec.Rotate(float(v) / 57.2957795f);
-                iSpeedX = vec.x;
-                iSpeedY = vec.y;
-                iRealSpeedX = iSpeedX;
-                if (!bOrient) iRealSpeedX *= -1;
-                char tmp[50];
-                sprintf(tmp, "%d", iSpeedX);
-                tfSpeedX->setText(tmp);
-                sprintf(tmp, "%d", iSpeedY);
-                tfSpeedY->setText(tmp);
-                iAngle = v;
-            }
+            v %= 360;
+            if (v < 0) v += 360;
+            hgeVector vec(iLinearSpeed, 0);
+            vec.Rotate(float(v) / 57.2957795f);
+            iSpeedX = vec.x;
+            iSpeedY = vec.y;
+            iRealSpeedX = iSpeedX;
+            if (!bOrient) iRealSpeedX *= -1;
+            char tmp[50];
+            sprintf(tmp, "%d", iSpeedX);
+            tfSpeedX->setText(tmp);
+            sprintf(tmp, "%d", iSpeedY);
+            tfSpeedY->setText(tmp);
+            iAngle = v;
         } else if (actionEvent.getSource() == tfSpeedX) {
             iSpeedX = atoi(tfSpeedX->getText().c_str());
             iRealSpeedX = iSpeedX;
@@ -319,13 +357,14 @@ namespace ObjEdit {
         State::EditingWW *mn = GV->editState;
         mn->vPort->ClipScreen();
         int objx = mn->Wrd2ScrX(mn->GetActivePlane(), GetUserDataFromObj(hTempObj)->GetX()),
-                objy = mn->Wrd2ScrY(mn->GetActivePlane(), GetUserDataFromObj(hTempObj)->GetY());
+            objy = mn->Wrd2ScrY(mn->GetActivePlane(), GetUserDataFromObj(hTempObj)->GetY());
         hgeVector vecDest(iRealSpeedX, iSpeedY);
         //vecDest.Clamp(200);
         if (bDraggingArrow) {
             GV->sprArrowVerticalM->SetColor(COL_ORANGE_ARROW);
             GV->sprArrowVerticalU->SetColor(COL_ORANGE_ARROW);
         }
-        mn->RenderArrow(objx, objy, objx + vecDest.x, objy + vecDest.y, 1, !bDraggingArrow);
+        float z = GV->editState->fZoom;
+        mn->RenderArrow(objx, objy, objx + vecDest.x * z, objy + vecDest.y * z, 1, !bDraggingArrow);
     }
 }

@@ -163,6 +163,48 @@ void State::EditingWW::ObjectOverlay() {
         GV->fntMyriad16->printf(mx + 25, my + 20, HGETEXT_LEFT, "~w~Y: ~y~%+d", 0, diffY);
     }
 }
+void State::EditingWW::HandleToolsaClick() {
+    float mx, my;
+    hge->Input_GetMousePos(&mx, &my);
+
+    if (toolsaAction == TOOL_OBJSA_PICKMINX) {
+        toolsaMinX = Scr2WrdX(GetActivePlane(), mx);
+        char label[200];
+        sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
+                toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
+        labtoolSelAreaValues->setCaption(label);
+        labtoolSelAreaValues->adjustSize();
+        toolsaAction = TOOL_OBJSA_NONE;
+        buttoolSelAreaPickMinX->setEnabled(true);
+    } else if (toolsaAction == TOOL_OBJSA_PICKMINY) {
+        toolsaMinY = Scr2WrdY(GetActivePlane(), my);
+        char label[200];
+        sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
+                toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
+        labtoolSelAreaValues->setCaption(label);
+        labtoolSelAreaValues->adjustSize();
+        toolsaAction = TOOL_OBJSA_NONE;
+        buttoolSelAreaPickMinY->setEnabled(true);
+    } else if (toolsaAction == TOOL_OBJSA_PICKMAXX) {
+        toolsaMaxX = Scr2WrdX(GetActivePlane(), mx);
+        char label[200];
+        sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
+                toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
+        labtoolSelAreaValues->setCaption(label);
+        labtoolSelAreaValues->adjustSize();
+        toolsaAction = TOOL_OBJSA_NONE;
+        buttoolSelAreaPickMaxX->setEnabled(true);
+    } else if (toolsaAction == TOOL_OBJSA_PICKMAXY) {
+        toolsaMaxY = Scr2WrdY(GetActivePlane(), my);
+        char label[200];
+        sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
+                toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
+        labtoolSelAreaValues->setCaption(label);
+        labtoolSelAreaValues->adjustSize();
+        toolsaAction = TOOL_OBJSA_NONE;
+        buttoolSelAreaPickMaxY->setEnabled(true);
+    }
+}
 
 bool State::EditingWW::ObjectThink(bool pbConsumed) {
     if (iActiveTool == EWW_TOOL_EDITOBJ && hEditObj->Kill()) {
@@ -250,70 +292,29 @@ bool State::EditingWW::ObjectThink(bool pbConsumed) {
         }
     } else if (iActiveTool == EWW_TOOL_OBJSELAREA) {
         if (toolsaAction == TOOL_OBJSA_PICKALL) {
-            if (vPort->GetWidget()->isMouseOver() && !pbConsumed && hge->Input_KeyDown(HGEK_LBUTTON) &&
-                !bDragSelection) {
+            if (bDragSelection) {
+                if (!hge->Input_GetKeyState(HGEK_LBUTTON)) {
+                    int wmx = Scr2WrdX(GetActivePlane(), mx), wmy = Scr2WrdY(GetActivePlane(), my);
+                    toolsaMinX = iDragSelectionOrigX > wmx ? wmx : iDragSelectionOrigX;
+                    toolsaMinY = iDragSelectionOrigY > wmy ? wmy : iDragSelectionOrigY;
+                    toolsaMaxX = iDragSelectionOrigX < wmx ? wmx : iDragSelectionOrigX;
+                    toolsaMaxY = iDragSelectionOrigY < wmy ? wmy : iDragSelectionOrigY;
+                    bDragSelection = false;
+                    char label[200];
+                    sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
+                            toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
+                    labtoolSelAreaValues->setCaption(label);
+                    labtoolSelAreaValues->adjustSize();
+                    toolsaAction = TOOL_OBJSA_NONE;
+                    buttoolSelAreaAll->setEnabled(true);
+                }
+            } else if (vPort->GetWidget()->isMouseOver() && !pbConsumed && hge->Input_GetKeyState(HGEK_LBUTTON)) {
                 bDragSelection = true;
                 iDragSelectionOrigX = Scr2WrdX(GetActivePlane(), mx);
                 iDragSelectionOrigY = Scr2WrdY(GetActivePlane(), my);
-            } else if (bDragSelection && !hge->Input_GetKeyState(HGEK_LBUTTON)) {
-                int wmx = Scr2WrdX(GetActivePlane(), mx), wmy = Scr2WrdY(GetActivePlane(), my);
-                toolsaMinX = iDragSelectionOrigX > wmx ? wmx : iDragSelectionOrigX;
-                toolsaMinY = iDragSelectionOrigY > wmy ? wmy : iDragSelectionOrigY;
-                toolsaMaxX = iDragSelectionOrigX < wmx ? wmx : iDragSelectionOrigX;
-                toolsaMaxY = iDragSelectionOrigY < wmy ? wmy : iDragSelectionOrigY;
-                bDragSelection = false;
-                char label[200];
-                sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
-                        toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
-                labtoolSelAreaValues->setCaption(label);
-                labtoolSelAreaValues->adjustSize();
-                toolsaAction = TOOL_OBJSA_NONE;
-                buttoolSelAreaAll->setEnabled(true);
             }
-        } else if (toolsaAction == TOOL_OBJSA_PICKMINX) {
-            if (vPort->GetWidget()->isMouseOver() && !pbConsumed && hge->Input_KeyDown(HGEK_LBUTTON)) {
-                toolsaMinX = Scr2WrdX(GetActivePlane(), mx);
-                char label[200];
-                sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
-                        toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
-                labtoolSelAreaValues->setCaption(label);
-                labtoolSelAreaValues->adjustSize();
-                toolsaAction = TOOL_OBJSA_NONE;
-                buttoolSelAreaPickMinX->setEnabled(true);
-            }
-        } else if (toolsaAction == TOOL_OBJSA_PICKMINY) {
-            if (vPort->GetWidget()->isMouseOver() && !pbConsumed && hge->Input_KeyDown(HGEK_LBUTTON)) {
-                toolsaMinY = Scr2WrdY(GetActivePlane(), my);
-                char label[200];
-                sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
-                        toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
-                labtoolSelAreaValues->setCaption(label);
-                labtoolSelAreaValues->adjustSize();
-                toolsaAction = TOOL_OBJSA_NONE;
-                buttoolSelAreaPickMinY->setEnabled(true);
-            }
-        } else if (toolsaAction == TOOL_OBJSA_PICKMAXX) {
-            if (vPort->GetWidget()->isMouseOver() && !pbConsumed && hge->Input_KeyDown(HGEK_LBUTTON)) {
-                toolsaMaxX = Scr2WrdX(GetActivePlane(), mx);
-                char label[200];
-                sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
-                        toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
-                labtoolSelAreaValues->setCaption(label);
-                labtoolSelAreaValues->adjustSize();
-                toolsaAction = TOOL_OBJSA_NONE;
-                buttoolSelAreaPickMaxX->setEnabled(true);
-            }
-        } else if (toolsaAction == TOOL_OBJSA_PICKMAXY) {
-            if (vPort->GetWidget()->isMouseOver() && !pbConsumed && hge->Input_KeyDown(HGEK_LBUTTON)) {
-                toolsaMaxY = Scr2WrdY(GetActivePlane(), my);
-                char label[200];
-                sprintf(label, "~w~X1: ~y~%d~w~ Y1: ~y~%d~w~ X2: ~y~%d~w~ Y2: ~y~%d~l~",
-                        toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY);
-                labtoolSelAreaValues->setCaption(label);
-                labtoolSelAreaValues->adjustSize();
-                toolsaAction = TOOL_OBJSA_NONE;
-                buttoolSelAreaPickMaxY->setEnabled(true);
-            }
+        } else if (vPort->GetWidget()->isMouseOver() && !pbConsumed && hge->Input_KeyDown(HGEK_LBUTTON)) {
+            HandleToolsaClick();
         }
     } else if (iActiveTool == EWW_TOOL_BRUSHOBJECT) {
         if (vObjectsBrushCB.empty()) {

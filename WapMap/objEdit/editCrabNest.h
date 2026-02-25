@@ -30,6 +30,15 @@ namespace ObjEdit {
         virtual void Save();
 
         virtual void Action(const gcn::ActionEvent &actionEvent);
+
+        void HandleEscape() override {
+            if (hRectPick->IsPicking()) {
+                hRectPick->getPickButton()->simulatePress();
+                return;
+            }
+
+            cObjEdit::HandleEscape();
+        }
     };
 
 }

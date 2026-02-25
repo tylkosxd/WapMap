@@ -143,6 +143,12 @@ namespace ObjEdit {
             butPick->setCaption(GETL2SV("EditObj_Projectile", bPicking ? L"Cancel" : L"Pick"));
             for (int i = 0; i < 4; i++)
                 tf[i]->setEnabled(!bPicking);
+            if (bPicking) {
+                for (int i = 0; i < 4; i++) valuesBackup[i] = getValue(i);
+            } else if (bDrag) {
+                bDrag = 0;
+                setValues(valuesBackup[0], valuesBackup[1], valuesBackup[2], valuesBackup[3]);
+            }
         }
 
         if (hEvList != 0)
@@ -207,7 +213,6 @@ namespace ObjEdit {
 
     void cProcPickRect::setType(enProcPickRectType type) {
         iType = type;
-        char tmp[50];
         if (iType == PickRect_MinMax) {
             setValues(hObj->GetParam(WWD::Param_MinX), hObj->GetParam(WWD::Param_MinY),
                       hObj->GetParam(WWD::Param_MaxX), hObj->GetParam(WWD::Param_MaxY));

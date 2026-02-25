@@ -8,7 +8,6 @@ namespace ObjEdit {
     private:
         SHR::TextField *tfCounter, *tfWidth;
         SHR::Lab *labCounter, *labWidth;
-        bool bDragging, bPicked;
         int iClickX, iClickY;
 
         friend class cObjPropVP;

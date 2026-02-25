@@ -2,7 +2,6 @@
 #include "../globals.h"
 #include "../langID.h"
 #include "../states/editing_ww.h"
-#include "../cObjectUserData.h"
 #include "../databanks/imageSets.h"
 
 extern HGE *hge;
@@ -41,8 +40,6 @@ namespace ObjEdit {
         tfWidth->setWidth(50);
         tfWidth->addActionListener(hAL);
         win->add(tfWidth, 100, 45);
-
-        bDragging = bPicked = 0;
     }
 
     cEditObjBreakPlank::~cEditObjBreakPlank() {
@@ -70,64 +67,5 @@ namespace ObjEdit {
     }
 
     void cEditObjBreakPlank::_Think(bool bMouseConsumed) {
-        float mx, my;
-        hge->Input_GetMousePos(&mx, &my);
-        bool bMouseIn = 1;
-        if (mx < hState->vPort->GetX() || my < hState->vPort->GetY() ||
-            mx > hState->vPort->GetX() + hState->vPort->GetWidth() ||
-            my > hState->vPort->GetY() + hState->vPort->GetHeight())
-            bMouseIn = 0;
-
-        int imgw, imgh;
-        hgeSprite *spr = hState->SprBank->GetObjectSprite(hTempObj);
-        imgw = spr->GetWidth();
-        imgh = spr->GetHeight();
-        int origx = hTempObj->GetParam(WWD::Param_LocationX),
-                origy = hTempObj->GetParam(WWD::Param_LocationY);
-        mx = hState->Scr2WrdX(hState->GetActivePlane(), mx);
-        my = hState->Scr2WrdY(hState->GetActivePlane(), my);
-
-        int modwidth = (hTempObj->GetParam(WWD::Param_Width) - 1) * 64;
-        if (modwidth < 0) modwidth = 0;
-
-        if (bDragging) {
-            int neww = (mx - (origx + imgw / 2)) / 64 + 2;
-            if (neww < 0) neww = 0;
-            if (neww != hTempObj->GetParam(WWD::Param_Width)) {
-                hTempObj->SetParam(WWD::Param_Width, neww);
-                hState->vPort->MarkToRedraw();
-                char tmp[32];
-                sprintf(tmp, "%d", neww);
-                tfWidth->setText(tmp);
-                hState->hPlaneData[hState->GetActivePlaneID()]->ObjectData.hQuadTree->UpdateObject(hTempObj);
-            }
-            if (!hge->Input_GetKeyState(HGEK_LBUTTON)) {
-                bDragging = 0;
-            }
-        }
-
-        float hsx, hsy;
-        spr->GetHotSpot(&hsx, &hsy);
-        origx -= hsx - imgw / 2;
-        origy -= hsy - imgh / 2;
-
-        if (mx > origx - imgw / 2 + modwidth && mx < origx + imgw / 2 + modwidth &&
-            my > origy - imgh / 2 && my < origy + imgh / 2) {
-            if (hge->Input_KeyDown(HGEK_LBUTTON)) {
-                iClickX = mx;
-                iClickY = my;
-                if (bPicked) {
-                    bDragging = 1;
-                }
-            } else if (hge->Input_KeyUp(HGEK_LBUTTON)) {
-                if (iClickX == mx &&
-                    iClickY == my) {
-                    bPicked = !bPicked;
-                    bAllowDragging = !bPicked;
-                    _bDragging = 0;
-                    dwHighlightColor = bPicked ? 0xFFFFFF00 : 0xFFFF0000;
-                }
-            }
-        }
     }
 }

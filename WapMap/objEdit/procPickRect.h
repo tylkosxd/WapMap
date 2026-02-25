@@ -28,6 +28,7 @@ namespace ObjEdit {
         int iDragX, iDragY;
         int iDragmX, iDragmY;
         gcn::ActionListener *hEvList;
+        int valuesBackup[4];
 
         void validate();
 

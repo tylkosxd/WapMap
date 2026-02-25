@@ -21,6 +21,15 @@ namespace ObjEdit {
         ~cEditObjStalactite();
 
         virtual void Action(const gcn::ActionEvent &actionEvent);
+
+        void HandleEscape() override {
+            if (hRectPick->IsPicking()) {
+                hRectPick->getPickButton()->simulatePress();
+                return;
+            }
+
+            cObjEdit::HandleEscape();
+        }
     };
 
 }

@@ -20,26 +20,12 @@ namespace SHR {
         bMarkedInvalid = 0;
         mSelectionPosition = -1;
         fFocusTimer = 0;
+        mIsDragged = false;
     }
 
-    TextField::TextField(const std::string &text) {
-        mCaretPosition = 0;
-        mXScroll = 0;
-
+    TextField::TextField(const std::string &text) : TextField() {
         mText = text;
         adjustSize();
-
-        setFocusable(true);
-
-        addMouseListener(this);
-        addKeyListener(this);
-        addFocusListener(this);
-        bNumerical = 0;
-        bAllowNegative = 1;
-        iMaxLength = 128;
-        bMarkedInvalid = 0;
-        mSelectionPosition = -1;
-        fFocusTimer = 0;
     }
 
     void TextField::setText(const std::string &text, bool bGenerateActionEvent) {
@@ -104,6 +90,18 @@ namespace SHR {
         graphics->popClipArea();
     }
 
+    void TextField::logic() {
+        if (mIsDragged) {
+            int x, y;
+            float mx, my;
+            getAbsolutePosition(x, y);
+            hge->Input_GetMousePos(&mx, &my);
+
+            if (mx - x < 0 && mXScroll > 0) mXScroll--;
+            else if (mx - x > getWidth() && mXScroll < getFont()->getWidth(mText) - getWidth() + 8) mXScroll++;
+        }
+    }
+
     void TextField::mouseMoved(MouseEvent &mouseEvent) {
         if (isEnabled()) {
             GV->SetCursor(TEXT);
@@ -122,10 +120,14 @@ namespace SHR {
         }
     }
 
+    void TextField::mouseReleased(MouseEvent &mouseEvent) {
+        mIsDragged = false;
+    }
+
     void TextField::mouseDragged(DragEvent &mouseEvent) {
+        mIsDragged = true;
         if (mText.length() != 0) {
             mSelectionPosition = getFont()->getStringIndexAt(mText, mouseEvent.getX() + mXScroll);
-            fixScroll();
         }
         mouseEvent.consume();
 
@@ -146,6 +148,10 @@ namespace SHR {
     void TextField::keyPressed(KeyEvent &keyEvent) {
         Key key = keyEvent.getKey();
         bool bSelection = mSelectionPosition != -1 && mSelectionPosition != mCaretPosition;
+
+        if (keyEvent.isConsumed() || key.getValue() == Key::TAB) {
+            return;
+        }
 
         if (key.getValue() == Key::LEFT) {
             if (keyEvent.isShiftPressed()) {
@@ -256,10 +262,9 @@ namespace SHR {
         } else if (key.getValue() == 'a' && keyEvent.isControlPressed()) { //select all
             mCaretPosition = 0;
             mSelectionPosition = mText.length();
-        } else if (key.isCharacter() && key.getValue() != Key::TAB && !bNumerical ||
-                   key.isNumber() ||
-                   key.getValue() == '-' && bNumerical && (mCaretPosition == 0 || mSelectionPosition == 0) &&
-                   bAllowNegative) {
+        } else if ((key.isCharacter() && !bNumerical) || key.isNumber()
+            || (key.getValue() == '-' && (!bNumerical || (bAllowNegative && (mCaretPosition == 0 || mSelectionPosition == 0))))
+            ) {
             if (bSelection || mText.length() < iMaxLength) {
                 if (bSelection) {
                     int caretpos = (mSelectionPosition < mCaretPosition ? mSelectionPosition : mCaretPosition);
@@ -271,12 +276,9 @@ namespace SHR {
                 setActionEventId("");
                 distributeActionEvent();
             }
-        }
+        } else return;
 
-        if (key.getValue() != Key::TAB) {
-            keyEvent.consume();
-        }
-
+        keyEvent.consume();
         fixScroll();
     }
 
@@ -307,18 +309,26 @@ namespace SHR {
     }
 
     void TextField::fixScroll() {
-        if (isFocused()) {
+        if (mText.empty()) {
+            mXScroll = 0;
+            return;
+        }
+
+        int textWidth = getFont()->getWidth(mText);
+
+        if (textWidth - mXScroll < getWidth() - 8) {
+            mXScroll = textWidth - getWidth() + 8;
+        } else {
             int caretX = getFont()->getWidth(mText.substr(0, mCaretPosition));
-
-            if (caretX - mXScroll >= getWidth() - 4) {
-                mXScroll = caretX - getWidth() + 4;
+            if (caretX - mXScroll >= getWidth() - 8) {
+                mXScroll = caretX - getWidth() + 8;
             } else if (caretX - mXScroll <= 0) {
-                mXScroll = caretX - getWidth() / 2;
-
-                if (mXScroll < 0) {
-                    mXScroll = 0;
-                }
+                mXScroll = caretX - 8;
             }
+        }
+
+        if (mXScroll < 0) {
+            mXScroll = 0;
         }
     }
 

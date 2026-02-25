@@ -23,7 +23,8 @@ namespace SHR {
         mDroppedDown = false;
         mPushed = false;
         mIsDragged = false;
-        mCaretPosition = 0;
+        mCaretPosition = -1;
+        mSelectionPosition = -1;
         mXScroll = 0;
         bMarkedInvalid = 0;
 
@@ -185,17 +186,34 @@ namespace SHR {
     void TextDropDown::keyPressed(KeyEvent &keyEvent) {
         bool bSelection = mSelectionPosition != -1 && mSelectionPosition != mCaretPosition;
         Key key = keyEvent.getKey();
-        if (mCaretPosition < 0) {
-            keyEvent.consume();
+
+        if (keyEvent.isConsumed() || key.getValue() == Key::TAB) {
             return;
         }
 
-        bool shouldFixScroll = true;
-        if (key.getValue() == Key::DOWN) {
+        if (key.getValue() == Key::ESCAPE) {
+            if (mDroppedDown) {
+                foldUp();
+            } else {
+                return;
+            }
+        } else if (key.getValue() == Key::UP) {
+            if (mDroppedDown) {
+                return;
+            }
+        } else if (key.getValue() == Key::DOWN) {
+            if (mDroppedDown) {
+                return;
+            }
+
+            mCaretPosition = -1;
+            mSelectionPosition = -1;
             dropDown();
-            keyEvent.consume();
         } else if (key.getValue() == Key::LEFT) {
-            if (keyEvent.isShiftPressed()) {
+            if (mDroppedDown) {
+            } else if (mCaretPosition == -1) {
+                mCaretPosition = 0;
+            } else if (keyEvent.isShiftPressed()) {
                 if (mSelectionPosition > 0)
                     mSelectionPosition--;
                 else if (mSelectionPosition == -1 && mCaretPosition != 0)
@@ -208,7 +226,10 @@ namespace SHR {
                 }
             } else mSelectionPosition = -1;
         } else if (key.getValue() == Key::RIGHT) {
-            if (keyEvent.isShiftPressed()) {
+            if (mDroppedDown) {
+            } else if (mCaretPosition == -1) {
+                mCaretPosition = mText.length();
+            } else if (keyEvent.isShiftPressed()) {
                 if (mSelectionPosition < mText.length() && mSelectionPosition != -1)
                     mSelectionPosition++;
                 else if (mSelectionPosition == -1 && mCaretPosition < mText.length())
@@ -220,84 +241,101 @@ namespace SHR {
                     mSelectionPosition = -1;
                 }
             } else mSelectionPosition = -1;
-        } else if (key.getValue() == Key::DELETE && (mCaretPosition < mText.size() || bSelection)) {
+        } else if (key.getValue() == Key::DELETE) {
             if (bSelection) {
                 deleteSelection();
-            } else {
+            } else if (mCaretPosition == -1) {
+                mText.clear();
+            } else if (mCaretPosition < mText.size()) {
                 mText.erase(mCaretPosition, 1);
             }
             setActionEventId("");
             distributeActionEvent();
-        } else if (key.getValue() == Key::BACKSPACE && (mCaretPosition > 0 || mCaretPosition == 0 && bSelection)) {
+        } else if (key.getValue() == Key::BACKSPACE) {
             if (bSelection) {
                 deleteSelection();
-            } else {
+            } else if (mCaretPosition == -1) {
+                mText.clear();
+            } else if (mCaretPosition > 0) {
                 mText.erase(mCaretPosition - 1, 1);
                 --mCaretPosition;
             }
             setActionEventId("");
             distributeActionEvent();
         } else if (key.getValue() == Key::ENTER) {
-            setActionEventId("ENTER");
-            distributeActionEvent();
+            if (mDroppedDown) {
+                return;
+            }
+
+            if (mCaretPosition == -1) {
+                dropDown();
+            } else {
+                setActionEventId("ENTER");
+                distributeActionEvent();
+            }
         } else if (key.getValue() == Key::HOME) {
+            if (mDroppedDown) {
+                return;
+            }
+
             if (keyEvent.isShiftPressed()) {
                 mSelectionPosition = 0;
             } else {
                 mCaretPosition = 0;
                 mSelectionPosition = -1;
             }
-
-            mXScroll = 0;
-            shouldFixScroll = false;
         } else if (key.getValue() == Key::END) {
+            if (mDroppedDown) {
+                return;
+            }
+
             if (keyEvent.isShiftPressed()) {
                 mSelectionPosition = mText.size();
             } else {
                 mCaretPosition = mText.size();
                 mSelectionPosition = -1;
             }
-
-            mXScroll = std::max(0, getFont()->getWidth(mText) - getWidth() + 29);
-            shouldFixScroll = false;
-        } else if (key.getValue() == 'v' && keyEvent.isControlPressed()) { //paste
-            if (bSelection) deleteSelection();
-            int pastepos = mCaretPosition;
-            char *cb = SHR::GetClipboard();
-            if (cb != NULL) {
-                char *nlfix = new char[strlen(cb) + 1];
-                int offset = 0;
-                for (int i = 0; i <= strlen(cb); i++) {
-                    if (cb[i] == 13 && cb[i + 1] == 10) {
-                        i += 2;
-                        offset += 2;
+        } else if (keyEvent.isControlPressed()) {
+            if (key.getValue() == 'v') { // paste
+                if (bSelection) deleteSelection();
+                int pastepos = mCaretPosition;
+                char *cb = SHR::GetClipboard();
+                if (cb != NULL) {
+                    char *nlfix = new char[strlen(cb) + 1];
+                    int offset = 0;
+                    for (int i = 0; i <= strlen(cb); i++) {
+                        if (cb[i] == 13 && cb[i + 1] == 10) {
+                            i += 2;
+                            offset += 2;
+                        }
+                        if (i <= strlen(cb))
+                            nlfix[i - offset] = cb[i];
                     }
-                    if (i <= strlen(cb))
-                        nlfix[i - offset] = cb[i];
+                    mText.insert(pastepos, nlfix);
+                    mCaretPosition += strlen(nlfix);
+                    delete[] nlfix;
+                    delete[] cb;
+                    setActionEventId("");
+                    distributeActionEvent();
                 }
-                mText.insert(pastepos, nlfix);
-                mCaretPosition += strlen(nlfix);
-                delete[] nlfix;
-                delete[] cb;
+            } else if (key.getValue() == 'c' && bSelection) { // copy
+                int start = (mSelectionPosition < mCaretPosition ? mSelectionPosition : mCaretPosition),
+                        end = (mSelectionPosition < mCaretPosition ? mCaretPosition : mSelectionPosition);
+                SHR::SetClipboard(mText.substr(start, end - start).c_str());
+            } else if (key.getValue() == 'x' && bSelection) { // cut
+                int start = (mSelectionPosition < mCaretPosition ? mSelectionPosition : mCaretPosition),
+                        end = (mSelectionPosition < mCaretPosition ? mCaretPosition : mSelectionPosition);
+                SHR::SetClipboard(mText.substr(start, end - start).c_str());
+                deleteSelection();
                 setActionEventId("");
                 distributeActionEvent();
+            } else if (key.getValue() == 'a') { // select all
+                mCaretPosition = 0;
+                mSelectionPosition = mText.length();
             }
-        } else if (key.getValue() == 'c' && keyEvent.isControlPressed() && bSelection) { //copy
-            int start = (mSelectionPosition < mCaretPosition ? mSelectionPosition : mCaretPosition),
-                    end = (mSelectionPosition < mCaretPosition ? mCaretPosition : mSelectionPosition);
-            SHR::SetClipboard(mText.substr(start, end - start).c_str());
-        } else if (key.getValue() == 'x' && keyEvent.isControlPressed() && bSelection) { //cut
-            int start = (mSelectionPosition < mCaretPosition ? mSelectionPosition : mCaretPosition),
-                    end = (mSelectionPosition < mCaretPosition ? mCaretPosition : mSelectionPosition);
-            SHR::SetClipboard(mText.substr(start, end - start).c_str());
-            deleteSelection();
-            setActionEventId("");
-            distributeActionEvent();
-        } else if (key.getValue() == 'a' && keyEvent.isControlPressed()) { //select all
-            mCaretPosition = 0;
-            mSelectionPosition = mText.length();
-        } else if (key.isCharacter() && key.getValue() != Key::TAB ||
-                   key.isNumber()) {
+        } else if (mCaretPosition == -1 && key.getValue() == Key::SPACE) {
+            dropDown();
+        } else if (mCaretPosition != -1 && key.isCharacter() || key.isNumber()) {
             if (bSelection) {
                 int caretpos = (mSelectionPosition < mCaretPosition ? mSelectionPosition : mCaretPosition);
                 deleteSelection();
@@ -309,13 +347,8 @@ namespace SHR {
             distributeActionEvent();
         }
 
-        if (key.getValue() != Key::TAB) {
-            keyEvent.consume();
-        }
-
-        if (shouldFixScroll) {
-            fixScroll();
-        }
+        fixScroll();
+        keyEvent.consume();
     }
 
     void TextDropDown::mouseMoved(MouseEvent &mouseEvent) {
@@ -357,7 +390,6 @@ namespace SHR {
                 mCaretPosition = -1;
                 mPushed = true;
                 dropDown();
-                requestModalMouseInputFocus();
             }
             mSelectionPosition = -1;
         }
@@ -369,7 +401,6 @@ namespace SHR {
             }
             mPushed = false;
             foldUp();
-            releaseModalMouseInputFocus();
         }
     }
 
@@ -481,6 +512,7 @@ namespace SHR {
             if (mFlipDirection) {
                 setPosition(mDimension.x, mDimension.y - getHeight() + mFoldedUpHeight);
             }
+            requestModalMouseInputFocus();
         }
 
         mListBox->requestFocus();
@@ -500,6 +532,7 @@ namespace SHR {
             mDroppedDown = false;
             adjustHeight();
             mInternalFocusHandler.focusNone();
+            releaseModalMouseInputFocus();
         }
     }
 
@@ -525,7 +558,7 @@ namespace SHR {
 		if (actionEvent.getId() != "WHEEL") {
 			foldUp();
 		}
-        releaseModalMouseInputFocus();
+        // releaseModalMouseInputFocus();
         mActionEventId = "SELECTION";
         distributeActionEvent();
         mActionEventId = "";
@@ -661,20 +694,27 @@ namespace SHR {
     }
 
     void TextDropDown::fixScroll() {
-        //if (isFocused())
-        //{
-        int caretX = mCaretPosition == -1 ? 0 : getFont()->getWidth(mText.substr(0, mCaretPosition));
+        if (mText.empty()) {
+            mXScroll = 0;
+            return;
+        }
 
-        if (caretX - mXScroll >= getWidth() - 25 - 4) {
-            mXScroll = caretX - (getWidth() - 25) + 4;
-        } else if (caretX - mXScroll <= 0) {
-            mXScroll = caretX - (getWidth() - 25) / 2;
+        int textWidth = getFont()->getWidth(mText);
 
-            if (mXScroll < 0) {
-                mXScroll = 0;
+        if (textWidth - mXScroll < getWidth() - 25 - 4) {
+            mXScroll = textWidth - getWidth() + 25 + 4;
+        } else {
+            int caretX = mCaretPosition == -1 ? 0 : getFont()->getWidth(mText.substr(0, mCaretPosition));
+            if (caretX - mXScroll >= getWidth() - 25 - 4) {
+                mXScroll = caretX - getWidth() + 25 + 4;
+            } else if (caretX - mXScroll <= 0) {
+                mXScroll = caretX - 4;
             }
         }
-        //}
+
+        if (mXScroll < 0) {
+            mXScroll = 0;
+        }
     }
 
     void TextDropDown::mouseEntered(MouseEvent &mouseEvent) {

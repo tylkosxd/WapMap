@@ -27,6 +27,7 @@ namespace SHR {
         bHide = 0;
         mAlphaMod = 1.0f;
         _isAppMaximized = GV->editState->bMaximized;
+        mFocusable = true;
     }
 
     Win::Win(guiParts *Parts, const std::string &caption)

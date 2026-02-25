@@ -54,6 +54,15 @@ namespace ObjEdit {
         void Draw() override;
 
         void ObjectMovedInsideEasyEdit(int fromX, int fromY) override;
+
+        void HandleEscape() override {
+            if (hRectPick->IsPicking()) {
+                hRectPick->getPickButton()->simulatePress();
+                return;
+            }
+
+            cObjEdit::HandleEscape();
+        }
     };
 
 }

@@ -30,6 +30,12 @@ namespace ObjEdit {
         virtual void Draw();
 
         bool bPick;
+
+        void HandleEscape() override {
+            if (bPick) { butPick->simulatePress(); return; }
+
+            cObjEdit::HandleEscape();
+        }
     };
 
 }

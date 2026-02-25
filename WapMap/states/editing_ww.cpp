@@ -2477,6 +2477,7 @@ void State::EditingWW::GainFocus(const ReturnCode& code, bool bFlipped) {
                 toolsaMaxY = ptr[3];
                 delete[] ptr;
                 SetTool(EWW_TOOL_OBJSELAREA);
+                toolsaCameFromObjProps = true;
             } else if (code.value == 1) {
                 objContext->EmulateClickID(OBJMENU_MOVE);
             } else if (code.value == 2 && !vObjectsPicked.empty()) {
@@ -2515,7 +2516,7 @@ void State::EditingWW::LockToolSpecificFunctions(bool bLock) {
 }
 
 void State::EditingWW::SetTool(int iNewTool) {
-    CloseTool(iNewTool);
+    CloseTool(iActiveTool);
     OpenTool(iNewTool);
     iActiveTool = iNewTool;
 }
@@ -2565,6 +2566,7 @@ void State::EditingWW::OpenTool(int iNewTool) {
         labtoolSelAreaValues->setCaption(label);
         labtoolSelAreaValues->adjustSize();
         toolsaAction = TOOL_OBJSA_NONE;
+        toolsaCameFromObjProps = false;
         LockToolSpecificFunctions(true);
     } else if (iNewTool == EWW_TOOL_EDITOBJ) {
         MinimizeWindows();
@@ -2584,6 +2586,7 @@ void State::EditingWW::OpenTool(int iNewTool) {
         hmbTile->butZoom->setHighlight(true);
         GV->SetCursor(ZOOM_IN);
     }
+    GV->editState->vPort->GetWidget()->requestFocus();
 }
 
 void State::EditingWW::CloseTool(int iNewTool) {
@@ -2599,7 +2602,6 @@ void State::EditingWW::CloseTool(int iNewTool) {
         wintpFillColor->setVisible(false);
         vTileGhosting.clear();
         vPort->MarkToRedraw();
-        return;
     } else if (iActiveTool == EWW_TOOL_WRITEID) {
         hmbTile->butIconWriteID->setHighlight(false);
         vTileGhosting.clear();
@@ -2617,7 +2619,6 @@ void State::EditingWW::CloseTool(int iNewTool) {
                     iTilePicked)->RemoveSettingsFromContainer(winTilePicker);
         vTileGhosting.clear();
         iTilePicked = EWW_TILE_NONE;
-        return;
     } else if (iActiveTool == EWW_TOOL_DUPLICATE) {
         winDuplicate->setVisible(false);
     } else if (iActiveTool == EWW_TOOL_BRUSHOBJECT) {
@@ -2633,7 +2634,6 @@ void State::EditingWW::CloseTool(int iNewTool) {
         hEditObj = NULL;
         MaximizeWindows();
     } else if (iActiveTool == EWW_TOOL_ALIGNOBJ) {
-
     } else if (iActiveTool == EWW_TOOL_NONE) {
         hmbTile->butIconSelect->setHighlight(false);
         iTileSelectX1 = iTileSelectY1 = iTileSelectX2 = iTileSelectY2 = -1;
@@ -3852,6 +3852,7 @@ void State::EditingWW::UpdateSelectAreaWindowButtons(SHR::But *source) {
     buttoolSelAreaPickMinY->setEnabled(source != buttoolSelAreaPickMinY);
     buttoolSelAreaPickMaxX->setEnabled(source != buttoolSelAreaPickMaxX);
     buttoolSelAreaPickMaxY->setEnabled(source != buttoolSelAreaPickMaxY);
+    vPort->GetWidget()->requestFocus();
 }
 
 void State::EditingWW::PutToBottomRight(SHR::Win *window) {

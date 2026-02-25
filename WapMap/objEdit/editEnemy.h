@@ -21,6 +21,7 @@ namespace ObjEdit {
         cProcPickRect *hRectPick;
         bool bPickSpeedXY;
         bool bPickGem;
+        int speedX, speedY;
 
         std::vector<SHR::RadBut*> rbType;
 
@@ -49,6 +50,13 @@ namespace ObjEdit {
         static void UpdateEnemyObject(WWD::Object *obj, const std::pair<std::string, std::string>& dataPair);
 
         bool isPickingXY() { return bPickSpeedXY; }
+
+        void HandleEscape() override {
+            if (hRectPick->IsPicking()) { hRectPick->getPickButton()->simulatePress(); return; }
+            if (bPickSpeedXY) { butPickSpeedXY->simulatePress(); return; }
+
+            cObjEdit::HandleEscape();
+        }
     };
 
 }

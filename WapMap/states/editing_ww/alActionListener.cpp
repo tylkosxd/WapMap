@@ -1179,6 +1179,16 @@ namespace State {
             return;
 
         switch (keyEvent.getKey().getValue()) {
+        case Key::ENTER: {
+            if (m_hOwn->iActiveTool == EWW_TOOL_OBJSELAREA) {
+                if (m_hOwn->toolsaAction == TOOL_OBJSA_NONE) {
+                    m_hOwn->buttoolSelAreaOK->simulatePress();
+                } else if (m_hOwn->toolsaAction != TOOL_OBJSA_PICKALL) {
+                    GV->editState->HandleToolsaClick();
+                }
+            }
+            break;
+        }
         case Key::ESCAPE: {
             if (m_hOwn->winWorld->isVisible()) {
                 m_hOwn->winWorld->setVisible(false);
@@ -1192,6 +1202,15 @@ namespace State {
             if (m_hOwn->winLogicBrowser->isVisible()) {
                 m_hOwn->winLogicBrowser->setVisible(false);
             }
+            if (m_hOwn->winSearchObj->isVisible()) {
+                m_hOwn->winSearchObj->setVisible(false);
+            }
+            if (m_hOwn->objContext->isVisible()) {
+                m_hOwn->objContext->setVisible(false);
+            }
+            if (m_hOwn->tilContext->isVisible()) {
+                m_hOwn->objContext->setVisible(false);
+            }
 
             switch (m_hOwn->iActiveTool) {
                 case EWW_TOOL_DUPLICATE:
@@ -1200,6 +1219,9 @@ namespace State {
                 case EWW_TOOL_SPACEOBJ:
                 case EWW_TOOL_ZOOM:
                     m_hOwn->SetTool(EWW_TOOL_NONE);
+                    break;
+                case EWW_TOOL_EDITOBJ:
+                    m_hOwn->hEditObj->HandleEscape();
                     break;
                 case EWW_TOOL_MOVEOBJECT:
                     if (m_hOwn->bEditObjDelete) {
@@ -1226,6 +1248,9 @@ namespace State {
                         m_hOwn->UpdateSelectAreaWindowButtons();
                     } else {
                         m_hOwn->SetTool(EWW_TOOL_NONE);
+                        if (m_hOwn->toolsaCameFromObjProps) {
+                            m_hOwn->_flipMe({ ReturnCodeType::ObjPropSelectedValues, 0 });
+                        }
                     }
                     break;
             }
@@ -1403,8 +1428,8 @@ namespace State {
                     }
                 break;
                 case 'm':
-                    m_hOwn->MirrorObjects(m_hOwn->vObjectsPicked, true, false);
                     if (m_hOwn->iActiveTool == EWW_TOOL_NONE) {
+                        m_hOwn->MirrorObjects(m_hOwn->vObjectsPicked, true, false);
                         for (auto object : m_hOwn->vObjectsPicked) {
                             int flags = object->GetDrawFlags() & (WWD::Flag_dr_NoDraw | WWD::Flag_dr_Flash);
                             if (object->GetFlipX()) flags |= WWD::Flag_dr_Mirror;
@@ -1415,8 +1440,8 @@ namespace State {
                     }
                     break;
                 case 'i':
-                    m_hOwn->MirrorObjects(m_hOwn->vObjectsPicked, false, true);
                     if (m_hOwn->iActiveTool == EWW_TOOL_NONE) {
+                        m_hOwn->MirrorObjects(m_hOwn->vObjectsPicked, false, true);
                         for (auto object : m_hOwn->vObjectsPicked) {
                             int flags = object->GetDrawFlags() & (WWD::Flag_dr_NoDraw | WWD::Flag_dr_Flash);
                             if (object->GetFlipX()) flags |= WWD::Flag_dr_Mirror;

@@ -780,6 +780,8 @@ namespace State {
 
         void InitEmpty();
 
+        void HandleToolsaClick();
+
         WWD::Object *GetObjUnderWorldPos(int mx, int my);
 
         SHR::But *MakeButton(int x, int y, Gfx16Icons icon, SHR::Container *dest, bool enable = 1, bool visible = 1,
@@ -893,6 +895,7 @@ namespace State {
         SHR::Lab *labtoolSelAreaValues; //label with values
         int toolsaMinX, toolsaMinY, toolsaMaxX, toolsaMaxY; //cached values
         int toolsaAction; //selected action
+		bool toolsaCameFromObjProps;
 
         //PLANE MANAGER vars
         SHR::Win *winpmMain;
@@ -904,7 +907,7 @@ namespace State {
                  *labpmOffX, *labpmOffY, *labpmOffset, *labpmPlaneSize, *labpmZCoord, *labpmFlags, *labpmTileSet;
         SHR::TextField *tfpmName, *tfpmTileSizeX, *tfpmTileSizeY, *tfpmPlaneSizeX, *tfpmPlaneSizeY, *tfpmMovX, *tfpmMovY, *tfpmOffX, *tfpmOffY, *tfpmZCoord;
         SHR::DropDown *ddpmTileSet;
-        SHR::TextBox *tbpmImagesets;
+        // SHR::TextBox *tbpmImagesets;
         SHR::But *butpmResUL, *butpmResU, *butpmResUR, *butpmResL, *butpmResC, *butpmResR, *butpmResDL, *butpmResD, *butpmResDR;
         SHR::CBox *cbpmFlagMainPlane, *cbpmFlagNoDraw, *cbpmFlagWrapX, *cbpmFlagWrapY, *cbpmAutoTileSize;
         SHR::But *butpmSave, *butpmDelete;

@@ -111,6 +111,7 @@ namespace State {
             m_hOwn->winisPick->setPosition(
                     hge->System_GetState(HGE_SCREENWIDTH) / 2 - m_hOwn->winisPick->getWidth() / 2,
                     hge->System_GetState(HGE_SCREENHEIGHT) / 2 - m_hOwn->winisPick->getHeight() / 2);
+            m_hOwn->winisPick->getParent()->requestFocus();
             m_hOwn->asImageSetPick = GV->editState->SprBank->GetAssetByID(m_hOwn->tddadvImageSet->getText().c_str());
             m_hOwn->iisPickIT = 0;
             m_hOwn->asimgImageSetFrame = NULL;
@@ -149,6 +150,7 @@ namespace State {
             m_hOwn->winisPick->setVisible(false);
             m_hOwn->window->setPosition(hge->System_GetState(HGE_SCREENWIDTH) / 2 - m_hOwn->window->getWidth() / 2,
                                         hge->System_GetState(HGE_SCREENHEIGHT) / 2 - m_hOwn->window->getHeight() / 2);
+            m_hOwn->window->getParent()->requestFocus();
         } else if (actionEvent.getSource() == m_hOwn->butisOK) {
             char tmp[64];
             sprintf(tmp, "%d", (m_hOwn->iisFrameIT == 0 ? -1 : m_hOwn->asimgImageSetFrame->GetID()));
@@ -1556,6 +1558,7 @@ State::ObjProp::ObjProp(EditingWW *main, WWD::Object *obj, bool bMove) {
     conMain->setDimension(
             gcn::Rectangle(0, 0, hge->System_GetState(HGE_SCREENWIDTH), hge->System_GetState(HGE_SCREENHEIGHT)));
     conMain->setOpaque(false);
+    conMain->setFocusable(true);
     gui->setTop(conMain);
 
     hObj = obj;
@@ -1566,6 +1569,9 @@ void State::ObjProp::Init() {
     hProp = new cObjectProp(hObj, true, mainSt);
     conMain->add(hProp->GetWindow());
     conMain->add(hProp->GetPickWindow());
+    conMain->addKeyListener(hProp);
+    conMain->addFocusListener(hProp);
+    conMain->requestFocus();
 }
 
 void State::ObjProp::Destroy() {
@@ -1583,9 +1589,9 @@ bool State::ObjProp::Think() {
         GV->Console->Printf("~r~Guichan exception: ~w~%s (%s:%d)", exc.getMessage().c_str(), exc.getFilename().c_str(),
                             exc.getLine());
     }
-    if (hProp->Kill() || hge->Input_KeyDown(HGEK_ESCAPE)) {
+    if (hProp->Kill()) {
         int value = bMoveObject;
-        if ((bMoveObject || mainSt->bEditObjDelete) && (hProp->Canceled() || hge->Input_KeyDown(HGEK_ESCAPE))) {
+        if ((bMoveObject || mainSt->bEditObjDelete) && hProp->Canceled()) {
             value = 2;
             mainSt->bEditObjDelete = false;
         }
@@ -1654,4 +1660,28 @@ std::string State::cObjectProp::getElementAt(int i) {
 
 int State::cObjectProp::getNumberOfElements() {
     return GV->vstrClawLogics.size();
+}
+
+void State::cObjectProp::keyPressed(KeyEvent &keyEvent) {
+    if (keyEvent.isConsumed()) return;
+    Key key = keyEvent.getKey();
+
+    if (key.getValue() == Key::ESCAPE) {
+        if (window->isVisible())
+            butCancel->simulatePress();
+        else {
+            window->setVisible(true);
+            winisPick->setVisible(false);
+            window->setPosition(hge->System_GetState(HGE_SCREENWIDTH) / 2 - window->getWidth() / 2,
+                                        hge->System_GetState(HGE_SCREENHEIGHT) / 2 - window->getHeight() / 2);
+            window->getParent()->requestFocus();
+        }
+    }
+    // else if (key.getValue() == Key::ENTER) {
+    //     butSave->simulatePress();
+    // }
+}
+
+void State::cObjectProp::focusLost(const FocusEvent &event) {
+    window->getParent()->requestFocus();
 }

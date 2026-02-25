@@ -26,6 +26,7 @@ namespace ObjEdit {
 
         tbText = new SHR::TextBox(GETL2S("EditObj_Text", "Sample"));
         tbText->setFont(GV->gcnParts.gcnfntMyriad16);
+        tbText->setForegroundColor(0xFFFFFF);
         tbText->setDimension(gcn::Rectangle(0, 0, 100, 20));
         tbText->setMinimalSize(300, 100);
         tbText->addActionListener(hAL);
@@ -338,7 +339,7 @@ namespace ObjEdit {
             float mx, my;
             hge->Input_GetMousePos(&mx, &my);
             int wmx = GV->editState->Scr2WrdX(GV->editState->GetActivePlane(), mx),
-                    wmy = GV->editState->Scr2WrdY(GV->editState->GetActivePlane(), my);
+                wmy = GV->editState->Scr2WrdY(GV->editState->GetActivePlane(), my);
             bool mouseOver = (wmx > areaX && wmy > areaY && wmx < areaX + areaW && wmy < areaY + areaH);
             if (mouseOver) {
                 if (hge->Input_KeyDown(HGEK_LBUTTON)) {

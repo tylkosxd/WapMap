@@ -24,6 +24,12 @@ namespace ObjEdit {
 
         bool bPicking;
         int iPickY;
+
+        void HandleEscape() override {
+            if (bPicking) { butPick->simulatePress(); return; }
+
+            cObjEdit::HandleEscape();
+        }
     };
 
 }

@@ -1664,7 +1664,7 @@ void State::EditingWW::DrawViewport() {
                         } while (false); // trick to allow breaking
                     }
                 } else if (logicInfo.IsBoss()) {
-                    if (iActiveTool != EWW_TOOL_EDITOBJ || !((ObjEdit::cEditObjEnemy *) hEditObj)->isPickingXY() ) {
+                    if (iActiveTool != EWW_TOOL_EDITOBJ) {
                         int outX = obj->GetParam(WWD::Param_SpeedX),
                             outY = obj->GetParam(WWD::Param_SpeedY);
 
@@ -1974,8 +1974,7 @@ void State::EditingWW::DrawViewport() {
                             }
 
                         if (containsWarp && strcmp(obj->GetLogic(), "CrabNest") != 0) {
-                            if (iActiveTool != EWW_TOOL_EDITOBJ || hEditObj->iType != ObjEdit::enEnemy
-                                || !((ObjEdit::cEditObjEnemy *) hEditObj)->isPickingXY() ) {
+                            if (iActiveTool != EWW_TOOL_EDITOBJ || hEditObj->iType != ObjEdit::enEnemy) {
                                 int outX = obj->GetParam(WWD::Param_SpeedX),
                                     outY = obj->GetParam(WWD::Param_SpeedY);
 

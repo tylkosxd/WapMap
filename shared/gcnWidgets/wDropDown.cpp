@@ -156,7 +156,7 @@ namespace SHR {
     }
 
     void DropDown::keyPressed(KeyEvent &keyEvent) {
-        if (keyEvent.isConsumed() || !mKeyboardFocus)
+        if (keyEvent.isConsumed())
             return;
 
         Key key = keyEvent.getKey();

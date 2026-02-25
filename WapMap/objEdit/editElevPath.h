@@ -76,6 +76,15 @@ namespace ObjEdit {
         void SynchronizeObj();
 
         void CloseChain(bool bChangeQuestioned = 0);
+
+        void HandleEscape() override {
+            if (bDragging) {
+                bDragging = false;
+                return;
+            }
+
+            cObjEdit::HandleEscape();
+        }
     };
 
 }

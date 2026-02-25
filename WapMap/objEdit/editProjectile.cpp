@@ -215,9 +215,9 @@ namespace ObjEdit {
             tfY2->setText(tmp);
         }
         int x1 = atoi(tfX1->getText().c_str()),
-                y1 = atoi(tfY1->getText().c_str()),
-                x2 = atoi(tfX2->getText().c_str()),
-                y2 = atoi(tfY2->getText().c_str());
+            y1 = atoi(tfY1->getText().c_str()),
+            x2 = atoi(tfX2->getText().c_str()),
+            y2 = atoi(tfY2->getText().c_str());
         tfX1->setMarkedInvalid(x1 >= x2 || x1 == 0);
         tfY1->setMarkedInvalid(y1 >= y2 || y1 == 0);
         tfX2->setMarkedInvalid(x1 >= x2 || x2 == 0);
@@ -270,7 +270,14 @@ namespace ObjEdit {
         } else if (actionEvent.getSource() == butPick) {
             bPick = !bPick;
             bAllowDragging = !bPick;
-            bDrag = 0;
+            if (bDrag) {
+                bDrag = 0;
+
+                hTempObj->SetParam(WWD::Param_MinX, atoi(tfX1->getText().c_str()));
+                hTempObj->SetParam(WWD::Param_MinY, atoi(tfY1->getText().c_str()));
+                hTempObj->SetParam(WWD::Param_MaxX, atoi(tfX2->getText().c_str()));
+                hTempObj->SetParam(WWD::Param_MaxY, atoi(tfY2->getText().c_str()));
+            }
             butPick->setCaption(GETL2SV("EditObj_Projectile", bPick ? L"Cancel" : L"Pick"));
             tfX1->setEnabled(!bPick);
             tfY1->setEnabled(!bPick);
@@ -338,6 +345,7 @@ namespace ObjEdit {
 
         if (bDrag && !hge->Input_GetKeyState(HGEK_LBUTTON)) {
             bDrag = 0;
+            UpdateRectMarks(1);
             butPick->simulatePress();
             return;
         }
@@ -383,7 +391,7 @@ namespace ObjEdit {
         if (iDragmX != mx || iDragmY != my) {
             iDragmX = mx;
             iDragmY = my;
-            UpdateRectMarks(1);
+            // UpdateRectMarks();
         }
     }
 

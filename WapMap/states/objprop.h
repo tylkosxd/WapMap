@@ -80,7 +80,7 @@ namespace State {
 
     class ObjProp;
 
-    class cObjectProp : public gcn::ListModel {
+    class cObjectProp : public gcn::ListModel, public gcn::KeyListener, public gcn::FocusListener {
     protected:
         bool bKill;
         bool bCanceled;
@@ -150,10 +150,12 @@ namespace State {
 
         void Save();
 
-        //inherited from listmodel
-        std::string getElementAt(int i);
+        std::string getElementAt(int i) override;
 
-        int getNumberOfElements();
+        int getNumberOfElements() override;
+
+        void keyPressed(KeyEvent& keyEvent) override;
+        void focusLost(const FocusEvent& event) override;
     };
 
     class ObjProp : public SHR::cState {

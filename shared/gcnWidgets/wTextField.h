@@ -40,10 +40,13 @@ namespace SHR {
         void fontChanged() override;
 
         void draw(Graphics *graphics) override;
+        virtual void logic();
 
         void mouseMoved(MouseEvent &mouseEvent) override;
 
         void mousePressed(MouseEvent &mouseEvent) override;
+
+        void mouseReleased(MouseEvent &mouseEvent) override;
 
         void mouseDragged(DragEvent &mouseEvent) override;
 
@@ -78,6 +81,7 @@ namespace SHR {
         unsigned int mCaretPosition;
         int mSelectionPosition;
         int mXScroll;
+        bool mIsDragged;
         bool bNumerical, bAllowNegative, bMarkedInvalid;
 
         void deleteSelection();

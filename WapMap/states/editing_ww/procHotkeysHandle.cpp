@@ -7,12 +7,6 @@
 extern HGE *hge;
 
 void State::EditingWW::HandleHotkeys() {
-    if (iActiveTool == EWW_TOOL_EDITOBJ) {
-        if (hge->Input_KeyDown(HGEK_ESCAPE)) {
-            hEditObj->SetKill(true);
-		}
-        return;
-    }
     if (!GV->StateMgr->IsAppFocused()) return;
     float mx, my;
     hge->Input_GetMousePos(&mx, &my);
@@ -28,7 +22,7 @@ void State::EditingWW::HandleHotkeys() {
                                                                                                     GetActivePlane()->GetPlaneWidthPx(),
                                                                                                     GetActivePlane()->GetPlaneHeightPx());
         }
-    } else if (iMode == EWW_MODE_OBJECT && vObjectsPicked.size() > 0 &&
+    } else if (iMode == EWW_MODE_OBJECT && vObjectsPicked.size() > 0 && iActiveTool == EWW_TOOL_NONE &&
                (hge->Input_KeyDown(HGEK_PGUP) || hge->Input_KeyDown(HGEK_PGDN))) {
         int id = (hge->Input_KeyDown(HGEK_PGUP) ? OBJMENU_ZC_INC : OBJMENU_ZC_DEC);
         if (hge->Input_GetKeyState(HGEK_SHIFT))
@@ -100,7 +94,7 @@ void State::EditingWW::HandleHotkeys() {
         if (iOldP != iTilePicked && iActiveTool == EWW_TOOL_BRUSH) {
         }
     } else if (iMode == EWW_MODE_OBJECT && !vObjectsPicked.empty() &&
-               vPort->GetWidget()->isFocused() &&
+               vPort->GetWidget()->isFocused() && iActiveTool == EWW_TOOL_NONE
                (hge->Input_GetKeyState(HGEK_CTRL) || hge->Input_GetKeyState(HGEK_SHIFT) ||
                 hge->Input_GetKeyState(HGEK_ALT)) &&
                (hge->Input_KeyDown(HGEK_LEFT) || hge->Input_KeyDown(HGEK_RIGHT) || hge->Input_KeyDown(HGEK_UP) ||

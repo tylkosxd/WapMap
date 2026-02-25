@@ -81,6 +81,7 @@ namespace ObjEdit {
             hPickArea[i]->setActionListener(hAL);
             hPickArea[i]->setAllowEmpty(1);
             hPickArea[i]->setType(i ? PickRect_AttackRect : PickRect_MinMax);
+            hPickArea[i]->getPickButton()->addActionListener(hAL);
             win->add(hPickArea[i], 5 + i * 177 + 26, 115 + 100);
 
             cbArea[i]->setEnabled(rbAreaType[1]->isSelected());

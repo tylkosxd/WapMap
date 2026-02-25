@@ -240,6 +240,24 @@ namespace ObjEdit {
         win->setY(y);
 	}
 
+    void cObjEdit::HandleEscape() {
+        if (!GV->editState->hInvCtrl->IsClipboardEmpty()) {
+            GV->editState->hInvCtrl->SetClipboardEmpty();
+            return;
+        }
+
+        if (IsMovingObject()) {
+            _bDragging = 0;
+            GV->editState->vPort->MarkToRedraw();
+            hTempObj->SetParam(WWD::Param_LocationX, _iMoveInitX);
+            hTempObj->SetParam(WWD::Param_LocationY, _iMoveInitY);
+            GetUserDataFromObj(hTempObj)->SyncToObj();
+            return;
+        }
+
+        SetKill(true);
+    }
+
     void cObjEdit::SaveChanges() {
         bObjectSaved = true;
 

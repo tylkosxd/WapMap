@@ -158,27 +158,26 @@ namespace SHR {
         Key key = keyEvent.getKey();
 
         if (key.getValue() == Key::ENTER || key.getValue() == Key::SPACE) {
+            keyEvent.consume();
             mActionEventId = "CLICK";
             distributeActionEvent();
-            keyEvent.consume();
         } else if (key.getValue() == Key::UP) {
-            setSelected(mSelected - 1);
-
-            if (mSelected == -1) {
+            if (mSelected > 0) {
+                setSelected(mSelected - 1);
+            } else {
                 if (mWrappingEnabled) {
                     setSelected(getListModel()->getNumberOfElements() - 1);
-                } else {
-                    setSelected(0);
                 }
             }
 
             keyEvent.consume();
         } else if (key.getValue() == Key::DOWN) {
-            if (mWrappingEnabled
-                && getSelected() == getListModel()->getNumberOfElements() - 1) {
-                setSelected(0);
+            if (mSelected < getListModel()->getNumberOfElements()) {
+                setSelected(mSelected + 1);
             } else {
-                setSelected(getSelected() + 1);
+                if (mWrappingEnabled) {
+                    setSelected(0);
+                }
             }
 
             keyEvent.consume();

@@ -155,6 +155,8 @@ namespace ObjEdit {
         void GetWindowPosition(int& x, int& y);
 
         void SetWindowPosition(int x, int y);
+
+        virtual void HandleEscape();
     };
 };
 

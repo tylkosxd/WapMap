@@ -154,22 +154,27 @@ namespace ObjEdit {
         tfDamage = new SHR::TextField(tmp);
         tfDamage->setDimension(gcn::Rectangle(0, 0, 150, 20));
         tfDamage->SetNumerical(1, 0);
+        tfDamage->addActionListener(hAL);
         win->add(tfDamage, 140, yoffset + 20 + 88 + 70 + 6);
 
         labWarpDest = new SHR::Lab("");
         labWarpDest->adjustSize();
         win->add(labWarpDest, 5, yoffset + 20 + 88 + 70 + 6);
 
-        sprintf(tmp, "%d", hTempObj->GetParam(WWD::Param_SpeedX));
+        speedX = hTempObj->GetParam(WWD::Param_SpeedX);
+        sprintf(tmp, "%d", speedX);
         tfSpeedX = new SHR::TextField(tmp);
         tfSpeedX->setDimension(gcn::Rectangle(0, 0, 100, 20));
         tfSpeedX->SetNumerical(1, 0);
+        tfSpeedX->addActionListener(hAL);
         win->add(tfSpeedX, 25, yoffset + 20 + 88 + 70 + 4 + 20);
 
-        sprintf(tmp, "%d", hTempObj->GetParam(WWD::Param_SpeedY));
+        speedY = hTempObj->GetParam(WWD::Param_SpeedY);
+        sprintf(tmp, "%d", speedY);
         tfSpeedY = new SHR::TextField(tmp);
         tfSpeedY->setDimension(gcn::Rectangle(0, 0, 100, 20));
         tfSpeedY->SetNumerical(1, 0);
+        tfSpeedY->addActionListener(hAL);
         win->add(tfSpeedY, 25, yoffset + 20 + 88 + 70 + 4 + 42);
 
         butPickSpeedXY = new SHR::But(GV->hGfxInterface, GETL2S("EditObj_Enemy", "Pick"));
@@ -398,8 +403,8 @@ namespace ObjEdit {
         ApplyInventoryToObject();
         hTempObj->SetParam(WWD::Param_Damage, tfDamage->isVisible() ? atoi(tfDamage->getText().c_str()) : 0);
         if (tfSpeedX->isVisible()) {
-            hTempObj->SetParam(WWD::Param_SpeedX, atoi(tfSpeedX->getText().c_str()));
-            hTempObj->SetParam(WWD::Param_SpeedY, atoi(tfSpeedY->getText().c_str()));
+            hTempObj->SetParam(WWD::Param_SpeedX, speedX);
+            hTempObj->SetParam(WWD::Param_SpeedY, speedY);
         } else {
             hTempObj->SetParam(WWD::Param_SpeedX, 0);
             hTempObj->SetParam(WWD::Param_SpeedY, 0);
@@ -421,18 +426,25 @@ namespace ObjEdit {
             return;
         } else if (actionEvent.getSource() == butPickSpeedXY) {
             bPickSpeedXY = !bPickSpeedXY;
+            if (!bPickSpeedXY) {
+                char tmp[50];
+                sprintf(tmp, "%d", speedX);
+                tfSpeedX->setText(tmp);
+                sprintf(tmp, "%d", speedY);
+                tfSpeedY->setText(tmp);
+            }
             RebuildWindow();
         } else if (actionEvent.getSource() == tfSpeedX) {
-            int v = atoi(tfSpeedX->getText().c_str());
+            speedX = atoi(tfSpeedX->getText().c_str());
             bool marked = tfSpeedX->isMarkedInvalid();
-            tfSpeedX->setMarkedInvalid(v == 0 || v >= GV->editState->GetActivePlane()->GetPlaneWidthPx());
+            tfSpeedX->setMarkedInvalid(speedX == 0 || speedX >= GV->editState->GetActivePlane()->GetPlaneWidthPx());
             if (tfSpeedX->isMarkedInvalid() != marked)
                 RebuildWindow();
             return;
         } else if (actionEvent.getSource() == tfSpeedY) {
-            int v = atoi(tfSpeedY->getText().c_str());
+            speedY = atoi(tfSpeedY->getText().c_str());
             bool marked = tfSpeedX->isMarkedInvalid();
-            tfSpeedY->setMarkedInvalid(v == 0 || v >= GV->editState->GetActivePlane()->GetPlaneWidthPx());
+            tfSpeedY->setMarkedInvalid(speedY == 0 || speedY >= GV->editState->GetActivePlane()->GetPlaneWidthPx());
             if (tfSpeedY->isMarkedInvalid() != marked)
                 RebuildWindow();
             return;
@@ -455,32 +467,22 @@ namespace ObjEdit {
             hRectPick->Think();
         hInventory->Think();
         if (bPickSpeedXY) {
-            int posx, posy;
-            bool save = 0;
             float mx, my;
             hge->Input_GetMousePos(&mx, &my);
-            if (bMouseConsumed || mx < GV->editState->vPort->GetX() || my < GV->editState->vPort->GetY() ||
+            if (hge->Input_KeyDown(HGEK_LBUTTON) && !(bMouseConsumed || mx < GV->editState->vPort->GetX() || my < GV->editState->vPort->GetY() ||
                 mx > GV->editState->vPort->GetX() + GV->editState->vPort->GetWidth() ||
-                my > GV->editState->vPort->GetY() + GV->editState->vPort->GetHeight()) {
-                posx = hTempObj->GetParam(WWD::Param_SpeedX);
-                posy = hTempObj->GetParam(WWD::Param_SpeedY);
-            } else {
+                my > GV->editState->vPort->GetY() + GV->editState->vPort->GetHeight())) {
                 int wmx = GV->editState->Scr2WrdX(GV->editState->GetActivePlane(), mx),
-                        wmy = GV->editState->Scr2WrdY(GV->editState->GetActivePlane(), my);
-                posx = wmx;
-                posy = wmy;
-                if (hge->Input_KeyDown(HGEK_LBUTTON)) {
-                    hTempObj->SetParam(WWD::Param_SpeedX, wmx);
-                    hTempObj->SetParam(WWD::Param_SpeedY, wmy);
-                    save = 1;
-                }
-            }
-            char tmp[64];
-            sprintf(tmp, "%d", posx);
-            tfSpeedX->setText(tmp);
-            sprintf(tmp, "%d", posy);
-            tfSpeedY->setText(tmp);
-            if (save) {
+                    wmy = GV->editState->Scr2WrdY(GV->editState->GetActivePlane(), my);
+                speedX = wmx;
+                speedY = wmy;
+
+                char tmp[64];
+                sprintf(tmp, "%d", speedX);
+                tfSpeedX->setText(tmp);
+                sprintf(tmp, "%d", speedY);
+                tfSpeedY->setText(tmp);
+
                 bPickSpeedXY = 0;
                 RebuildWindow();
             }
@@ -489,32 +491,37 @@ namespace ObjEdit {
 
     void cEditObjEnemy::RenderObjectOverlay() {
         float mx, my;
-        hge->Input_GetMousePos(&mx, &my);
-        if (bPickSpeedXY && mx > GV->editState->vPort->GetX() && my > GV->editState->vPort->GetY() &&
-            mx < GV->editState->vPort->GetX() + GV->editState->vPort->GetWidth() &&
-            my < GV->editState->vPort->GetY() + GV->editState->vPort->GetHeight() &&
-            GV->editState->conMain->getWidgetAt(mx, my) == GV->editState->vPort->GetWidget()) {
-            int wmx = GV->editState->Scr2WrdX(GV->editState->GetActivePlane(), mx),
-                    wmy = GV->editState->Scr2WrdY(GV->editState->GetActivePlane(), my);
-            hgeSprite *spr = GV->sprSmiley;
-            if (bPickGem) {
-                auto bank = GV->editState->SprBank->GetAssetByID(
-                        GetInventoryItemImageSet(GV->editState->hInvCtrl->GetItemByIt(EndOfLevelPowerupIt)));
-                auto image = bank ? bank->GetIMGByIterator(0) : nullptr;
-                spr = image ? image->GetSprite() : spr;
-            } else {
-                auto bank = GV->editState->SprBank->GetAssetByID("CLAW");
-                auto image = bank ? bank->GetIMGByID(401) : nullptr;
-                spr = image ? image->GetSprite() : spr;
-            }
-            spr->SetColor(0xBBFFFFFF);
-            spr->RenderEx(mx, my, 0, GV->editState->fZoom);
-            mx += (spr->GetWidth() / 2 + 15) * GV->editState->fZoom;
-            GV->fntMyriad16->printf(mx + 1, my + 1, HGETEXT_LEFT, "~l~%s %d, %d", 0,
-                                    GETL2SV("EditObj_Enemy", bPickGem ? L"GemDest" : L"WarpDest"), wmx, wmy);
-            GV->fntMyriad16->printf(mx, my, HGETEXT_LEFT, "~w~%s ~y~%d~w~, ~y~%d", 0,
-                                    GETL2SV("EditObj_Enemy", bPickGem ? L"GemDest" : L"WarpDest"), wmx, wmy);
+        int wmx, wmy;
+        WWD::Plane* plane = GV->editState->GetActivePlane();
+        if (bPickSpeedXY) {
+            hge->Input_GetMousePos(&mx, &my);
+            wmx = GV->editState->Scr2WrdX(plane, mx),
+            wmy = GV->editState->Scr2WrdY(plane, my);
+        } else {
+            wmx = speedX;
+            wmy = speedY;
+            mx = GV->editState->Wrd2ScrX(plane, wmx);
+            my = GV->editState->Wrd2ScrY(plane, wmy);
         }
+
+        hgeSprite *spr = GV->sprSmiley;
+        if (bPickGem) {
+            auto bank = GV->editState->SprBank->GetAssetByID(
+                    GetInventoryItemImageSet(GV->editState->hInvCtrl->GetItemByIt(EndOfLevelPowerupIt)));
+            auto image = bank ? bank->GetIMGByIterator(0) : nullptr;
+            spr = image ? image->GetSprite() : spr;
+        } else {
+            auto bank = GV->editState->SprBank->GetAssetByID("CLAW");
+            auto image = bank ? bank->GetIMGByID(401) : nullptr;
+            spr = image ? image->GetSprite() : spr;
+        }
+        spr->SetColor(0xBBFFFFFF);
+        spr->RenderEx(mx, my, 0, GV->editState->fZoom);
+        mx += (spr->GetWidth() / 2 + 15) * GV->editState->fZoom;
+        GV->fntMyriad16->printf(mx + 1, my + 1, HGETEXT_LEFT, "~l~%s %d, %d", 0,
+                                GETL2SV("EditObj_Enemy", bPickGem ? L"GemDest" : L"WarpDest"), wmx, wmy);
+        GV->fntMyriad16->printf(mx, my, HGETEXT_LEFT, "~w~%s ~y~%d~w~, ~y~%d", 0,
+                                GETL2SV("EditObj_Enemy", bPickGem ? L"GemDest" : L"WarpDest"), wmx, wmy);
     }
 
     void cEditObjEnemy::Draw() {
