@@ -756,11 +756,7 @@ namespace State {
                 m_hOwn->objContext->setVisible(false);
             } else if (actionEvent.getSource() == m_hOwn->advcon_Warp) {
                 if (m_hOwn->advcon_Warp->GetSelectedID() == OBJMENU_ADV_WARP_GOTO) {
-                    int destX = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_SpeedX),
-                        destY = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_SpeedY);
-                    m_hOwn->NavigateToPoint(destX, destY);
-                    m_hOwn->MDI->GetActiveDoc()->fPrevWarpX = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationX),
-                    m_hOwn->MDI->GetActiveDoc()->fPrevWarpY = m_hOwn->vObjectsPicked[0]->GetParam(WWD::Param_LocationY);
+                    m_hOwn->NavigateToWarpDestination(m_hOwn->vObjectsPicked[0]);
                     m_hOwn->objContext->setVisible(false);
                 }
             } else if (actionEvent.getSource() == m_hOwn->advcon_Container) {

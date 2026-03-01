@@ -16,13 +16,21 @@ class LocationsList : public gcn::ListModel {
 
         LocationsList() {};
 
-        int addLocation(const std::string& name, int x, int y, WWD::Object *linkedObject = NULL);
+        int addLocation(std::string& name, int x, int y);
+
+        bool addLocationLinkedToObject(WWD::Object *object, const char* objType);
 
         void deleteLocation(int i);
 
         stLocation* getLocation(int i);
 
-        int renameLocation(int index, const std::string& newName);
+        int renameLocation(int index, std::string& newName);
+
+        void sort();
+
+        bool moveElement(int index, int move);
+
+        bool isObjectList = 0;
     
     public:
 
@@ -46,14 +54,11 @@ class winLocationsBrowser : public cWindow {
         SHR::ScrollArea *saLocs;
         SHR::TabbedArea *tabarLocs;
 
-        std::vector<stLocation> vWarps;
-        std::vector<stLocation> vCheckpoints;
+        std::vector<stLocation> vWarps, vCheckpoints;
 
         LocationsList *lmLocs[Locs::COUNT];
 
-        SHR::But *butDelete;
-        SHR::But *butEdit;
-        SHR::But *butRefresh;
+        SHR::But *butDelete, *butEdit, *butAddFav, *butMoveDown, *butMoveUp, *butFollowWarp;
 
         int m_selectedTab = Locs::Favourites;
 

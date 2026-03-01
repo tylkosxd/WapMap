@@ -1112,6 +1112,7 @@ namespace State {
 		void NavigateToStartLocation();
 		void NavigateToEndLocation();
         void NavigateToPoint(int x, int y);
+        void NavigateToWarpDestination(WWD::Object *warp);
 
         cTileClipboardEntry *arTileClipboard[TILE_CLIPBOARD_CAPACITY] = {NULL};
         int iCurTileCbE = CLIPBOARD_IS_EMPTY;
