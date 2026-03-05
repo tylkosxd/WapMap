@@ -33,3 +33,13 @@ void State::EditingWW::NavigateToPoint(int x, int y)
     fCamX = x - (vPort->GetWidth() / 2 / fZoom);
     fCamY = y - (vPort->GetHeight() / 2 / fZoom);
 }
+
+void State::EditingWW::NavigateToWarpDestination(WWD::Object *warp)
+{
+    int destX = warp->GetParam(WWD::Param_SpeedX), destY = warp->GetParam(WWD::Param_SpeedY);
+    if (destX > 0 || destY > 0) {
+        MDI->GetActiveDoc()->fPrevWarpX = warp->GetX();
+        MDI->GetActiveDoc()->fPrevWarpY = warp->GetY();
+        NavigateToPoint(destX, destY);
+    }
+}
