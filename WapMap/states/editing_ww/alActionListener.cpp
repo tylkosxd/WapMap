@@ -107,62 +107,13 @@ namespace State {
             if (m_hOwn->tfWriteID->getActionEventId() == "ENTER") {
                 m_hOwn->TextEditMoveToNextTile(true);
             }
-        } else if (actionEvent.getSource() == m_hOwn->hmbTile->butIconPencil ||
-                   actionEvent.getSource() == m_hOwn->buttpiModePencil) {
+        } else if (actionEvent.getSource() == m_hOwn->hmbTile->butIconPencil) {
             m_hOwn->SetTool(EWW_TOOL_PENCIL);
-        } else if (actionEvent.getSource() == m_hOwn->hmbTile->butIconBrush ||
-                   actionEvent.getSource() == m_hOwn->buttpiModeBrush) {
+        } else if (actionEvent.getSource() == m_hOwn->hmbTile->butIconBrush) {
             m_hOwn->SetTool(EWW_TOOL_BRUSH);
-        } else if (actionEvent.getSource() == m_hOwn->hmbTile->butIconFill ||
-                   actionEvent.getSource() == m_hOwn->buttpiFlood) {
+        } else if (actionEvent.getSource() == m_hOwn->hmbTile->butIconFill) {
             m_hOwn->SetTool(EWW_TOOL_FILL);
-        } else if (actionEvent.getSource() == m_hOwn->buttpiPoint) {
-            m_hOwn->iTileDrawMode = EWW_DRAW_POINT;
-            if (m_hOwn->iActiveTool == EWW_TOOL_FILL)
-                m_hOwn->SetTool(EWW_TOOL_PENCIL);
-            m_hOwn->RebuildTilePicker();
-        } else if (actionEvent.getSource() == m_hOwn->winTilePicker) {
-            m_hOwn->SetTool(EWW_TOOL_NONE);
-        } else if (actionEvent.getSource() == m_hOwn->buttpiLine) {
-            m_hOwn->iTileDrawMode = EWW_DRAW_LINE;
-            if (m_hOwn->iActiveTool == EWW_TOOL_FILL)
-                m_hOwn->SetTool(EWW_TOOL_PENCIL);
-            m_hOwn->RebuildTilePicker();
-        } else if (actionEvent.getSource() == m_hOwn->buttpiRect) {
-            m_hOwn->iTileDrawMode = EWW_DRAW_RECT;
-            if (m_hOwn->iActiveTool == EWW_TOOL_FILL)
-                m_hOwn->SetTool(EWW_TOOL_PENCIL);
-            m_hOwn->RebuildTilePicker();
-        } else if (actionEvent.getSource() == m_hOwn->buttpiEllipse) {
-            m_hOwn->iTileDrawMode = EWW_DRAW_ELLIPSE;
-            if (m_hOwn->iActiveTool == EWW_TOOL_FILL)
-                m_hOwn->SetTool(EWW_TOOL_PENCIL);
-            m_hOwn->RebuildTilePicker();
-        } else if (actionEvent.getSource() == m_hOwn->buttpiSpray) {
-            m_hOwn->iTileDrawMode = EWW_DRAW_SPRAY;
-            if (m_hOwn->iActiveTool == EWW_TOOL_FILL)
-                m_hOwn->SetTool(EWW_TOOL_PENCIL);
-            m_hOwn->RebuildTilePicker();
-        } else if (actionEvent.getSource() == m_hOwn->slitpiPointSize) {
-            char tmp[128];
-            sprintf(tmp, "%s: %d", GETL2S("TilePicker", "PointSize"), int(m_hOwn->slitpiPointSize->getValue()));
-            m_hOwn->labtpiPointSize->setCaption(tmp);
-            m_hOwn->labtpiPointSize->adjustSize();
-        } else if (actionEvent.getSource() == m_hOwn->slitpiLineThickness) {
-            char tmp[128];
-            sprintf(tmp, "%s: %d", GETL2S("TilePicker", "LineThickness"), int(m_hOwn->slitpiLineThickness->getValue()));
-            m_hOwn->labtpiLineThickness->setCaption(tmp);
-            m_hOwn->labtpiLineThickness->adjustSize();
-        } else if (actionEvent.getSource() == m_hOwn->slitpiSpraySize) {
-            char tmp[128];
-            sprintf(tmp, "%s: %d", GETL2S("TilePicker", "SpraySize"), int(m_hOwn->slitpiSpraySize->getValue()));
-            m_hOwn->labtpiSpraySize->setCaption(tmp);
-            m_hOwn->labtpiSpraySize->adjustSize();
-        } else if (actionEvent.getSource() == m_hOwn->slitpiSprayDensity) {
-            char tmp[128];
-            sprintf(tmp, "%s: %d%%", GETL2S("TilePicker", "SprayDensity"), int(m_hOwn->slitpiSprayDensity->getValue()));
-            m_hOwn->labtpiSprayDensity->setCaption(tmp);
-            m_hOwn->labtpiSprayDensity->adjustSize();
+        
         } else if (actionEvent.getSource() == m_hOwn->sliZoom) {
             float sliz = 1;
             if (m_hOwn->sliZoom->getValue() > 1) {
@@ -863,12 +814,6 @@ namespace State {
                 sprintf(tmp, "%s: %.0fpx", GETL(Lang_BrushInterval), m_hOwn->sliobrDistance->getValue());
                 m_hOwn->labobrDistance->setCaption(tmp);
                 m_hOwn->labobrDistance->adjustSize();
-            } else if (actionEvent.getSource() == m_hOwn->buttpiReloadBrush) {
-                m_hOwn->HandleBrushSwitch(m_hOwn->iTilePicked, EWW_TILE_NONE);
-                m_hOwn->iTilePicked = EWW_TILE_NONE;
-                m_hOwn->hTileset->ReloadBrushes();
-                m_hOwn->RebuildTilePicker();
-                m_hOwn->gui->focusNone();
             } else if (actionEvent.getSource() == m_hOwn->butmeasClear) {
                 m_hOwn->m_vMeasurePoints.clear();
             } else if (actionEvent.getSource() == m_hOwn->tftpTileID) {

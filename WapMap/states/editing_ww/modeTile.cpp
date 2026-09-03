@@ -4,6 +4,7 @@
 #include <cmath>
 #include "../../databanks/tiles.h"
 #include "../../cBrush.h"
+#include "../../windows/tilePicker.h"
 
 extern HGE *hge;
 
@@ -170,8 +171,8 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
                     vTileGhosting.clear();
 
                     if (iTileDrawMode == EWW_DRAW_POINT || iTileDrawMode == EWW_DRAW_SPRAY) {
-                        int pointsize = (iTileDrawMode == EWW_DRAW_POINT ? slitpiPointSize->getValue()
-                                                                         : slitpiSpraySize->getValue());
+                        int pointsize = (iTileDrawMode == EWW_DRAW_POINT ? hwinTilePicker->GetPointSize()
+                                                                         : hwinTilePicker->GetSpraySize());
                         if (pointsize == 1) {
                             TileGhost tg;
                             tg.x = hx;
@@ -202,7 +203,7 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
                                     }
                                 }
                             if (iTileDrawMode == EWW_DRAW_SPRAY) {
-                                float density = slitpiSprayDensity->getValue() / 100.0f;
+                                float density = hwinTilePicker->GetSprayDensity() / 100.0f;
                                 int clearnum = float(vTileGhosting.size()) * (1.0f - density);
                                 for (int i = 0; i < clearnum; i++) {
                                     int idx = hge->Random_Int(0, vTileGhosting.size() - 1);
@@ -218,7 +219,7 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
                             y2 = (iTileDrawStartY > hy ? iTileDrawStartY : hy);
 
                         if (iTileDrawMode == EWW_DRAW_LINE) {
-                            int thickness = slitpiLineThickness->getValue();
+                            int thickness = hwinTilePicker->GetLineThickness();
 
                             TileGhost tg;
                             tg.pl = GetActivePlane();
@@ -309,7 +310,7 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
                         } else if (iTileDrawMode == EWW_DRAW_RECT) {
                             for (int y = y1; y <= y2; y++)
                                 for (int x = x1; x <= x2; x++) {
-                                    if (cbtpiRectFilled->isSelected() || !cbtpiRectFilled->isSelected() &&
+                                    if (hwinTilePicker->GetRectFill() || !hwinTilePicker->GetRectFill() &&
                                                                          (x == x1 || x == x2 || y == y1 ||
                                                                           y == y2)) {
                                         TileGhost tg;
@@ -358,7 +359,7 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
                                 tg.x = tg.pl->ClampX(centerX - x);
                                 tg.y = tg.pl->ClampY(centerY + y);
                                 vTileGhosting.push_back(tg);
-                                if (cbtpiEllipseFilled->isSelected()) {
+                                if (hwinTilePicker->GetEllipseFill()) {
                                     for (int z = centerX - x; z < centerX + x; z++) {
                                         tg.x = tg.pl->ClampX(z);
                                         tg.y = tg.pl->ClampY(centerY - y);
@@ -400,7 +401,7 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
                                 tg.x = tg.pl->ClampX(centerX - x);
                                 tg.y = tg.pl->ClampY(centerY + y);
                                 vTileGhosting.push_back(tg);
-                                if (cbtpiEllipseFilled->isSelected()) {
+                                if (hwinTilePicker->GetEllipseFill()) {
                                     for (int z = centerX - x; z < centerX + x; z++) {
                                         tg.x = tg.pl->ClampX(z);
                                         tg.y = tg.pl->ClampY(centerY - y);
@@ -506,7 +507,7 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
                             }
                     }
                     lockDrawing = true;
-                    RebuildTilePicker();
+                    hwinTilePicker->Rebuild();
                 } else if (iActiveTool == EWW_TOOL_FILL) {
                     FloodFill(hx, hy, iTilePicked);
                     hPlaneData[GetActivePlaneID()]->bUpdateBuffer = 1;
@@ -631,121 +632,4 @@ void State::EditingWW::FloodFill(int x, int y, int tile) {
     }
 
     delete[] bFloodFillBuf;
-}
-
-void State::EditingWW::RebuildTilePicker(bool forceSliderRefresh) {
-    if (!btpiFixedPos) {
-        winTilePicker->setY(vPort->GetY());
-        winTilePicker->setHeight(vPort->GetHeight());
-        //btpiFixedPos = 1;
-        buttpiReloadBrush->setY(winTilePicker->getHeight() - 50);
-        labtpiReloadBrush->setY(winTilePicker->getHeight() - 50 + 6);
-        cbtpiShowTileID->setY(winTilePicker->getHeight() - 60);
-        cbtpiShowProperties->setY(winTilePicker->getHeight() - 40);
-    }
-    buttpiModePencil->setHighlight(iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL);
-    buttpiModeBrush->setHighlight(iActiveTool == EWW_TOOL_BRUSH);
-
-    buttpiPoint->setHighlight(
-            iActiveTool != EWW_TOOL_FILL && iTilePicked != EWW_TILE_PIPETTE && iTileDrawMode == EWW_DRAW_POINT);
-    buttpiLine->setHighlight(
-            iActiveTool != EWW_TOOL_FILL && iTilePicked != EWW_TILE_PIPETTE && iTileDrawMode == EWW_DRAW_LINE);
-    buttpiRect->setHighlight(
-            iActiveTool != EWW_TOOL_FILL && iTilePicked != EWW_TILE_PIPETTE && iTileDrawMode == EWW_DRAW_RECT);
-    buttpiEllipse->setHighlight(
-            iActiveTool != EWW_TOOL_FILL && iTilePicked != EWW_TILE_PIPETTE && iTileDrawMode == EWW_DRAW_ELLIPSE);
-    buttpiFlood->setHighlight(iTilePicked != EWW_TILE_PIPETTE && iActiveTool == EWW_TOOL_FILL);
-    buttpiSpray->setHighlight(
-            iActiveTool != EWW_TOOL_FILL && iTilePicked != EWW_TILE_PIPETTE && iTileDrawMode == EWW_DRAW_SPRAY);
-
-    buttpiPoint->setVisible(iActiveTool != EWW_TOOL_BRUSH);
-    buttpiLine->setVisible(iActiveTool != EWW_TOOL_BRUSH);
-    buttpiRect->setVisible(iActiveTool != EWW_TOOL_BRUSH);
-    buttpiEllipse->setVisible(iActiveTool != EWW_TOOL_BRUSH);
-    buttpiFlood->setVisible(iActiveTool != EWW_TOOL_BRUSH);
-    buttpiSpray->setVisible(iActiveTool != EWW_TOOL_BRUSH);
-    buttpiReloadBrush->setVisible(iActiveTool == EWW_TOOL_BRUSH);
-    labtpiReloadBrush->setVisible(iActiveTool == EWW_TOOL_BRUSH);
-
-    labtpiToolOptions->setVisible(iActiveTool == EWW_TOOL_PENCIL);
-    labtpiPointSize->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_POINT);
-    slitpiPointSize->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_POINT);
-    labtpiLineThickness->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_LINE);
-    slitpiLineThickness->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_LINE);
-    cbtpiRectFilled->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_RECT);
-    cbtpiEllipseFilled->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_ELLIPSE);
-    labtpiSpraySize->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_SPRAY);
-    labtpiSprayDensity->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_SPRAY);
-    slitpiSpraySize->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_SPRAY);
-    slitpiSprayDensity->setVisible(iActiveTool == EWW_TOOL_PENCIL && iTileDrawMode == EWW_DRAW_SPRAY);
-
-    if (iActiveTool == EWW_TOOL_BRUSH) {
-        iTilePickerOffUp = 0;
-        iTilePickerOffDown = 60;
-        if (iTilePicked != -1) {
-            cBrush *br = hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetBrushByIterator(iTilePicked);
-            if (iTilePicked >= 0 && br->HasSettings())
-                iTilePickerOffDown += 10 + br->GetSettingsHeight();
-        }
-    } else {
-        iTilePickerOffUp = 40 + 32 * 2;
-        iTilePickerOffDown = 70;
-    }
-    iTilePickerOffUp += 15 + 40;
-
-    cbtpiShowTileID->setVisible(iActiveTool != EWW_TOOL_BRUSH);
-    cbtpiShowProperties->setVisible(iActiveTool != EWW_TOOL_BRUSH);
-    slitpiPicker->setY(iTilePickerOffUp);
-    slitpiPicker->setHeight(winTilePicker->getHeight() - iTilePickerOffUp - iTilePickerOffDown);
-    RefreshTilePickerSlider(forceSliderRefresh);
-}
-
-void State::EditingWW::RefreshTilePickerSlider(bool forceSliderRefresh) {
-    cTileImageSet *set = hTileset->GetSet(GetActivePlane()->GetImageSet(0));
-    int scale = 0;
-    if (!set) scale = 0;
-    else {
-        if (iActiveTool == EWW_TOOL_BRUSH)
-            scale = set->GetBrushesCount() * 57 - slitpiPicker->getHeight();
-        else
-            scale = int((set->GetTilesCount() + 2) / 4 + 1) * 57 - slitpiPicker->getHeight() + 10;
-    }
-
-    slitpiPicker->setEnabled(scale > 0);
-    if (scale > 0)
-        slitpiPicker->setScaleEnd(scale);
-    else slitpiPicker->setValue(0);
-
-    if (!winTilePicker->isVisible() || forceSliderRefresh) {
-        slitpiPicker->setValue(0);
-    }
-}
-
-void State::EditingWW::HandleBrushSwitch(int itOld, int itNew) {
-    bool changed = false;
-    int oOff = 0, nOff = 0;
-    cTileImageSet *set = hTileset->GetSet(GetActivePlane()->GetImageSet(0));
-    if (itOld >= 0 && set->GetBrushByIterator(itOld)->HasSettings()) {
-        oOff = set->GetBrushByIterator(itOld)->GetSettingsHeight() + 10;
-        set->GetBrushByIterator(itOld)->RemoveSettingsFromContainer(winTilePicker);
-        changed = true;
-    }
-    if (changed) {
-        RebuildTilePicker();
-        if (nOff != oOff && slitpiPicker->isEnabled())
-            slitpiPicker->setValue(slitpiPicker->getValue() + (nOff - oOff));
-        changed = false;
-    }
-    if (itNew >= 0 && set->GetBrushByIterator(itNew)->HasSettings()) {
-        nOff = set->GetBrushByIterator(itNew)->GetSettingsHeight() + 10;
-        set->GetBrushByIterator(itNew)->AddSettingsToContainer(winTilePicker, 5,
-                                                               winTilePicker->getHeight() - 60 -
-                                                               set->GetBrushByIterator(itNew)->GetSettingsHeight());
-        changed = true;
-    }
-    if (changed) {
-        RebuildTilePicker();
-        if (nOff != oOff && slitpiPicker->isEnabled())
-            slitpiPicker->setValue(slitpiPicker->getValue() + (nOff - oOff));
-    }
 }

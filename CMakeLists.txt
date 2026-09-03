@@ -268,6 +268,7 @@ add_executable(WapMap
 	${PROJECT_SOURCE_DIR}/WapMap/windows/newMap.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/options.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/windows/tileBrowser.cpp
+	${PROJECT_SOURCE_DIR}/WapMap/windows/tilePicker.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/wViewport.cpp
 	${PROJECT_SOURCE_DIR}/WapMap/res.rc
 	${PROJECT_SOURCE_DIR}/WapMap/app.manifest

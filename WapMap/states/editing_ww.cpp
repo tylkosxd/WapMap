@@ -16,6 +16,7 @@
 #include "../windows/imgsetBrowser.h"
 #include "../windows/options.h"
 #include "../windows/about.h"
+#include "../windows/tilePicker.h"
 #include <direct.h>
 #include "../databanks/logics.h"
 #include "../databanks/tiles.h"
@@ -323,6 +324,7 @@ void State::EditingWW::Init() {
     hwinPaletteBrowser = new winPaletteBrowser();
     hwinGoToCoords = new winGoToCoords();
     hwinLocationsBrowser = new winLocationsBrowser();
+    hwinTilePicker = new winTilePicker();
     hWindows.push_back(hwinNewMap);
     hWindows.push_back(hwinOptions);
     hWindows.push_back(hwinHotkeys);
@@ -332,6 +334,7 @@ void State::EditingWW::Init() {
     hWindows.push_back(hwinPaletteBrowser);
     hWindows.push_back(hwinGoToCoords);
     hWindows.push_back(hwinLocationsBrowser);
+    hWindows.push_back(hwinTilePicker);
 
     for (auto & hWindow : hWindows) {
         SHR::Win *win = hWindow->GetWindow();
@@ -341,126 +344,12 @@ void State::EditingWW::Init() {
         }
     }
 
-    winTilePicker = new SHR::Win(&GV->gcnParts, GETL2S("TilePicker", "WinCaption"));
-    winTilePicker->setDimension(gcn::Rectangle(0, 0, 250, vPort->GetHeight()));
-    winTilePicker->setClose(1);
-    winTilePicker->addActionListener(mainListener);
-    winTilePicker->setVisible(0);
-    conMain->add(winTilePicker, vPort->GetX(), vPort->GetY());
-    btpiFixedPos = 0;
-
-    vptpi = new WIDG::Viewport(vp, VP_TILEPICKER);
-    winTilePicker->add(vptpi, 0, 0);
-
-    buttpiModePencil = MakeButton(5, 15, Icon_Pencil, winTilePicker);
-    labtpiModePencil = new SHR::Lab(GETL2S("TilePicker", "ModePencil"));
-    labtpiModePencil->adjustSize();
-    winTilePicker->add(labtpiModePencil, 5 + 35, 15 + 6);
-    buttpiModeBrush = MakeButton(115, 15, Icon_Brush, winTilePicker);
-    labtpiModeBrush = new SHR::Lab(GETL2S("TilePicker", "ModeBrush"));
-    labtpiModeBrush->adjustSize();
-    winTilePicker->add(labtpiModeBrush, 115 + 35, 15 + 6);
-
-    buttpiPoint = MakeButton(5, 15 + 40, Icon_Point, winTilePicker);
-    buttpiLine = MakeButton(5 + 32, 15 + 40, Icon_Line, winTilePicker);
-    buttpiRect = MakeButton(5, 15 + 40 + 32, Icon_Rect, winTilePicker);
-    buttpiEllipse = MakeButton(5 + 32, 15 + 40 + 32, Icon_Ellipse, winTilePicker);
-    buttpiFlood = MakeButton(5, 15 + 40 + 32 * 2, Icon_Fill, winTilePicker);
-    buttpiSpray = MakeButton(5 + 32, 15 + 40 + 32 * 2, Icon_Spray, winTilePicker);
-
-    labtpiToolOptions = new SHR::Lab(GETL2S("TilePicker", "ToolOptions"));
-    labtpiToolOptions->adjustSize();
-    winTilePicker->add(labtpiToolOptions, 10 + 64, 55);
-
-    char labtmp[128];
-    sprintf(labtmp, "%s: 1", GETL2S("TilePicker", "Pointsize"));
-    labtpiPointSize = new SHR::Lab(labtmp);
-    labtpiPointSize->adjustSize();
-    winTilePicker->add(labtpiPointSize, 15 + 64, 45 + 30);
-
-    slitpiPointSize = new SHR::Slider(1, 20);
-    slitpiPointSize->setOrientation(SHR::Slider::HORIZONTAL);
-    slitpiPointSize->setStyle(SHR::Slider::POINTER);
-    slitpiPointSize->setDimension(gcn::Rectangle(0, 0, 150, 14));
-    slitpiPointSize->addActionListener(mainListener);
-    winTilePicker->add(slitpiPointSize, 15 + 64, 45 + 50);
-
-    sprintf(labtmp, "%s: 1", GETL2S("TilePicker", "LineThickness"));
-    labtpiLineThickness = new SHR::Lab(labtmp);
-    labtpiLineThickness->adjustSize();
-    winTilePicker->add(labtpiLineThickness, 15 + 64, 45 + 30);
-
-    slitpiLineThickness = new SHR::Slider(1, 20);
-    slitpiLineThickness->setOrientation(SHR::Slider::HORIZONTAL);
-    slitpiLineThickness->setStyle(SHR::Slider::POINTER);
-    slitpiLineThickness->setDimension(gcn::Rectangle(0, 0, 150, 14));
-    slitpiLineThickness->addActionListener(mainListener);
-    winTilePicker->add(slitpiLineThickness, 15 + 64, 45 + 50);
-
-    cbtpiRectFilled = new SHR::CBox(GV->hGfxInterface, GETL2S("TilePicker", "Filled"));
-    cbtpiRectFilled->setSelected(1);
-    cbtpiRectFilled->adjustSize();
-    winTilePicker->add(cbtpiRectFilled, 15 + 64, 45 + 30);
-
-    cbtpiEllipseFilled = new SHR::CBox(GV->hGfxInterface, GETL2S("TilePicker", "Filled"));
-    cbtpiEllipseFilled->setSelected(1);
-    cbtpiEllipseFilled->adjustSize();
-    winTilePicker->add(cbtpiEllipseFilled, 15 + 64, 45 + 30);
-
-    sprintf(labtmp, "%s: 2", GETL2S("TilePicker", "SpraySize"));
-    labtpiSpraySize = new SHR::Lab(labtmp);
-    labtpiSpraySize->adjustSize();
-    winTilePicker->add(labtpiSpraySize, 15 + 64, 45 + 30);
-
-    slitpiSpraySize = new SHR::Slider(2, 20);
-    slitpiSpraySize->setOrientation(SHR::Slider::HORIZONTAL);
-    slitpiSpraySize->setStyle(SHR::Slider::POINTER);
-    slitpiSpraySize->addActionListener(mainListener);
-    slitpiSpraySize->setDimension(gcn::Rectangle(0, 0, 150, 14));
-    winTilePicker->add(slitpiSpraySize, 15 + 64, 45 + 50);
-
-    sprintf(labtmp, "%s: 50%%", GETL2S("TilePicker", "SprayDensity"));
-    labtpiSprayDensity = new SHR::Lab(labtmp);
-    labtpiSprayDensity->adjustSize();
-    winTilePicker->add(labtpiSprayDensity, 15 + 64, 45 + 70);
-
-    slitpiSprayDensity = new SHR::Slider(10, 100);
-    slitpiSprayDensity->setOrientation(SHR::Slider::HORIZONTAL);
-    slitpiSprayDensity->setStyle(SHR::Slider::POINTER);
-    slitpiSprayDensity->addActionListener(mainListener);
-    slitpiSprayDensity->setValue(50);
-    slitpiSprayDensity->setDimension(gcn::Rectangle(0, 0, 150, 14));
-    winTilePicker->add(slitpiSprayDensity, 15 + 64, 45 + 90);
-
-
-    buttpiReloadBrush = MakeButton(5, 10, Icon_Reload, winTilePicker);
-    labtpiReloadBrush = new SHR::Lab(GETL2S("TilePicker", "ReloadBrushes"));
-    labtpiReloadBrush->adjustSize();
-    winTilePicker->add(labtpiReloadBrush, 5 + 35, 10);
-
-    //cbtpiShowTileID = new SHR::CBox()
-    cbtpiShowTileID = new SHR::CBox(GV->hGfxInterface, GETL2S("TilePicker", "ShowTileID"));
-    cbtpiShowTileID->adjustSize();
-    cbtpiShowTileID->addActionListener(mainListener);
-    winTilePicker->add(cbtpiShowTileID, 5, 10);
-
-    cbtpiShowProperties = new SHR::CBox(GV->hGfxInterface, GETL2S("TilePicker", "ShowTileProp"));
-    cbtpiShowProperties->adjustSize();
-    cbtpiShowProperties->addActionListener(mainListener);
-    winTilePicker->add(cbtpiShowProperties, 5, 10);
-
-    slitpiPicker = new SHR::Slider(0);
-    slitpiPicker->setOrientation(SHR::Slider::VERTICAL);
-    slitpiPicker->setDimension(gcn::Rectangle(0, 0, 15, 100));
-    slitpiPicker->setMarkerLength(40);
-    winTilePicker->add(slitpiPicker, 230, 100);
-
     wintpFillColor = new SHR::Win(&GV->gcnParts, GETL(Lang_FillColor));
     wintpFillColor->setDimension(gcn::Rectangle(0, 0, 194, 61));
     wintpFillColor->setMovable(1);
     wintpFillColor->setVisible(0);
     wintpFillColor->setClose(0);
-    conMain->add(wintpFillColor, 250, hge->System_GetState(HGE_SCREENHEIGHT) - 97);
+    conMain->add(wintpFillColor, 292, vPort->GetY() + 291);
 
     vptpfcPalette = new WIDG::Viewport(vp, VP_FILLCOLOR);
     vptpfcPalette->setVisible(0);
@@ -2534,8 +2423,9 @@ void State::EditingWW::OpenTool(int iNewTool) {
             iTileDrawMode = EWW_DRAW_POINT;
         }
         iActiveTool = iNewTool;
-        RebuildTilePicker(true);
-        winTilePicker->setVisible(true);
+        hwinTilePicker->Rebuild(true);
+        if (!hwinTilePicker->isOpened())
+            hwinTilePicker->Open();
     } else if (iNewTool == EWW_TOOL_WRITEID) {
         hmbTile->butIconWriteID->setHighlight(true);
         iTileWriteIDx = iTileWriteIDy = -1;
@@ -2546,9 +2436,9 @@ void State::EditingWW::OpenTool(int iNewTool) {
         hmbTile->butIconBrush->setHighlight(true);
         iActiveTool = iNewTool;
         iTileDrawMode = EWW_DRAW_POINT;
-        RebuildTilePicker(true);
-        if (!winTilePicker->isVisible())
-            winTilePicker->setVisible(true);
+        hwinTilePicker->Rebuild(true);
+        if (!hwinTilePicker->isOpened())
+            hwinTilePicker->Open();
         iLastBrushPlacedX = iLastBrushPlacedY = -1;
     } else if (iNewTool == EWW_TOOL_BRUSHOBJECT) {
         winObjectBrush->setPosition(vPort->GetX(), vPort->GetY() + vPort->GetHeight() - winObjectBrush->getHeight());
@@ -2597,9 +2487,8 @@ void State::EditingWW::CloseTool(int iNewTool) {
         hmbTile->butIconFill->setHighlight(false);
         if (iNewTool != EWW_TOOL_PENCIL && iNewTool != EWW_TOOL_FILL) {
             iTilePicked = EWW_TILE_NONE;
-            if (iNewTool != EWW_TOOL_BRUSH) {
-                winTilePicker->setVisible(false);
-            }
+            if (iNewTool != EWW_TOOL_BRUSH)
+                hwinTilePicker->Close();
         }
         wintpFillColor->setVisible(false);
         vTileGhosting.clear();
@@ -2612,15 +2501,11 @@ void State::EditingWW::CloseTool(int iNewTool) {
         winSpacing->setVisible(false);
     } else if (iActiveTool == EWW_TOOL_BRUSH) {
         hmbTile->butIconBrush->setHighlight(false);
-        if (iNewTool != EWW_TOOL_PENCIL && iNewTool != EWW_TOOL_FILL) {
-            winTilePicker->setVisible(false);
-        }
-
-        if (iTilePicked >= 0 && MDI->GetActiveDoc() != NULL)
-            hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetBrushByIterator(
-                    iTilePicked)->RemoveSettingsFromContainer(winTilePicker);
+        hwinTilePicker->CloseBrush();
         vTileGhosting.clear();
         iTilePicked = EWW_TILE_NONE;
+        if (iNewTool != EWW_TOOL_PENCIL && iNewTool != EWW_TOOL_FILL)
+            hwinTilePicker->Close();
     } else if (iActiveTool == EWW_TOOL_DUPLICATE) {
         winDuplicate->setVisible(false);
     } else if (iActiveTool == EWW_TOOL_BRUSHOBJECT) {
@@ -2731,7 +2616,7 @@ void State::EditingWW::SwitchPlane() {
     }
     if (iActiveTool == EWW_TOOL_BRUSH || iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PENCIL) {
         iTilePicked = EWW_TILE_NONE;
-        RefreshTilePickerSlider();
+        hwinTilePicker->RefreshSlider();
     }
     if (iActiveTool == EWW_TOOL_BRUSH)
         vTileGhosting.clear();
@@ -3229,12 +3114,6 @@ void State::EditingWW::DocumentSwitched() {
 
     cbutActiveMode->setVisible(true);
 
-    if (iActiveTool == EWW_TOOL_BRUSH || iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PENCIL) {
-        if (iActiveTool == EWW_TOOL_BRUSH && MDI->GetActiveDoc() != NULL && iTilePicked != EWW_TILE_NONE)
-            HandleBrushSwitch(iTilePicked, EWW_TILE_NONE);
-        iTilePicked = EWW_TILE_NONE;
-    }
-
     hParser = MDI->GetActiveDoc()->hParser;
     SprBank = MDI->GetActiveDoc()->hSprBank;
     hTileset = MDI->GetActiveDoc()->hTilesBank;
@@ -3348,8 +3227,6 @@ void State::EditingWW::DocumentSwitched() {
         //SwitchActiveModeMenuBar(cbutActiveMode->getSelectedEntryID() ? (cModeMenuBar*)hmbObject : (cModeMenuBar*)hmbTile);
     }
     FixInterfacePositions();
-
-    slitpiPicker->setValue(0);
 }
 
 void State::EditingWW::SetZoom(float fZ) {

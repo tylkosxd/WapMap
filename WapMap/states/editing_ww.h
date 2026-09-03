@@ -125,9 +125,8 @@ typedef unsigned long DWORD;
 #define VP_PLANEPROPERTIES  17
 #define VP_WELCOMESCREEN    18
 #define VP_CRASHRETRIEVE    19
-#define VP_TILEPICKER       20
-#define VP_LOGICBROWSER     21
-#define VP_TILEBROWSER      22
+#define VP_LOGICBROWSER     20
+#define VP_TILEBROWSER      21
 
 #define LMODEL_PLANES           0
 #define LMODEL_SCALE            1
@@ -309,6 +308,8 @@ class winImageSetBrowser;
 class winOptions;
 
 class winAbout;
+
+class winTilePicker;
 
 namespace SHR {
     class ComboBut;
@@ -673,6 +674,8 @@ namespace State {
         int iActiveTool;
 
         int iTilePicked;
+        int iPipetteTileHL;
+        
         bool lockDrawing;
 
         bool bExit;
@@ -1048,31 +1051,9 @@ namespace State {
 
         SHR::Slider *sliZoom;
 
-        //tilepicker
-        SHR::Win *winTilePicker;
-        SHR::But *buttpiModePencil, *buttpiModeBrush, *buttpiSpray, *buttpiReloadBrush,
-                *buttpiPoint, *buttpiLine, *buttpiRect, *buttpiEllipse, *buttpiFlood;
-        SHR::Lab *labtpiReloadBrush, *labtpiModePencil, *labtpiModeBrush, *labtpiToolOptions, *labtpiPointSize, *labtpiSpraySize,
-                *labtpiSprayDensity, *labtpiLineThickness;
-        SHR::CBox *cbtpiRectFilled, *cbtpiEllipseFilled;
-        SHR::Slider *slitpiPointSize, *slitpiSpraySize, *slitpiSprayDensity, *slitpiLineThickness;
-        SHR::CBox *cbtpiShowTileID, *cbtpiShowProperties;
-        SHR::Slider *slitpiPicker;
-        int iTilePickerOffUp, iTilePickerOffDown;
-        int iTileDrawMode;
-        int iPipetteTileHL;
-        bool btpiFixedPos;
-        WIDG::Viewport *vptpi;
-
         //float fHomeBackButTimer;
 
-        void RebuildTilePicker(bool forceSliderRefresh = false);
-
-        void RefreshTilePickerSlider(bool forceSliderRefresh = false);
-
-        void DrawTilePicker();
-
-        void HandleBrushSwitch(int itOld, int itNew);
+        int iTileDrawMode;
 
         void SyncDB_ImageSets();
 
@@ -1097,6 +1078,7 @@ namespace State {
         winPaletteBrowser *hwinPaletteBrowser;
         winGoToCoords *hwinGoToCoords;
         winLocationsBrowser *hwinLocationsBrowser;
+        winTilePicker *hwinTilePicker;
 
         void TextEditMoveToNextTile(bool saving = false);
 

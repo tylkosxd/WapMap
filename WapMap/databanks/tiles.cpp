@@ -12,6 +12,7 @@
 #include "../states/dialog.h"
 #include "../version.h"
 #include "../windows/tileBrowser.h"
+#include "../windows/tilePicker.h"
 
 extern structProgressInfo _ghProgressInfo;
 extern HGE *hge;
@@ -69,12 +70,12 @@ void cBankTile::BatchProcessEnd() {
     }
     if (bReloadBrushes) {
         if (GV->editState->iActiveTool == EWW_TOOL_BRUSH) {
-            GV->editState->HandleBrushSwitch(GV->editState->iTilePicked, EWW_TILE_NONE);
+            GV->editState->hwinTilePicker->HandleBrushSwitch(GV->editState->iTilePicked, EWW_TILE_NONE);
             GV->editState->iTilePicked = EWW_TILE_NONE;
         }
         ReloadBrushes();
         if (GV->editState->iActiveTool == EWW_TOOL_BRUSH) {
-            GV->editState->RebuildTilePicker();
+            GV->editState->hwinTilePicker->Rebuild();
         }
     }
 

@@ -26,8 +26,6 @@ namespace State {
             m_hOwn->DrawWelcomeScreen();
         } else if (iCode == VP_CRASHRETRIEVE) {
             m_hOwn->DrawCrashRetrieve();
-        } else if (iCode == VP_TILEPICKER) {
-            m_hOwn->DrawTilePicker();
         }
     }
 

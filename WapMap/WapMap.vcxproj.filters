@@ -261,7 +261,10 @@
     <ClCompile Include="windows\about.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-      <ClCompile Include="windows\hotkeys.cpp">
+    <ClCompile Include="windows\hotkeys.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\tilePicker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="windows\imgsetBrowser.cpp">
@@ -1058,9 +1061,13 @@
     <ClInclude Include="objEdit\editLavaHand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-      <ClInclude Include="windows\hotkeys.h">
+    <ClInclude Include="windows\hotkeys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="windows\tilePicker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res.rc">
