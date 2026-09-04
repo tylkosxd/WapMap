@@ -160,7 +160,7 @@ std::string LocationsList::getElementAt(int i) {
     return name;
 }
 
-inline const char* getStr(const wchar_t* wstr) {
+const char* winLocationsBrowser::getStr(const wchar_t* wstr) {
     return GETL2SV("Win_GoToLocations", wstr);
 }
 

@@ -62,6 +62,8 @@ class winLocationsBrowser : public cWindow {
 
         int m_selectedTab = Locs::Favourites;
 
+        const char* getStr(const wchar_t* str);
+        
         void RefreshLists();
 
     public:

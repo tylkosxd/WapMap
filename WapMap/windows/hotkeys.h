@@ -8,6 +8,7 @@
 
 class winHotkeys : public cWindow {
 private:
+    const char* getStr(const wchar_t* str);
     WIDG::Viewport *vp;
     int m_width, m_height;
     int m_hotkeysPerFrame, m_separatorX, m_descrWidth, m_descrSpacing;
