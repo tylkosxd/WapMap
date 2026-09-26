@@ -83,6 +83,12 @@ public:
 
     const char *GetName() { return m_szName; }
 
+    void SetName(const char* str) { 
+        delete [] m_szName;
+        m_szName = new char[strlen(str) + 1];
+        strcpy(m_szName, str);
+    };
+
     void UpdateHash();
 
     std::string GetHash() { return strHash; }

@@ -12,12 +12,17 @@ namespace State {
         return ShowDialog(pszTitle, pszErrorString, piIcon, piButtons);
     }
 
-    int InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons, const char* textFieldInitValue) {
-        return ShowDialog(pszTitle, pszErrorString, 0, piButtons | ST_DIALOG_TEXT_FIELD, textFieldInitValue);
+    int InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons, const char* textFieldInitValue, int length) {
+        return ShowDialog(pszTitle, pszErrorString, 0, piButtons | ST_DIALOG_TEXT_FIELD, textFieldInitValue, 0, length);
     }
 
-    const ReturnCode& ShowDialog(const char* pszTitle, const char* pszErrorString, int piIcon, int piButtons, const char* textFieldInitValue) {
-        auto dialog = new Dialog(pszTitle, pszErrorString, piIcon, piButtons, textFieldInitValue);
+    int InputNumericalDialog(const char *pszTitle, const char *pszErrorString, int piButtons, const char* textFieldInitValue, int length) {
+        return ShowDialog(pszTitle, pszErrorString, 0, piButtons | ST_DIALOG_TEXT_FIELD, textFieldInitValue, 1, length);
+    }
+
+    const ReturnCode& ShowDialog(const char* pszTitle, const char* pszErrorString, int piIcon, int piButtons, const char* textFieldInitValue,
+                bool numerical, int length) {
+        auto dialog = new Dialog(pszTitle, pszErrorString, piIcon, piButtons, textFieldInitValue, numerical, length);
         dialog->Init();
         GV->StateMgr->Push(dialog);
         do {
@@ -27,7 +32,8 @@ namespace State {
     }
 }
 
-State::Dialog::Dialog(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons, const char* textFieldInitValue) {
+State::Dialog::Dialog(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons, const char* textFieldInitValue,
+        bool numerical, int length) {
     iIcon = piIcon;
     iButtons = piButtons;
     szTitle = new char[strlen(pszTitle) + 1];
@@ -35,6 +41,8 @@ State::Dialog::Dialog(const char *pszTitle, const char *pszErrorString, int piIc
     szMessage = new char[strlen(pszErrorString) + 1];
     strcpy(szMessage, pszErrorString);
     initialText = textFieldInitValue;
+    bNumerical = numerical;
+    iLength = length;
 }
 
 void State::Dialog::Init() {
@@ -73,6 +81,10 @@ void State::Dialog::Init() {
 
     if (textField) {
         textField->setDimension(gcn::Rectangle(0, 0, width - (iIcon ? 90 : 15), 20));
+        if (bNumerical)
+            textField->SetNumerical(1);
+        if (iLength)
+            textField->setMaxLength(iLength);
         win->add(textField, iIcon ? 72 : 5, messageHeight + 12);
     }
 

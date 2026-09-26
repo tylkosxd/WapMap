@@ -9,6 +9,7 @@
 #include "window.h"
 
 class cTile;
+class cTileImageSet;
 
 class winTileBrowser : public cWindow {
 private:
@@ -27,6 +28,14 @@ private:
     std::vector<cTile *> *hSingleGroup;
     std::vector<cTile *> vtGroups[3];
     int m_iGroupTilesW, m_iGroupTilesH;
+
+    SHR::Lab *MakeLabel(const wchar_t* lstr, int x, int y);
+
+    SHR::But *MakeButton(const wchar_t* lstr, Gfx16Icons icon, int x, int y, int w = 150, int h = 20);
+
+    void RenameTileSet(cTileImageSet* ts);
+
+    void ChangeTileID(cTileImageSet* ts);
 
     int MouseHandleGroup(std::vector<cTile *> tiles, int x, int y, int tilesPerRow);
 

@@ -31,15 +31,21 @@
 #define RETURN_SKIP             5
 
 namespace State {
-    const ReturnCode& ShowDialog(const char* pszTitle, const char* pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0);
+    const ReturnCode& ShowDialog(const char* pszTitle, const char* pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK,
+            const char* textFieldInitValue = 0, bool numerical = 0, int length = 0);
 
     int MessageBox(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK);
 
-    int InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0);
+    int InputDialog(const char *pszTitle, const char *pszErrorString, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0,
+            int length = 0);
+
+    int InputNumericalDialog(const char *pszTitle, const char *pszErrorString, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0,
+            int length = 0);
 
     class Dialog : public SHR::cState, gcn::KeyListener, gcn::ActionListener {
     public:
-        Dialog(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0);
+        Dialog(const char *pszTitle, const char *pszErrorString, int piIcon, int piButtons = ST_DIALOG_BUT_OK, const char* textFieldInitValue = 0,
+                bool numerical = 0, int length = 0);
 
         void Init() override;
 
@@ -61,6 +67,8 @@ namespace State {
         int iIcon, iButtons;
         SHR::But *butOK, *butYes, *butNo, *butCancel, *butRetry, *butSkip;
         SHR::TextField *textField;
+        bool bNumerical;
+        int iLength;
         char *szMessage, *szTitle;
         int messageHeight;
         const char *initialText;
