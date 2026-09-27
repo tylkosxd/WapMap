@@ -2950,7 +2950,7 @@ void State::EditingWW::ViewportOverlay() {
 }
 
 void State::EditingWW::RenderCloudTip(int x, int y, int w, int h, int ax, int ay) {
-    SHR::SetQuad(&q, GV->colBase & 0x7FFFFFFF, x, y, x + w, y + h);
+    SHR::SetQuad(&q, GV->colBase & 0xAFFFFFFF, x, y, x + w, y + h);
     hge->Gfx_RenderQuad(&q);
     hgeTriple tr;
     tr.tex = 0;
@@ -2987,13 +2987,21 @@ void State::EditingWW::RenderTileClipboardPreview() {
 
     cTileClipboardEntry *cbEntry = arTileClipboard[iCurTileCbE];
 
-    int tileW = 64, tileH = 64;
+    auto *ts = hTileset->GetSet(cbEntry->imageset);
+    int tileW = ts ? ts->GetTilesWidth() : 64,
+        tileH = ts ? ts->GetTilesHeight() : 64;
+    int sprTileW = hTileset->GetMaxTileWidth(),
+        sprTileH = hTileset->GetMaxTileHeight();
     if (tileW * cbEntry->width > 400 || tileW * cbEntry->height > 400) {
         int bigger = cbEntry->width > cbEntry->height ? cbEntry->width : cbEntry->height;
-        tileW = 400 / bigger;
-        tileH = 400 / bigger;
+        int d = 400 / bigger;
+        sprTileW = d * sprTileW / tileW;
+        sprTileH = d * sprTileH / tileH;
+        tileW = d;
+        tileH = d;
     }
-    int px = 24, py = hge->System_GetState(HGE_SCREENHEIGHT) - (tileH * cbEntry->height) - 100;
+    int px = 24,
+        py = hge->System_GetState(HGE_SCREENHEIGHT) - (tileH * cbEntry->height) - 100;
     RenderCloudTip(px - 14, py - 10, tileW * cbEntry->width + 28, tileH * cbEntry->height + 55, butMicroTileCB->getX() + 12,
                    butMicroTileCB->getY() - 3);
     for (int i = 0, y = 0; y < cbEntry->height; y++) {
@@ -3002,15 +3010,17 @@ void State::EditingWW::RenderTileClipboardPreview() {
             if (tile->IsInvisible() || tile->IsFilled())
                 continue;
             uint16_t id = tile->GetID();
-            cTile *tileImg = hTileset->GetTile(cbEntry->imageset, id);
+            cTile *tileImg = ts->GetTile(id);
+            int dx = px + tileW * x,
+                dy = py + tileH * y;
             if (!tileImg) {
-                GV->sprUnknownTile->RenderStretch(px + tileW * x, py + tileH * y, px + tileW * (x + 1), py + tileH * (y + 1));
+                GV->sprUnknownTile->RenderStretch(dx, dy, dx + sprTileW, dy + sprTileH);
             } else {
                 hgeSprite *spr = tileImg->GetImage();
                 spr->SetColor(0xFFFFFFFF);
                 spr->SetFlip(0, 0);
                 spr->SetHotSpot(0, 0);
-                spr->RenderStretch(px + tileW * x, py + tileH * y, px + tileW * (x + 1), py + tileH * (y + 1));
+                spr->RenderStretch(dx, dy, dx + sprTileW, dy + sprTileH);
             }
         }
     }
