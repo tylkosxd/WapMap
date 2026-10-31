@@ -11,14 +11,16 @@
 class winTilePicker : public cWindow {
 private:
     SHR::But *MakeButton(int x, int y, Gfx32Icons icon);
-    SHR::But *butSpray, *butReloadBrush, *butPoint, *butLine, *butRect, *butEllipse, *butFlood;
-    SHR::Lab *labReloadBrush, *labToolOptions, *labPointSize, *labSpraySize, *labSprayDensity, *labLineThickness;
+    void RenderSingleTile(int i, int x, int y, int d, DWORD borderColor, bool drawInfo, bool byTileID = 0);
+    SHR::But *butSpray, *butReloadBrush, *butPoint, *butLine, *butRect, *butEllipse, *butFlood, *butPipette, *butBrush;
+    SHR::Lab *labReloadBrush, *labPointSize, *labSpraySize, *labSprayDensity, *labLineThickness;
     SHR::CBox *cbRectFilled, *cbEllipseFilled;
     SHR::Slider *sliPointSize, *sliSpraySize, *sliSprayDensity, *sliLineThickness;
     SHR::CBox *cbShowTileID, *cbShowProperties;
     SHR::Slider *sliPicker;
     int iTilePickerOffUp, iTilePickerOffDown;
     int iTileDim = 64;
+    int iInventorySeparator = 56;
     WIDG::Viewport *vp;
 
 public:

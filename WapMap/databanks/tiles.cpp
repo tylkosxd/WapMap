@@ -70,8 +70,8 @@ void cBankTile::BatchProcessEnd() {
     }
     if (bReloadBrushes) {
         if (GV->editState->iActiveTool == EWW_TOOL_BRUSH) {
-            GV->editState->hwinTilePicker->HandleBrushSwitch(GV->editState->iTilePicked, EWW_TILE_NONE);
-            GV->editState->iTilePicked = EWW_TILE_NONE;
+            GV->editState->hwinTilePicker->HandleBrushSwitch(GV->editState->MDI->GetActiveDoc()->iBrushPicked, EWW_TILE_NONE);
+            GV->editState->MDI->GetActiveDoc()->iBrushPicked = EWW_TILE_NONE;
         }
         ReloadBrushes();
         if (GV->editState->iActiveTool == EWW_TOOL_BRUSH) {

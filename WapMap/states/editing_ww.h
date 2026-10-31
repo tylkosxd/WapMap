@@ -79,6 +79,7 @@ typedef unsigned long DWORD;
 #define EWW_TOOL_FILL            3  //tile mode flood feature
 #define EWW_TOOL_WRITEID         4 //tile mode write id
 #define EWW_TOOL_ZOOM            5 //zoom
+#define EWW_TOOL_PIPETTE         6 //pipette
 
 #define EWW_TOOL_DUPLICATE       9  //object duplication
 #define EWW_TOOL_MOVEOBJECT      10  //moving objects, self-explaining
@@ -99,7 +100,8 @@ typedef unsigned long DWORD;
 #define EWW_TILE_NONE       -1
 #define EWW_TILE_FILL       -2
 #define EWW_TILE_ERASE      -3
-#define EWW_TILE_PIPETTE    -4
+#define EWW_TILE_HIGHLIGHT  -4
+#define EWW_TILE_UNKNOWN    -5
 
 #define EWW_DRAW_POINT      0
 #define EWW_DRAW_LINE       1
@@ -673,7 +675,6 @@ namespace State {
         int iMode;
         int iActiveTool;
 
-        int iTilePicked;
         int iPipetteTileHL;
         
         bool lockDrawing;
@@ -768,11 +769,33 @@ namespace State {
 
         void ExitMode(int piMode);
 
-        bool TileThink(bool pbConsumed);
-
         bool ObjectThink(bool pbConsumed);
 
+        bool TileThink(bool pbConsumed);
+
+        void PipetteTileHighlight();
+
+        void TileClipboardGhostPreview(int mouseX, int mouseY);
+
         void FloodFill(int x, int y, int tile);
+
+        void PencilThink(int hx, int hy, int hxUnwrapped, int hyUnwrapped);
+
+        void WriteIDThink(int hx, int hy);
+
+        bool PipetteThink(int hx, int hy);
+
+        void PencilPointThink(int *hx, int *hy, int hxUnwrapped, int hyUnwrapped);
+
+        void PencilLineThink(int hx, int hy);
+
+        void PencilRectThink(int hx, int hy);
+
+        void PencilEllipseThink(int hx, int hy);
+
+        void AddTileToTileGhosting(int i, int x, int y);
+
+        void PlacePencilTiles();
 
         void DrawTileAttributes(int tileId, float posX, float posY, float widthMod, float heightMod, unsigned char a = 255);
 

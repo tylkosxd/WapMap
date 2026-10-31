@@ -11,7 +11,10 @@ void State::EditingWW::HandleHotkeys() {
     float mx, my;
     hge->Input_GetMousePos(&mx, &my);
     bool bFocus = vPort->GetWidget()->isFocused();
-    if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_A)) {
+    bool bCtrl = hge->Input_GetKeyState(HGEK_CTRL),
+        bShift = hge->Input_GetKeyState(HGEK_SHIFT),
+        bAlt = hge->Input_GetKeyState(HGEK_ALT);
+    if (bFocus && bCtrl && hge->Input_KeyDown(HGEK_A)) {
         if (iMode == EWW_MODE_TILE) {
             iTileSelectX1 = iTileSelectY1 = 0;
             iTileSelectX2 = GetActivePlane()->GetPlaneWidth() - 1;
@@ -25,29 +28,29 @@ void State::EditingWW::HandleHotkeys() {
     } else if (iMode == EWW_MODE_OBJECT && vObjectsPicked.size() > 0 && iActiveTool == EWW_TOOL_NONE &&
                (hge->Input_KeyDown(HGEK_PGUP) || hge->Input_KeyDown(HGEK_PGDN))) {
         int id = (hge->Input_KeyDown(HGEK_PGUP) ? OBJMENU_ZC_INC : OBJMENU_ZC_DEC);
-        if (hge->Input_GetKeyState(HGEK_SHIFT))
+        if (bShift)
             id += 2;
-        else if (hge->Input_GetKeyState(HGEK_CTRL))
+        else if (bCtrl)
             id += 1;
         objZCoordContext->EmulateClickID(id);
-    } else if (iMode == EWW_MODE_OBJECT && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_F) &&
+    } else if (iMode == EWW_MODE_OBJECT && bCtrl && hge->Input_KeyDown(HGEK_F) &&
                hmbObject->butIconSearchObject->isEnabled()) {
         hmbObject->butIconSearchObject->simulatePress();
-    } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_X) &&
+    } else if (bFocus && bCtrl && hge->Input_KeyDown(HGEK_X) &&
                vObjectsPicked.size() != 0 && iMode == EWW_MODE_OBJECT) {
         objContext->EmulateClickID(OBJMENU_CUT);
-    } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_C) &&
+    } else if (bFocus && bCtrl && hge->Input_KeyDown(HGEK_C) &&
                vObjectsPicked.size() != 0 && iMode == EWW_MODE_OBJECT) {
         objContext->EmulateClickID(OBJMENU_COPY);
-    } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_C) && iMode == EWW_MODE_TILE &&
+    } else if (bFocus && bCtrl && hge->Input_KeyDown(HGEK_C) && iMode == EWW_MODE_TILE &&
                iTileSelectX1 != -1 && iTileSelectX2 != -1 && iTileSelectY1 != -1 && iTileSelectY2 != -1) {
         tilContext->EmulateClickID(TILMENU_COPY);
-    } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_X) && iMode == EWW_MODE_TILE &&
+    } else if (bFocus && bCtrl && hge->Input_KeyDown(HGEK_X) && iMode == EWW_MODE_TILE &&
                iTileSelectX1 != -1 && iTileSelectX2 != -1 && iTileSelectY1 != -1 && iTileSelectY2 != -1) {
         tilContext->EmulateClickID(TILMENU_CUT);
     } else if (bFocus && iMode == EWW_MODE_TILE && iCurTileCbE != CLIPBOARD_IS_EMPTY &&
-               ((hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_V)) ||
-                (bFocus && hge->Input_GetKeyState(HGEK_ALT) && hge->Input_KeyDown(HGEK_LBUTTON)))) {
+               ((bCtrl && hge->Input_KeyDown(HGEK_V)) ||
+                (bFocus && bAlt && hge->Input_KeyDown(HGEK_LBUTTON)))) {
         float mx, my;
         hge->Input_GetMousePos(&mx, &my);
         contextX = mx;
@@ -58,51 +61,78 @@ void State::EditingWW::HandleHotkeys() {
         tilContext->EmulateClickID(TILMENU_DELETE);
     } else if (bFocus && hge->Input_KeyDown(HGEK_DELETE) && vObjectsPicked.size() != 0) {
         objContext->EmulateClickID(OBJMENU_DELETE);
-    } else if (hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_GetKeyState(HGEK_ALT) && hge->Input_KeyDown(HGEK_P)) {
+    } else if (bCtrl && bAlt && hge->Input_KeyDown(HGEK_P)) {
 
-    } else if (iMode == EWW_MODE_TILE && (iActiveTool == EWW_TOOL_BRUSH || iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL)) {
+    } else if (iMode == EWW_MODE_TILE && (iActiveTool == EWW_TOOL_BRUSH || iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PIPETTE)) {
         if (hge->Input_KeyDown(HGEK_R)) {
             SetTool(EWW_TOOL_PENCIL);
-            iTilePicked = EWW_TILE_ERASE;
+            MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot] = EWW_TILE_ERASE;
             vPort->MarkToRedraw();
         }
-        else if (hge->Input_KeyDown(HGEK_P) && (iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL)) {
-            iTilePicked = EWW_TILE_PIPETTE;
+        else if (hge->Input_KeyDown(HGEK_P)) {
+            SetTool(EWW_TOOL_PIPETTE);
             vPort->MarkToRedraw();
         }
         else if (hge->Input_KeyDown(HGEK_F)) {
             SetTool(EWW_TOOL_PENCIL);
-            iTilePicked = EWW_TILE_FILL;
+            MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot] = EWW_TILE_FILL;
             vPort->MarkToRedraw();
         }
-
-        int iOldP = iTilePicked;
-        if (hge->Input_KeyDown(HGEK_ADD)) {
-            if ((iActiveTool == EWW_TOOL_PENCIL &&
-                 iTilePicked + 1 < hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetTilesCount()) ||
-                (iActiveTool == EWW_TOOL_BRUSH &&
-                 iTilePicked + 1 < hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetBrushesCount())) {
-                iTilePicked++;
-                vPort->MarkToRedraw();
-            }
-        } else if (hge->Input_KeyDown(HGEK_SUBTRACT)) {
-            if (iTilePicked > 0) {
-                iTilePicked--;
-                vPort->MarkToRedraw();
-            }
+        
+        int bNewTileSlot = 0;
+        if (hge->Input_KeyDown(HGEK_1)) {
+            MDI->GetActiveDoc()->iTileSlot = 0;
+            bNewTileSlot = 1;
+        } else if (hge->Input_KeyDown(HGEK_2)) {
+            MDI->GetActiveDoc()->iTileSlot = 1;
+            bNewTileSlot = 1;
+        } else if (hge->Input_KeyDown(HGEK_3)) {
+            MDI->GetActiveDoc()->iTileSlot = 2;
+            bNewTileSlot = 1;
+        } else if (hge->Input_KeyDown(HGEK_4)) {
+            MDI->GetActiveDoc()->iTileSlot = 3;
+            bNewTileSlot = 1;
+        } else if (hge->Input_KeyDown(HGEK_5)) {
+            MDI->GetActiveDoc()->iTileSlot = 4;
+            bNewTileSlot = 1;
+        } else if (hge->Input_KeyDown(HGEK_6)) {
+            MDI->GetActiveDoc()->iTileSlot = 5;
+            bNewTileSlot = 1;
+        } else if (hge->Input_KeyDown(HGEK_7)) {
+            MDI->GetActiveDoc()->iTileSlot = 6;
+            bNewTileSlot = 1;
+        } else if (hge->Input_KeyDown(HGEK_8)) {
+            MDI->GetActiveDoc()->iTileSlot = 7;
+            bNewTileSlot = 1;
         }
-        if (iOldP != iTilePicked && iActiveTool == EWW_TOOL_BRUSH) {
+        if (bNewTileSlot && iActiveTool == EWW_TOOL_BRUSH)
+            SetTool(EWW_TOOL_PENCIL);
+
+        int iOldP = MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot];
+        if (hge->Input_KeyDown(HGEK_ADD)) {
+            if (iActiveTool == EWW_TOOL_PENCIL && iOldP + 1 < hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetTilesCount()) {
+                MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot]++;
+                vPort->MarkToRedraw();
+            } else if (iActiveTool == EWW_TOOL_BRUSH && iOldP + 1 < hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetBrushesCount()) {
+                MDI->GetActiveDoc()->iBrushPicked++;
+                vPort->MarkToRedraw();
+            }
+        } else if (hge->Input_KeyDown(HGEK_SUBTRACT) && iOldP > 0) {
+            if (iActiveTool == EWW_TOOL_PENCIL) {
+                MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot]--;
+                vPort->MarkToRedraw();
+            } else if (iActiveTool == EWW_TOOL_BRUSH) {
+                MDI->GetActiveDoc()->iBrushPicked--;
+                vPort->MarkToRedraw();
+            }
         }
     } else if (iMode == EWW_MODE_OBJECT && !vObjectsPicked.empty() &&
-               vPort->GetWidget()->isFocused() && iActiveTool == EWW_TOOL_NONE
-               (hge->Input_GetKeyState(HGEK_CTRL) || hge->Input_GetKeyState(HGEK_SHIFT) ||
-                hge->Input_GetKeyState(HGEK_ALT)) &&
+               vPort->GetWidget()->isFocused() && iActiveTool == EWW_TOOL_NONE &&
+               (bCtrl || bShift || bAlt) &&
                (hge->Input_KeyDown(HGEK_LEFT) || hge->Input_KeyDown(HGEK_RIGHT) || hge->Input_KeyDown(HGEK_UP) ||
                 hge->Input_KeyDown(HGEK_DOWN))) {
-        int moveResX = 0, moveResY = 0, moveRes = 0;
-        if (hge->Input_GetKeyState(HGEK_CTRL)) moveRes = 1;
-        else if (hge->Input_GetKeyState(HGEK_SHIFT)) moveRes = 10;
-        else if (hge->Input_GetKeyState(HGEK_ALT)) moveRes = 64;
+        int moveResX = 0, moveResY = 0;
+        int moveRes = bCtrl ? 1 : bShift? 10 : bAlt ? 64 : 0;
 
         if (hge->Input_KeyDown(HGEK_LEFT)) moveResX = -moveRes;
         else if (hge->Input_KeyDown(HGEK_RIGHT)) moveResX = moveRes;
@@ -127,12 +157,12 @@ void State::EditingWW::HandleHotkeys() {
         NavigateToStartLocation();
     } else if (bFocus && hParser && hge->Input_KeyDown(HGEK_END)) {
         NavigateToEndLocation();
-    } else if (hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_M)) {
+    } else if (bCtrl && hge->Input_KeyDown(HGEK_M)) {
         cbutActiveMode->setSelectedEntryID(!cbutActiveMode->getSelectedEntryID(), 1);
-    } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_G)) {
+    } else if (bFocus && bCtrl && hge->Input_KeyDown(HGEK_G)) {
         hPlaneData[GetActivePlaneID()]->bDrawGrid = !hPlaneData[GetActivePlaneID()]->bDrawGrid;
         vPort->MarkToRedraw();
-    } else if (bFocus && hge->Input_GetKeyState(HGEK_CTRL) && hge->Input_KeyDown(HGEK_B)) {
+    } else if (bFocus && bCtrl && hge->Input_KeyDown(HGEK_B)) {
         hPlaneData[GetActivePlaneID()]->bDrawBoundary = !hPlaneData[GetActivePlaneID()]->bDrawBoundary;
         vPort->MarkToRedraw();
     } else if (bFocus && iMode == EWW_MODE_OBJECT && vObjectsPicked.size() == 1) {

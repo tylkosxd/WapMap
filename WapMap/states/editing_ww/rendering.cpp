@@ -635,7 +635,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                         ++tgIterator;
 
                     if (tgIterator != vTileGhosting.end()) {
-                        if (tgIterator->id == EWW_TILE_PIPETTE) {
+                        if (tgIterator->id == EWW_TILE_HIGHLIGHT) {
                             if (plane == tgIterator->pl && x == tgIterator->x && y == tgIterator->y) {
                                 pickerHighlight = true;
                                 if (tile->IsInvisible()) {
@@ -650,12 +650,8 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                             }
                         } else if (cy == tgIterator->y && cx == tgIterator->x && plane == tgIterator->pl) {
                             if (tgIterator->id >= 0 && tgIterator->id != tile->GetID()) {
-                                auto *tile = hTileset->GetSet(plane->GetImageSet(0))->GetTile(tgIterator->id);
-                                hgeSprite *spr;
-                                if (!tile)
-                                    spr = GV->sprUnknownTile;
-                                else
-                                    spr = tile->GetImage();
+                                auto *ctile = hTileset->GetSet(plane->GetImageSet(0))->GetTile(tgIterator->id);
+                                hgeSprite *spr = ctile ? ctile->GetImage() : GV->sprUnknownTile;
                                 spr->SetColor(SETA(col, 160));
                                 spr->SetHotSpot(0, 0);
                                 spr->RenderEx(posX, posY, 0, fZoom);

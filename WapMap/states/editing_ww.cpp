@@ -139,8 +139,6 @@ void State::EditingWW::Init() {
 
     fCamLastX = fCamLastY = 0;
 
-    iTilePicked = EWW_TILE_NONE;
-
     FirstRun_data = 0;
 
     GV->Console->Print("~w~Creating viewport...");
@@ -349,7 +347,7 @@ void State::EditingWW::Init() {
     wintpFillColor->setMovable(1);
     wintpFillColor->setVisible(0);
     wintpFillColor->setClose(0);
-    conMain->add(wintpFillColor, 292, vPort->GetY() + 291);
+    conMain->add(wintpFillColor, 350, vPort->GetY() + 291);
 
     vptpfcPalette = new WIDG::Viewport(vp, VP_FILLCOLOR);
     vptpfcPalette->setVisible(0);
@@ -2144,6 +2142,10 @@ bool State::EditingWW::Think() {
         bMouseConsumed = ObjectThink(bMouseConsumed);
     } else if (iMode == EWW_MODE_TILE) {
         bMouseConsumed = TileThink(bMouseConsumed);
+        if (!hwinTilePicker->isOpened() && 
+                (iActiveTool == EWW_TOOL_BRUSH || iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PIPETTE)) {
+            SetTool(EWW_TOOL_NONE);
+        }
     }
 
     if (iActiveTool == EWW_TOOL_MEASURE && !bMouseConsumed) {
@@ -2407,13 +2409,13 @@ void State::EditingWW::LockToolSpecificFunctions(bool bLock) {
 }
 
 void State::EditingWW::SetTool(int iNewTool) {
-    CloseTool(iActiveTool);
+    CloseTool(iNewTool);
     OpenTool(iNewTool);
     iActiveTool = iNewTool;
 }
 
 void State::EditingWW::OpenTool(int iNewTool) {
-    if (iNewTool == EWW_TOOL_PENCIL || iNewTool == EWW_TOOL_FILL) {
+    if (iNewTool == EWW_TOOL_PENCIL || iNewTool == EWW_TOOL_FILL || iNewTool == EWW_TOOL_PIPETTE) {
         if (iNewTool == EWW_TOOL_FILL) {
             hmbTile->butIconFill->setHighlight(true);
         } else {
@@ -2423,7 +2425,7 @@ void State::EditingWW::OpenTool(int iNewTool) {
             iTileDrawMode = EWW_DRAW_POINT;
         }
         iActiveTool = iNewTool;
-        hwinTilePicker->Rebuild(true);
+        hwinTilePicker->Rebuild(1);
         if (!hwinTilePicker->isOpened())
             hwinTilePicker->Open();
     } else if (iNewTool == EWW_TOOL_WRITEID) {
@@ -2436,7 +2438,7 @@ void State::EditingWW::OpenTool(int iNewTool) {
         hmbTile->butIconBrush->setHighlight(true);
         iActiveTool = iNewTool;
         iTileDrawMode = EWW_DRAW_POINT;
-        hwinTilePicker->Rebuild(true);
+        hwinTilePicker->Rebuild(1);
         if (!hwinTilePicker->isOpened())
             hwinTilePicker->Open();
         iLastBrushPlacedX = iLastBrushPlacedY = -1;
@@ -2472,7 +2474,6 @@ void State::EditingWW::OpenTool(int iNewTool) {
         ShowAndUpdateDuplicateMenu();
     } else if (iNewTool == EWW_TOOL_NONE) {
         hmbTile->butIconSelect->setHighlight(true);
-        iTilePicked = EWW_TILE_NONE;
         GV->SetCursor(DEFAULT);
     } else if (iNewTool == EWW_TOOL_ZOOM) {
         hmbTile->butZoom->setHighlight(true);
@@ -2482,15 +2483,12 @@ void State::EditingWW::OpenTool(int iNewTool) {
 }
 
 void State::EditingWW::CloseTool(int iNewTool) {
-    if (iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL) {
+    if (iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PIPETTE) {
         hmbTile->butIconPencil->setHighlight(false);
         hmbTile->butIconFill->setHighlight(false);
-        if (iNewTool != EWW_TOOL_PENCIL && iNewTool != EWW_TOOL_FILL) {
-            iTilePicked = EWW_TILE_NONE;
-            if (iNewTool != EWW_TOOL_BRUSH)
-                hwinTilePicker->Close();
-        }
-        wintpFillColor->setVisible(false);
+        if (iNewTool != EWW_TOOL_BRUSH && iNewTool != EWW_TOOL_PENCIL && iNewTool != EWW_TOOL_FILL && iNewTool != EWW_TOOL_PIPETTE)
+            hwinTilePicker->Close();
+        wintpFillColor->setVisible(0);
         vTileGhosting.clear();
         vPort->MarkToRedraw();
     } else if (iActiveTool == EWW_TOOL_WRITEID) {
@@ -2503,8 +2501,7 @@ void State::EditingWW::CloseTool(int iNewTool) {
         hmbTile->butIconBrush->setHighlight(false);
         hwinTilePicker->CloseBrush();
         vTileGhosting.clear();
-        iTilePicked = EWW_TILE_NONE;
-        if (iNewTool != EWW_TOOL_PENCIL && iNewTool != EWW_TOOL_FILL)
+        if (iNewTool != EWW_TOOL_PENCIL && iNewTool != EWW_TOOL_FILL && iNewTool != EWW_TOOL_PIPETTE)
             hwinTilePicker->Close();
     } else if (iActiveTool == EWW_TOOL_DUPLICATE) {
         winDuplicate->setVisible(false);
@@ -2614,8 +2611,9 @@ void State::EditingWW::SwitchPlane() {
         SetTool(EWW_TOOL_NONE);
         SetMode(EWW_MODE_TILE);
     }
-    if (iActiveTool == EWW_TOOL_BRUSH || iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PENCIL) {
-        iTilePicked = EWW_TILE_NONE;
+    if (hwinTilePicker->isOpened() || iActiveTool == EWW_TOOL_BRUSH ||
+    iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PENCIL ||iActiveTool == EWW_TOOL_PIPETTE) {
+        MDI->GetActiveDoc()->iBrushPicked = EWW_TILE_NONE;
         hwinTilePicker->RefreshSlider();
     }
     if (iActiveTool == EWW_TOOL_BRUSH)

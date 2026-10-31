@@ -10,6 +10,8 @@
 #define MDI_CONTEXT_PREVIOUSLYCLOSED  3
 #define MDI_CONTEXT_RELOAD            4
 
+#define TILE_INVENTORY_SLOTS 8
+
 namespace State {
     struct PlaneData;
 };
@@ -97,6 +99,9 @@ struct DocumentData {
     std::vector<WWD::Object *> vObjectsPicked;
     float fZoom;
     int iTileSelectX1, iTileSelectY1, iTileSelectX2, iTileSelectY2;
+    int iTilePicked[TILE_INVENTORY_SLOTS] = {-1, -1, -1, -1, -1, -1, -1, -1};
+    int iTileSlot = 0;
+    int iBrushPicked = -1;
 
     //meta
     std::vector<stGuideLine> vGuides;
