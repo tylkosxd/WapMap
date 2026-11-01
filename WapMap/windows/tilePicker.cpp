@@ -127,12 +127,6 @@ void winTilePicker::Open() {
 
 void winTilePicker::OnDocumentChange() {
     sliPicker->setValue(0);
-    auto *es = GV->editState;
-    int at = es->iActiveTool;
-    if (es->MDI->GetActiveDoc() == NULL)
-        return;
-    if (at == EWW_TOOL_BRUSH)
-        es->SetTool(EWW_TOOL_PENCIL);
 }
 
 void winTilePicker::action(const ActionEvent &actionEvent) {
@@ -223,14 +217,17 @@ void winTilePicker::Draw(int piCode) {
     int dx2 = dx + myWin.getWidth() - 1,
         dy2 = dy + myWin.getHeight() - 1;
 
+    // vertical inventory separator
     hge->Gfx_RenderLine(dx + iInventorySeparator - 1, dy + 25, dx + iInventorySeparator - 1, dy2, GV->colLineDark);
     hge->Gfx_RenderLine(dx + iInventorySeparator, dy + 25, dx + iInventorySeparator, dy2, GV->colLineBright);
 
+    // horizontal tools/tiles
     hge->Gfx_RenderLine(dx + iInventorySeparator, dy + iTilePickerOffUp + 13, dx2, dy + iTilePickerOffUp + 13, GV->colLineDark);
     hge->Gfx_RenderLine(dx + iInventorySeparator, dy + iTilePickerOffUp + 14, dx2, dy + iTilePickerOffUp + 14, GV->colLineBright);
 
-    hge->Gfx_RenderLine(dx+ iInventorySeparator, dy2 - iTilePickerOffDown + 20, dx2, dy2 - iTilePickerOffDown + 20, GV->colLineDark);
-    hge->Gfx_RenderLine(dx+ iInventorySeparator, dy2 - iTilePickerOffDown + 21, dx2, dy2 - iTilePickerOffDown + 21, GV->colLineBright);
+    // horizontal tiles settings separator
+    hge->Gfx_RenderLine(dx + iInventorySeparator, dy2 - iTilePickerOffDown + 20, dx2, dy2 - iTilePickerOffDown + 20, GV->colLineDark);
+    hge->Gfx_RenderLine(dx + iInventorySeparator, dy2 - iTilePickerOffDown + 21, dx2, dy2 - iTilePickerOffDown + 21, GV->colLineBright);
 
     for (int i = 0; i < TILE_INVENTORY_SLOTS; i++) {
         int tilePv = 48,
@@ -262,11 +259,6 @@ void winTilePicker::Draw(int piCode) {
     if (!set)
         return;
 
-    if (es->iActiveTool == EWW_TOOL_BRUSH && ad->iBrushPicked >= 0 && set->GetBrushByIterator(ad->iBrushPicked)->HasSettings()) {
-        hge->Gfx_RenderLine(dx, dy2 - 40, dx2, dy2 - 40, GV->colLineDark);
-        hge->Gfx_RenderLine(dx, dy2 - 39, dx2, dy2 - 39, GV->colLineBright);
-    }
-
     int itpx = dx + 2 + iInventorySeparator,
         itpy = dy + iTilePickerOffUp + 16;
     int clipx = myWin.getWidth() - 20;
@@ -285,7 +277,7 @@ void winTilePicker::Draw(int piCode) {
 
     int scroll = sliPicker->getValue();
     if (es->iActiveTool == EWW_TOOL_BRUSH) {
-        int ioldsel = ad->iTilePicked[ad->iTileSlot];
+        int ioldsel = ad->iBrushPicked;
         int loopst = scroll / (iTileDim + 3),
             loopen = sliPicker->getHeight() / (iTileDim + 3) + 2;
         for (int i = 0; i < set->GetBrushesCount() && i < (loopst + loopen); i++) {
@@ -307,6 +299,9 @@ void winTilePicker::Draw(int piCode) {
         }
         if (ioldsel != ad->iBrushPicked)
             HandleBrushSwitch(ioldsel, ad->iBrushPicked);
+        
+        hge->Gfx_RenderLine(dx + iInventorySeparator, dy2 - 40, dx2, dy2 - 40, GV->colLineDark);
+        hge->Gfx_RenderLine(dx + iInventorySeparator, dy2 - 39, dx2, dy2 - 39, GV->colLineBright);
     } 
     else {
         int tilesCount = set->GetTilesCount();
@@ -440,26 +435,20 @@ void winTilePicker::Rebuild(bool forceSliderRefresh) {
     sliSpraySize->setVisible(isPencil && dm == EWW_DRAW_SPRAY);
     sliSprayDensity->setVisible(isPencil && dm == EWW_DRAW_SPRAY);
 
+    iTilePickerOffUp = 65;
+    iTilePickerOffDown = 60;
     if (at == EWW_TOOL_BRUSH) {
-        iTilePickerOffUp = 0;
-        iTilePickerOffDown = 60;
-        if (bp != EWW_TILE_NONE) {
-            auto *set = es->hTileset->GetSet(es->GetActivePlane()->GetImageSet(0));
-            if (set->GetBrushesCount() > 0 && bp) {
-                auto *br = set->GetBrushByIterator(bp);
-                if (br && br->HasSettings())
-                    iTilePickerOffDown += 10 + br->GetSettingsHeight();
-            }
-            
+        auto *set = es->hTileset->GetSet(es->GetActivePlane()->GetImageSet(0));
+        if (set && bp < set->GetBrushesCount() && bp >= 0) {
+            cBrush *br = set->GetBrushByIterator(bp);
+            if (br && br->HasSettings())
+                iTilePickerOffDown += 10 + br->GetSettingsHeight();
         }
-    } else if (at == EWW_TOOL_FILL || at == EWW_TOOL_PIPETTE) {
-        iTilePickerOffUp = 0;
-        iTilePickerOffDown = 70;
     } else {
-        iTilePickerOffUp = 45;
-        iTilePickerOffDown = 70;
+        if (at == EWW_TOOL_PENCIL)
+            iTilePickerOffUp += 45;
+        iTilePickerOffDown += 10;
     }
-    iTilePickerOffUp += 15 + 40;
 
     cbShowTileID->setVisible(!isBrush);
     cbShowProperties->setVisible(!isBrush);
@@ -491,31 +480,30 @@ void winTilePicker::RefreshSlider(bool forceSliderRefresh) {
 }
 
 void winTilePicker::HandleBrushSwitch(int itOld, int itNew) {
-    bool rebuild = 0;
-    int oOff = 0, nOff = 0;
-    cTileImageSet *set = GV->editState->hTileset->GetSet(GV->editState->GetActivePlane()->GetImageSet(0));
+    int off = 0;
+    auto *plane = GV->editState->hParser->GetPlane(GV->editState->MDI->GetActiveDoc()->iSelectedPlane);
+    cTileImageSet *set = GV->editState->hTileset->GetSet(plane->GetImageSet(0));
+    if (!set) return;
     if (itOld >= 0 && itOld < set->GetBrushesCount()) {
         auto *br = set->GetBrushByIterator(itOld);
         if (br && br->HasSettings()) {
-            oOff = br->GetSettingsHeight() + 10;
+            off = br->GetSettingsHeight() + 10;
             br->RemoveSettingsFromContainer(&myWin);
-            rebuild = 1;
-            if (nOff != oOff && sliPicker->isEnabled())
-                sliPicker->setValue(sliPicker->getValue() + (nOff - oOff));
+            if (sliPicker->isEnabled())
+                sliPicker->setValue(sliPicker->getValue() + off);
+            Rebuild();
         }
     }
-    if (itNew >= 0 && set->GetBrushByIterator(itNew)->HasSettings()) {
+    if (itNew >= 0 && itOld < set->GetBrushesCount()) {
         auto *br = set->GetBrushByIterator(itNew);
         if (br && br->HasSettings()) {
-            nOff = br->GetSettingsHeight() + 10;
-            br->AddSettingsToContainer(&myWin, 5, myWin.getHeight() - 60 - br->GetSettingsHeight());
-            rebuild = 1;
-            if (nOff != oOff && sliPicker->isEnabled())
-                sliPicker->setValue(sliPicker->getValue() + (nOff - oOff));
+            off = br->GetSettingsHeight() + 10;
+            br->AddSettingsToContainer(&myWin, 5 + iInventorySeparator, myWin.getHeight() - 60 - br->GetSettingsHeight());
+            if (sliPicker->isEnabled())
+                sliPicker->setValue(sliPicker->getValue() - off);
+            Rebuild();
         }
     }
-    if (rebuild)
-        Rebuild();
 }
 
 void winTilePicker::CloseBrush() {
@@ -530,7 +518,8 @@ void winTilePicker::CloseBrush() {
             return;
         }
         auto *br = set->GetBrushByIterator(brushPicked);
-        if (br)
+        if (br && br->HasSettings())
             br->RemoveSettingsFromContainer(&myWin);
+        es->MDI->GetActiveDoc()->iBrushPicked = EWW_TILE_NONE;
     }
 }

@@ -2612,13 +2612,15 @@ void State::EditingWW::SwitchPlane() {
         SetMode(EWW_MODE_TILE);
     }
     if (hwinTilePicker->isOpened() || iActiveTool == EWW_TOOL_BRUSH ||
-    iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PENCIL ||iActiveTool == EWW_TOOL_PIPETTE) {
+    iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_PIPETTE) {
+        hwinTilePicker->HandleBrushSwitch(MDI->GetActiveDoc()->iBrushPicked, EWW_TILE_NONE);
         MDI->GetActiveDoc()->iBrushPicked = EWW_TILE_NONE;
         hwinTilePicker->RefreshSlider();
     }
     if (iActiveTool == EWW_TOOL_BRUSH)
         vTileGhosting.clear();
     hAppMenu->SyncPlaneSwitched();
+    MDI->GetActiveDoc()->iSelectedPlane = GetActivePlaneID();
 }
 
 bool State::EditingWW::OpenDocuments() {
@@ -3024,6 +3026,7 @@ void State::EditingWW::PrepareForDocumentSwitch() {
     MDI->GetActiveDoc()->iTileSelectY1 = iTileSelectY1;
     MDI->GetActiveDoc()->iTileSelectX2 = iTileSelectX2;
     MDI->GetActiveDoc()->iTileSelectY2 = iTileSelectY2;
+    SwitchPlane();
 }
 
 void State::EditingWW::SyncLogicBrowser() {
@@ -3212,7 +3215,6 @@ void State::EditingWW::DocumentSwitched() {
     tfmsSaveAs->setText(pathtemp, true);
 
     hInvCtrl->MapSwitch();
-    SwitchPlane();
     hAppMenu->SyncDocumentSwitched();
     hNativeController->SyncDocumentSwitched(hParser);
 
