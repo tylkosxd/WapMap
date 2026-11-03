@@ -99,7 +99,7 @@ struct DocumentData {
     std::vector<WWD::Object *> vObjectsPicked;
     float fZoom;
     int iTileSelectX1, iTileSelectY1, iTileSelectX2, iTileSelectY2;
-    int iTilePicked[TILE_INVENTORY_SLOTS] = {-1, -1, -1, -1, -1, -1, -1, -1};
+    int iTilePicked[TILE_INVENTORY_SLOTS] = {-3, -3, -3, -3, -3, -3, -3, -3};
     int iTileSlot = 0;
     int iBrushPicked = -1;
 
