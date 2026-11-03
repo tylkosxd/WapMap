@@ -163,7 +163,7 @@ bool State::EditingWW::TileThink(bool pbConsumed) {
     if (tgSize != vTileGhosting.size()) {
         vPort->MarkToRedraw();
     }
-    return 1;
+    return 0;
 }
 
 void State::EditingWW::PipetteTileHighlight() {
