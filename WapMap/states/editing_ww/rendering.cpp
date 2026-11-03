@@ -660,6 +660,15 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                                 }
                                 ghosted = true;
                             } else if (tgIterator->id == EWW_TILE_ERASE && !tile->IsInvisible()) {
+                                hge->Gfx_RenderLine(posX, posY, posX + tw, posY, TILE_ERASER_PREVIEW_COLOR_DARK);
+                                hge->Gfx_RenderLine(posX, posY + th, posX + tw, posY + th, TILE_ERASER_PREVIEW_COLOR_DARK);
+                                hge->Gfx_RenderLine(posX, posY - 1, posX - 1, posY + th, TILE_ERASER_PREVIEW_COLOR_DARK);
+                                hge->Gfx_RenderLine(posX + tw, posY - 1, posX + tw, posY + th, TILE_ERASER_PREVIEW_COLOR_DARK);
+
+                                hge->Gfx_RenderLine(posX, posY + 1, posX + tw - 1, posY + 1, TILE_ERASER_PREVIEW_COLOR_BRIGHT);
+                                hge->Gfx_RenderLine(posX + 1, posY + th - 1, posX + tw - 1, posY + th - 1, TILE_ERASER_PREVIEW_COLOR_BRIGHT);
+                                hge->Gfx_RenderLine(posX + 1, posY + 1, posX + 1, posY + th - 1, TILE_ERASER_PREVIEW_COLOR_BRIGHT);
+                                hge->Gfx_RenderLine(posX + tw - 1, posY + 1, posX + tw - 1, posY + th - 1, TILE_ERASER_PREVIEW_COLOR_BRIGHT);
                                 ghosted = true;
                             } else if (tgIterator->id == EWW_TILE_FILL && !tile->IsFilled()) {
                                 SHR::SetQuad(&q, SETA(hDataCtrl->GetPalette()->GetColor(plane->GetFillColor()), GETA(col)),
