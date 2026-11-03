@@ -127,6 +127,7 @@ void winTilePicker::Open() {
 
 void winTilePicker::OnDocumentChange() {
     sliPicker->setValue(0);
+    RefreshSlider();
 }
 
 void winTilePicker::action(const ActionEvent &actionEvent) {
