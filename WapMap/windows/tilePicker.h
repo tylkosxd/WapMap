@@ -54,7 +54,7 @@ public:
 
     bool GetRectFill() { return cbRectFilled->isSelected(); }
 
-    bool GetEllipseFill() { return cbRectFilled->isSelected(); }
+    bool GetEllipseFill() { return cbEllipseFilled->isSelected(); }
 };
 
 #endif // H_WIN_TILEPICKER
