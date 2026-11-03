@@ -146,7 +146,7 @@ void State::EditingWW::HandleHotkeys() {
         if (hge->Input_KeyDown(HGEK_ADD)) {
             auto *set = hTileset->GetSet(GetActivePlane()->GetImageSet(0));
             if (!set) return;
-            if (iActiveTool == EWW_TOOL_PENCIL && iOldP + 1 < set->GetTilesCount()) {
+            if ((iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL) && iOldP + 1 < set->GetTilesCount()) {
                 dd->iTilePicked[dd->iTileSlot]++;
                 vPort->MarkToRedraw();
             } else if (iActiveTool == EWW_TOOL_BRUSH && iOldP + 1 < set->GetBrushesCount()) {
@@ -154,7 +154,7 @@ void State::EditingWW::HandleHotkeys() {
                 vPort->MarkToRedraw();
             }
         } else if (hge->Input_KeyDown(HGEK_SUBTRACT) && iOldP > 0) {
-            if (iActiveTool == EWW_TOOL_PENCIL) {
+            if (iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL) {
                 dd->iTilePicked[dd->iTileSlot]--;
                 vPort->MarkToRedraw();
             } else if (iActiveTool == EWW_TOOL_BRUSH) {
