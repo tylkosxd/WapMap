@@ -3,6 +3,7 @@
 #include "../../cObjectUserData.h"
 #include "../../../shared/gcnWidgets/wComboButton.h"
 #include "../../databanks/tiles.h"
+#include "../../windows/tilePicker.h"
 
 extern HGE *hge;
 
@@ -64,65 +65,100 @@ void State::EditingWW::HandleHotkeys() {
     } else if (bCtrl && bAlt && hge->Input_KeyDown(HGEK_P)) {
 
     } else if (iMode == EWW_MODE_TILE && (iActiveTool == EWW_TOOL_BRUSH || iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL || iActiveTool == EWW_TOOL_PIPETTE)) {
-        if (hge->Input_KeyDown(HGEK_R)) {
+        auto *dd = MDI->GetActiveDoc();
+        if (hge->Input_KeyDown(HGEK_E)) {
             SetTool(EWW_TOOL_PENCIL);
-            MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot] = EWW_TILE_ERASE;
+            dd->iTilePicked[dd->iTileSlot] = EWW_TILE_ERASE;
+            vPort->MarkToRedraw();
+        }
+        else if (hge->Input_KeyDown(HGEK_L)) {
+            if (iActiveTool != EWW_TOOL_PENCIL)
+                SetTool(EWW_TOOL_PENCIL);
+            iTileDrawMode = EWW_DRAW_LINE;
+            hwinTilePicker->Rebuild();
+            vPort->MarkToRedraw();
+        }
+        else if (hge->Input_KeyDown(HGEK_R)) {
+            if (iActiveTool != EWW_TOOL_PENCIL)
+                SetTool(EWW_TOOL_PENCIL);
+            iTileDrawMode = EWW_DRAW_RECT;
+            hwinTilePicker->Rebuild();
+            vPort->MarkToRedraw();
+        }
+        else if (hge->Input_KeyDown(HGEK_C)) {
+            if (iActiveTool != EWW_TOOL_PENCIL)
+                SetTool(EWW_TOOL_PENCIL);
+            iTileDrawMode = EWW_DRAW_ELLIPSE;
+            hwinTilePicker->Rebuild();
+            vPort->MarkToRedraw();
+        }
+        else if (hge->Input_KeyDown(HGEK_S)) {
+            if (iActiveTool != EWW_TOOL_PENCIL)
+                SetTool(EWW_TOOL_PENCIL);
+            iTileDrawMode = EWW_DRAW_SPRAY;
+            hwinTilePicker->Rebuild();
             vPort->MarkToRedraw();
         }
         else if (hge->Input_KeyDown(HGEK_P)) {
-            SetTool(EWW_TOOL_PIPETTE);
+            int tool = iActiveTool != EWW_TOOL_PIPETTE ? EWW_TOOL_PIPETTE : EWW_TOOL_PENCIL;
+            SetTool(tool);
             vPort->MarkToRedraw();
         }
         else if (hge->Input_KeyDown(HGEK_F)) {
-            SetTool(EWW_TOOL_PENCIL);
-            MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot] = EWW_TILE_FILL;
+            SetTool(EWW_TOOL_FILL);
+            vPort->MarkToRedraw();
+        }
+        else if (hge->Input_KeyDown(HGEK_B)) {
+            SetTool(EWW_TOOL_BRUSH);
             vPort->MarkToRedraw();
         }
         
         int bNewTileSlot = 0;
         if (hge->Input_KeyDown(HGEK_1)) {
-            MDI->GetActiveDoc()->iTileSlot = 0;
+            dd->iTileSlot = 0;
             bNewTileSlot = 1;
         } else if (hge->Input_KeyDown(HGEK_2)) {
-            MDI->GetActiveDoc()->iTileSlot = 1;
+            dd->iTileSlot = 1;
             bNewTileSlot = 1;
         } else if (hge->Input_KeyDown(HGEK_3)) {
-            MDI->GetActiveDoc()->iTileSlot = 2;
+            dd->iTileSlot = 2;
             bNewTileSlot = 1;
         } else if (hge->Input_KeyDown(HGEK_4)) {
-            MDI->GetActiveDoc()->iTileSlot = 3;
+            dd->iTileSlot = 3;
             bNewTileSlot = 1;
         } else if (hge->Input_KeyDown(HGEK_5)) {
-            MDI->GetActiveDoc()->iTileSlot = 4;
+            dd->iTileSlot = 4;
             bNewTileSlot = 1;
         } else if (hge->Input_KeyDown(HGEK_6)) {
-            MDI->GetActiveDoc()->iTileSlot = 5;
+            dd->iTileSlot = 5;
             bNewTileSlot = 1;
         } else if (hge->Input_KeyDown(HGEK_7)) {
-            MDI->GetActiveDoc()->iTileSlot = 6;
+            dd->iTileSlot = 6;
             bNewTileSlot = 1;
         } else if (hge->Input_KeyDown(HGEK_8)) {
-            MDI->GetActiveDoc()->iTileSlot = 7;
+            dd->iTileSlot = 7;
             bNewTileSlot = 1;
         }
         if (bNewTileSlot && iActiveTool == EWW_TOOL_BRUSH)
             SetTool(EWW_TOOL_PENCIL);
 
-        int iOldP = MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot];
+        int iOldP = iActiveTool == EWW_TOOL_BRUSH ? dd->iBrushPicked : dd->iTilePicked[dd->iTileSlot];
         if (hge->Input_KeyDown(HGEK_ADD)) {
-            if (iActiveTool == EWW_TOOL_PENCIL && iOldP + 1 < hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetTilesCount()) {
-                MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot]++;
+            auto *set = hTileset->GetSet(GetActivePlane()->GetImageSet(0));
+            if (!set) return;
+            if (iActiveTool == EWW_TOOL_PENCIL && iOldP + 1 < set->GetTilesCount()) {
+                dd->iTilePicked[dd->iTileSlot]++;
                 vPort->MarkToRedraw();
-            } else if (iActiveTool == EWW_TOOL_BRUSH && iOldP + 1 < hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetBrushesCount()) {
-                MDI->GetActiveDoc()->iBrushPicked++;
+            } else if (iActiveTool == EWW_TOOL_BRUSH && iOldP + 1 < set->GetBrushesCount()) {
+                dd->iBrushPicked++;
                 vPort->MarkToRedraw();
             }
         } else if (hge->Input_KeyDown(HGEK_SUBTRACT) && iOldP > 0) {
             if (iActiveTool == EWW_TOOL_PENCIL) {
-                MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot]--;
+                dd->iTilePicked[dd->iTileSlot]--;
                 vPort->MarkToRedraw();
             } else if (iActiveTool == EWW_TOOL_BRUSH) {
-                MDI->GetActiveDoc()->iBrushPicked--;
+                dd->iBrushPicked--;
                 vPort->MarkToRedraw();
             }
         }

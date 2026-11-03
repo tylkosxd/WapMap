@@ -225,10 +225,29 @@ void State::EditingWW::PencilThink(int hx, int hy, int hxUnwrapped, int hyUnwrap
         } else if (iTileDrawStartX != -1 && iTileDrawStartY != -1) {
             if (iTileDrawMode == EWW_DRAW_LINE) {
                 PencilLineThink(hx, hy);
-            } else if (iTileDrawMode == EWW_DRAW_RECT) {
-                PencilRectThink(hx, hy);
-            } else if (iTileDrawMode == EWW_DRAW_ELLIPSE) {
-                PencilEllipseThink(hx, hy);
+            } else {
+                if (hge->Input_GetKeyState(HGEK_SHIFT)) {
+                    int dx = hx - iTileDrawStartX,
+                        dy = hy - iTileDrawStartY,
+                        maxlen = std::max(abs(dx), abs(dy));
+                    if (dx >= 0 && dy >= 0) {
+                        hx = iTileDrawStartX + maxlen;
+                        hy = iTileDrawStartY + maxlen;
+                    } else if (dx < 0 && dy >= 0) {
+                        hx = iTileDrawStartX - maxlen;
+                        hy = iTileDrawStartY + maxlen;
+                    } else if (dx < 0 && dy < 0) {
+                        hx = iTileDrawStartX - maxlen;
+                        hy = iTileDrawStartY - maxlen;
+                    } else if (dx >= 0 && dy < 0) {
+                        hx = iTileDrawStartX + maxlen;
+                        hy = iTileDrawStartY - maxlen;
+                    }
+                }
+                if (iTileDrawMode == EWW_DRAW_RECT)
+                    PencilRectThink(hx, hy);
+                else if (iTileDrawMode == EWW_DRAW_ELLIPSE)
+                    PencilEllipseThink(hx, hy);
             }
         }
         iLastBrushPlacedX = hx;
@@ -325,6 +344,16 @@ void State::EditingWW::PencilLineThink(int hx, int hy) {
         y1 = iTileDrawStartY,
         x2 = hx,
         y2 = hy;
+    if (hge->Input_GetKeyState(HGEK_SHIFT)) {
+        if (abs(x2 - x1) - abs(y2 - y1) > 1)
+            y2 = y1;
+        else if (abs(x2 - x1) - abs(y2 - y1) < -1)
+            x2 = x1;
+        else if ((x2 > x1 && y2 > y1) || (x2 < x1 && y2 < y1))
+            y2 = y1 + x2 - x1;
+        else
+            y2 = y1 - x2 + x1;
+    }
     int thickness = hwinTilePicker->GetLineThickness();
     int tilePicked = MDI->GetActiveDoc()->iTilePicked[MDI->GetActiveDoc()->iTileSlot];
 
