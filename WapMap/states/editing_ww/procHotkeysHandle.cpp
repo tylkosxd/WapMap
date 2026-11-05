@@ -146,18 +146,36 @@ void State::EditingWW::HandleHotkeys() {
         if (hge->Input_KeyDown(HGEK_ADD)) {
             auto *set = hTileset->GetSet(GetActivePlane()->GetImageSet(0));
             if (!set) return;
-            if ((iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL) && iOldP + 1 < set->GetTilesCount()) {
-                dd->iTilePicked[dd->iTileSlot]++;
+            if ((iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL)) {
+                if (iOldP + 1 >= set->GetTilesCount())
+                    dd->iTilePicked[dd->iTileSlot] = set->GetTilesCount() - 1;
+                else if (iOldP < EWW_TILE_ERASE || iOldP == EWW_TILE_NONE)
+                    dd->iTilePicked[dd->iTileSlot] = EWW_TILE_ERASE;
+                else if (iOldP == EWW_TILE_ERASE)
+                    dd->iTilePicked[dd->iTileSlot] = EWW_TILE_FILL;
+                else if (iOldP == EWW_TILE_FILL)
+                    dd->iTilePicked[dd->iTileSlot] = 0;
+                else
+                    dd->iTilePicked[dd->iTileSlot]++;
                 vPort->MarkToRedraw();
             } else if (iActiveTool == EWW_TOOL_BRUSH && iOldP + 1 < set->GetBrushesCount()) {
                 dd->iBrushPicked++;
                 vPort->MarkToRedraw();
             }
-        } else if (hge->Input_KeyDown(HGEK_SUBTRACT) && iOldP > 0) {
+        } else if (hge->Input_KeyDown(HGEK_SUBTRACT)) {
+            auto *set = hTileset->GetSet(GetActivePlane()->GetImageSet(0));
+            if (!set) return;
             if (iActiveTool == EWW_TOOL_PENCIL || iActiveTool == EWW_TOOL_FILL) {
-                dd->iTilePicked[dd->iTileSlot]--;
+                if (iOldP >= set->GetTilesCount())
+                    dd->iTilePicked[dd->iTileSlot] = set->GetTilesCount() - 1;
+                else if (iOldP > 0)
+                    dd->iTilePicked[dd->iTileSlot]--;
+                else if (iOldP == 0)
+                    dd->iTilePicked[dd->iTileSlot] = EWW_TILE_FILL;
+                else
+                    dd->iTilePicked[dd->iTileSlot] = EWW_TILE_ERASE;
                 vPort->MarkToRedraw();
-            } else if (iActiveTool == EWW_TOOL_BRUSH) {
+            } else if (iActiveTool == EWW_TOOL_BRUSH && iOldP > 0) {
                 dd->iBrushPicked--;
                 vPort->MarkToRedraw();
             }
