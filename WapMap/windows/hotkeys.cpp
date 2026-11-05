@@ -6,7 +6,7 @@
 #include "../states/editing_ww.h"
 
 #define WIN_HOTKEYS_CATEGORIES 4
-#define WIN_HOTKEYS_COUNT {9, 15, 21, 12}
+#define WIN_HOTKEYS_COUNT {11, 20, 21, 12}
 
 const char* winHotkeys::getStr(const wchar_t* str) {
     return GETL2SV("Win_Hotkeys", str);
