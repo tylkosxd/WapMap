@@ -361,26 +361,34 @@ void winTilePicker::RenderSingleTile(int i, int x, int y, int d, DWORD borderCol
         cTileImageSet *set = es->hTileset->GetSet(es->GetActivePlane()->GetImageSet(0));
         if (!set) return;
         cTile *tile = byTileID ? set->GetTile(i) : set->GetTileByIterator(i);
-        hgeSprite *spr = tile ? tile->GetImage() : GV->sprUnknownTile;
-        spr->SetFlip(0, 0);
-        spr->SetHotSpot(0, 0);
-        spr->SetColor(0xFFFFFFFF);
-        int tileW = GV->editState->GetActivePlane()->GetTileWidth(),
-            tileH = GV->editState->GetActivePlane()->GetTileHeight(),
-            maxTileW =  GV->editState->hTileset->GetMaxTileWidth(),
-            maxTileH = GV->editState->hTileset->GetMaxTileHeight();
-        spr->RenderStretch(x, y, x + (d*maxTileW/tileW), y + (d*maxTileH/tileH));
-        if (tile && drawInfo) {
-            if (cbShowProperties->isSelected()) {
-                float scaleX = (float)d / tileW,
-                    scaleY = (float)d / tileH;
-                es->DrawTileAttributes(tile->GetID(), x, y, scaleX, scaleY);
-            }
-            if (cbShowTileID->isSelected()) {
-                GV->fntMyriad16->SetColor(0xFF000000);
-                GV->fntMyriad16->printf(x + d/2 + 1, y + 1 + 0.75f*d, HGETEXT_CENTER, "%d", 0, tile->GetID());
-                GV->fntMyriad16->SetColor(0xFFFFFFFF);
-                GV->fntMyriad16->printf(x + d/2, y + 0.75f*d, HGETEXT_CENTER, "%d", 0, tile->GetID());
+        if (!tile) {
+            hgeSprite *spr = GV->sprUnknownTile;
+            spr->SetFlip(0, 0);
+            spr->SetHotSpot(0, 0);
+            spr->SetColor(0xFFFFFFFF);
+            spr->RenderStretch(x, y, x + d, y + d);
+        } else {
+            hgeSprite *spr = tile ? tile->GetImage() : GV->sprUnknownTile;
+            spr->SetFlip(0, 0);
+            spr->SetHotSpot(0, 0);
+            spr->SetColor(0xFFFFFFFF);
+            int tileW = GV->editState->GetActivePlane()->GetTileWidth(),
+                tileH = GV->editState->GetActivePlane()->GetTileHeight(),
+                maxTileW =  GV->editState->hTileset->GetMaxTileWidth(),
+                maxTileH = GV->editState->hTileset->GetMaxTileHeight();
+            spr->RenderStretch(x, y, x + (d*maxTileW/tileW), y + (d*maxTileH/tileH));
+            if (tile && drawInfo) {
+                if (cbShowProperties->isSelected() && es->GetActivePlane()->GetFlag(WWD::PLANE_FLAGS::Flag_p_MainPlane)) {
+                    float scaleX = (float)d / tileW,
+                        scaleY = (float)d / tileH;
+                    es->DrawTileAttributes(tile->GetID(), x, y, scaleX, scaleY);
+                }
+                if (cbShowTileID->isSelected()) {
+                    GV->fntMyriad16->SetColor(0xFF000000);
+                    GV->fntMyriad16->printf(x + d/2 + 1, y + 1 + 0.75f*d, HGETEXT_CENTER, "%d", 0, tile->GetID());
+                    GV->fntMyriad16->SetColor(0xFFFFFFFF);
+                    GV->fntMyriad16->printf(x + d/2, y + 0.75f*d, HGETEXT_CENTER, "%d", 0, tile->GetID());
+                }
             }
         }
     }
