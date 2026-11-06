@@ -671,7 +671,7 @@ int State::EditingWW::RenderPlane(WWD::Plane *plane, int pl) {
                                 hge->Gfx_RenderLine(posX + tw - 1, posY + 1, posX + tw - 1, posY + th - 1, TILE_ERASER_PREVIEW_COLOR_BRIGHT);
                                 ghosted = true;
                             } else if (tgIterator->id == EWW_TILE_FILL && !tile->IsFilled()) {
-                                SHR::SetQuad(&q, SETA(hDataCtrl->GetPalette()->GetColor(plane->GetFillColor()), GETA(col)),
+                                SHR::SetQuad(&q, SETA(hDataCtrl->GetPalette()->GetColor(plane->GetFillColor()), 160),
                                              posX, posY, ceil(posX + tw), ceil(posY + th));
                                 hge->Gfx_RenderQuad(&q);
                                 ghosted = true;
