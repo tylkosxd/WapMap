@@ -3015,11 +3015,15 @@ void State::EditingWW::RenderTileClipboardPreview() {
             if (tile->IsInvisible() || tile->IsFilled())
                 continue;
             uint16_t id = tile->GetID();
-            cTile *tileImg = ts->GetTile(id);
             int dx = px + tileW * x,
                 dy = py + tileH * y;
+            if (!ts) {
+                GV->sprUnknownTile->RenderStretch(dx, dy, dx + tileW, dy + tileH);
+                continue;
+            }
+            cTile *tileImg = ts->GetTile(id);
             if (!tileImg) {
-                GV->sprUnknownTile->RenderStretch(dx, dy, dx + sprTileW, dy + sprTileH);
+                GV->sprUnknownTile->RenderStretch(dx, dy, dx + tileW, dy + tileH);
             } else {
                 hgeSprite *spr = tileImg->GetImage();
                 spr->SetColor(0xFFFFFFFF);
