@@ -1490,6 +1490,7 @@ namespace State {
                     }
                 }
 
+                // select object on top
                 while (vObjectsHL.size() > 1) {
                     if (vObjectsHL.back()->GetZ() > vObjectsHL.front()->GetZ()) {
                         vObjectsHL[0] = vObjectsHL.back();
@@ -1668,43 +1669,43 @@ namespace State {
             dragDropY = mouseEvent.getY();
             GV->SetCursor(mouseEvent.isAltPressed() ? ZOOM_OUT : ZOOM_IN);
         } else if (iMode == EWW_MODE_OBJECT) {
-             if (iActiveTool == EWW_TOOL_NONE) {
-                 if (mouseEvent.getButton() == MouseEvent::LEFT) {
-                     if (mouseEvent.isAltPressed()) {
-                         if (iCurObjCbE != CLIPBOARD_IS_EMPTY) {
-                             contextX = mouseEvent.getX() + vPort->GetX();
-                             contextY = mouseEvent.getY() + vPort->GetY();
-                             objContext->EmulateClickID(OBJMENU_PASTE);
-                         }
-                     } else if (vObjectsHL.empty()) {
-                         bDragSelection = true;
-                         iDragSelectionOrigX = Scr2WrdX(GetActivePlane(), mouseEvent.getX() + vPort->GetX());
-                         iDragSelectionOrigY = Scr2WrdY(GetActivePlane(), mouseEvent.getY() + vPort->GetY());
-                     } else {
-                         sameObjectClicked = CURRENT_SELECTION_IS_HOVERED;
-                         if (!sameObjectClicked) {
-                             if (mouseEvent.isShiftPressed()) {
-                                 vObjectsPicked.push_back(vObjectsHL[0]);
-                             } else {
-                                 vObjectsPicked = vObjectsHL;
-                             }
-                             selectionKeyObject = vObjectsHL[0];
-                         } else if (mouseEvent.isShiftPressed()) {
-                             vObjectsPicked.erase(std::remove(vObjectsPicked.begin(), vObjectsPicked.end(),
-                                                              vObjectsHL[0]), vObjectsPicked.end());
-                             if (selectionKeyObject == vObjectsHL[0]) {
-                                 if (vObjectsPicked.empty()) {
-                                     selectionKeyObject = NULL;
-                                 } else {
-                                     selectionKeyObject = vObjectsPicked.back();
-                                 }
-                             }
-                         }
-                     }
-                 } else if (mouseEvent.getButton() == MouseEvent::RIGHT) {
-                     showObjectModeContextMenu(mouseEvent);
-                 }
-             }
+            if (iActiveTool == EWW_TOOL_NONE) {
+                if (mouseEvent.getButton() == MouseEvent::LEFT) {
+                    if (mouseEvent.isAltPressed()) {
+                        if (iCurObjCbE != CLIPBOARD_IS_EMPTY) {
+                            contextX = mouseEvent.getX() + vPort->GetX();
+                            contextY = mouseEvent.getY() + vPort->GetY();
+                            objContext->EmulateClickID(OBJMENU_PASTE);
+                        }
+                    } else if (vObjectsHL.empty()) {
+                        bDragSelection = true;
+                        iDragSelectionOrigX = Scr2WrdX(GetActivePlane(), mouseEvent.getX() + vPort->GetX());
+                        iDragSelectionOrigY = Scr2WrdY(GetActivePlane(), mouseEvent.getY() + vPort->GetY());
+                    } else {
+                        sameObjectClicked = CURRENT_SELECTION_IS_HOVERED;
+                        if (!sameObjectClicked) {
+                            if (mouseEvent.isShiftPressed()) {
+                                vObjectsPicked.push_back(vObjectsHL[0]);
+                            } else {
+                                vObjectsPicked = vObjectsHL;
+                            }
+                            selectionKeyObject = vObjectsHL[0];
+                        } else if (mouseEvent.isShiftPressed()) {
+                            vObjectsPicked.erase(std::remove(vObjectsPicked.begin(), vObjectsPicked.end(),
+                                                            vObjectsHL[0]), vObjectsPicked.end());
+                            if (selectionKeyObject == vObjectsHL[0]) {
+                                if (vObjectsPicked.empty()) {
+                                    selectionKeyObject = NULL;
+                                } else {
+                                    selectionKeyObject = vObjectsPicked.back();
+                                }
+                            }
+                        }
+                    }
+                } else if (mouseEvent.getButton() == MouseEvent::RIGHT) {
+                    showObjectModeContextMenu(mouseEvent);
+                }
+            }
         } else if (iMode == EWW_MODE_TILE && iActiveTool == EWW_TOOL_NONE) {
             if (mouseEvent.getButton() == MouseEvent::LEFT && !mouseEvent.isAltPressed()) {
                 bDragSelection = true;
@@ -1787,22 +1788,32 @@ namespace State {
                         bEditObjDelete = false;
                         GV->tempObjBeingCreated = 0;
                     } else if (iActiveTool == EWW_TOOL_NONE) {
-                        if (vObjectsPicked.size() == 1 && sameObjectClicked && mouseEvent.getClickCount() >= 2) {
-                            int mwx = Scr2WrdX(GetActivePlane(), mouseEvent.getX()),
-                                mwy = Scr2WrdY(GetActivePlane(), mouseEvent.getY());
-                            std::vector<WWD::Object *> mouseObj = hPlaneData[GetActivePlaneID()]->ObjectData.hQuadTree
-                                    ->GetObjectsByArea(mwx, mwy, mwx + 1, mwy + 1);
-                            bool found = false;
-                            for (auto &obj : mouseObj)
-                                if (obj == vObjectsPicked[0]) {
-                                    found = true;
+                        if (vObjectsPicked.size() == 1 && sameObjectClicked) {
+                            int mwx = Scr2WrdX(GetActivePlane(), mouseEvent.getX() + vPort->GetX()),
+                                mwy = Scr2WrdY(GetActivePlane(), mouseEvent.getY() + vPort->GetY());
+                            auto mouseObj = hPlaneData[GetActivePlaneID()]->ObjectData.hQuadTree->
+                                            GetObjectsByArea(mwx, mwy, 1, 1);
+                            bool found = 0;
+                            if (mouseObj.size() == 0) return;
+                            WWD::Object *nextObj = mouseObj[0];
+                            for (auto &obj : mouseObj) {
+                                if (found) {
+                                    nextObj = obj;
                                     break;
                                 }
-                            if (found) {
+                                if (obj == vObjectsPicked[0])
+                                    found = 1;
+                            }
+                            if (found && mouseEvent.getClickCount() >= 2) {
                                 if (IsEditableObject(vObjectsPicked[0], NULL))
                                     OpenObjectEdit(vObjectsPicked[0]);
                                 else
                                     OpenObjectWindow(vObjectsPicked[0]);
+                            } else if (found) {
+                                vObjectsPicked.clear();
+                                vObjectsPicked.push_back(nextObj);
+                                vObjectsHL = vObjectsPicked;
+                                vPort->MarkToRedraw();
                             }
                         }
                     }
