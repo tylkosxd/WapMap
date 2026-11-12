@@ -2949,13 +2949,13 @@ void State::EditingWW::SyncAttribMenuWithTile() {
             }
             rbtpOut[outside >= WWD::Attrib_Unknown ? 0 : outside]->setSelected(true);
             auto mask = ((WWD::DoubleTileAttrib *) attrib)->getMask();
-            sprintf(tmp, "%d", mask.x1);
+            sprintf(tmp, "%d", std::abs(mask.x1));
             tftpX1->setText(tmp);
-            sprintf(tmp, "%d", mask.y1);
+            sprintf(tmp, "%d", std::abs(mask.y1));
             tftpY1->setText(tmp);
-            sprintf(tmp, "%d", mask.x2);
+            sprintf(tmp, "%d", std::abs(mask.x2));
             tftpX2->setText(tmp);
-            sprintf(tmp, "%d", mask.y2);
+            sprintf(tmp, "%d", std::abs(mask.y2));
             tftpY2->setText(tmp);
             winTileProp->setDimension(gcn::Rectangle(dx, dy, 300, 350));
             break;

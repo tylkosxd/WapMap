@@ -419,7 +419,13 @@ void WWD::Parser::CompileToStream(std::iostream *psDestination) {
         psDestination->WLEN(&i, 4);
 
     for (size_t z = 0; z < m_hTileAttribs.size(); z++) {
-        m_hTileAttribs[z]->compileToStream(psDestination);
+        if (!m_hTileAttribs[z]) {
+            auto* tempAttrib = new WWD::DoubleTileAttrib(0, 0, WWD::Attrib_Clear);
+            tempAttrib->compileToStream(psDestination);
+            delete [] tempAttrib;
+        } else {
+            m_hTileAttribs[z]->compileToStream(psDestination);
+        }
     }
     if (m_Header.m_iFlags & Flag_w_Compress) {
         //printf("original: 0x%p, uncompressed: 0x%p\n", psTrueDestination, psDestination);
@@ -1536,16 +1542,20 @@ void WWD::Parser::SetTileAttribs(int piTile, TileAttrib* htaAttribs)
 }
 
 void WWD::Parser::SetTileAttribsCount(int i) {
-    if (i == m_hTileAttribs.size()) return;
+    if (i == m_hTileAttribs.size())
+        return;
     if (i > m_hTileAttribs.size()) {
         int num = i - m_hTileAttribs.size();
-        for (int x = 0; x < num; x++)
-            m_hTileAttribs.push_back(nullptr);
-        return;
+        for (int x = 0; x < num; x++) {
+            m_hTileAttribs.push_back(
+                    new WWD::DoubleTileAttrib(mainPlane->GetTileWidth(), mainPlane->GetTileHeight(), WWD::Attrib_Clear));
+        }
+    } else {
+        int num = m_hTileAttribs.size() - i;
+        int start = m_hTileAttribs.size() - num;
+        for (int x = start; x < m_hTileAttribs.size(); x++)
+            delete m_hTileAttribs[x];
+        m_hTileAttribs.erase(m_hTileAttribs.begin() + start, m_hTileAttribs.begin() + start + num);
     }
-    int num = m_hTileAttribs.size() - i;
-    int start = m_hTileAttribs.size() - num;
-    for (int x = start; x < m_hTileAttribs.size(); x++)
-        delete m_hTileAttribs[x];
-    m_hTileAttribs.erase(m_hTileAttribs.begin() + start, m_hTileAttribs.begin() + start + num);
+    GV->editState->MarkUnsaved(this);
 }

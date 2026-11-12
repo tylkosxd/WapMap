@@ -436,11 +436,8 @@ void cDataController::FixCustomDir() {
     hCustom = new cDiscFeed(strCustomPath);
 }
 
-void cDataController::FixTileProperties(std::vector<int>& idsToAdd) {
-    hParser->SetTileAttribsCount(idsToAdd[0] + 1); // added in reverse order so 1st is biggest
-    for (const int id : idsToAdd) {
-        hParser->SetTileAttribs(id, new WWD::SingleTileAttrib(0, 0, WWD::Attrib_Clear));
-    }
+void cDataController::FixTileProperties(int tileW, int tileH, int maxTileID) {
+    hParser->SetTileAttribsCount(maxTileID + 1);
 }
 
 std::vector<cFile> cDataController::GetFilesList(std::string strPath, int iLoadPolicy) {
