@@ -92,7 +92,7 @@ void State::EditingWW::HandleHotkeys() {
             hwinTilePicker->Rebuild();
             vPort->MarkToRedraw();
         }
-        else if (hge->Input_KeyDown(HGEK_S)) {
+        else if (!bCtrl && hge->Input_KeyDown(HGEK_S)) {
             if (iActiveTool != EWW_TOOL_PENCIL)
                 SetTool(EWW_TOOL_PENCIL);
             iTileDrawMode = EWW_DRAW_SPRAY;
@@ -113,7 +113,7 @@ void State::EditingWW::HandleHotkeys() {
             vPort->MarkToRedraw();
         }
         
-        int bNewTileSlot = 0;
+        bool bNewTileSlot = 0;
         if (hge->Input_KeyDown(HGEK_1)) {
             dd->iTileSlot = 0;
             bNewTileSlot = 1;
@@ -139,8 +139,14 @@ void State::EditingWW::HandleHotkeys() {
             dd->iTileSlot = 7;
             bNewTileSlot = 1;
         }
-        if (bNewTileSlot && iActiveTool == EWW_TOOL_BRUSH)
-            SetTool(EWW_TOOL_PENCIL);
+        if (bNewTileSlot) {
+            if (iActiveTool != EWW_TOOL_BRUSH) {
+                vTileGhosting.clear();
+                vPort->MarkToRedraw();
+            } else {
+                SetTool(EWW_TOOL_PENCIL);
+            }
+        }
 
         int iOldP = iActiveTool == EWW_TOOL_BRUSH ? dd->iBrushPicked : dd->iTilePicked[dd->iTileSlot];
         if (hge->Input_KeyDown(HGEK_ADD)) {
