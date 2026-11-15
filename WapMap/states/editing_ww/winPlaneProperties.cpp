@@ -320,6 +320,7 @@ void State::EditingWW::SavePlaneProperties() {
         pd->hRB = NULL;
         hPlaneData.push_back(pd);
         MDI->GetActiveDoc()->hPlaneData.push_back(pd);
+        hAppMenu->SyncPlanes();
     } else {
         if (strcmp(tfpmName->getText().c_str(), pl->GetName()) != 0) {
             bChange = 1;
@@ -517,6 +518,7 @@ void State::EditingWW::DeletePlaneProperties() {
     MarkUnsaved();
     vPort->MarkToRedraw();
     SyncPlaneProperties();
+    hAppMenu->SyncPlanes();
 }
 
 void State::EditingWW::SetAnchorPlaneProperties(int anchor) {
