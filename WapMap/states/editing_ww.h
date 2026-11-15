@@ -796,7 +796,7 @@ namespace State {
 
         void PencilEllipseThink(int hx, int hy);
 
-        void AddTileToTileGhosting(int i, int x, int y);
+        void AddTileToTileGhosting(int i, int x, int y, bool byID = 0);
 
         void PlacePencilTiles();
 

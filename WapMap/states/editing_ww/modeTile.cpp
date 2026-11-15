@@ -192,7 +192,7 @@ void State::EditingWW::TileClipboardGhostPreview(int mouseX, int mouseY) {
                     int tileID = cbEntry->tiles[i].IsFilled() ? EWW_TILE_FILL
                                : cbEntry->tiles[i].IsInvisible() ? EWW_TILE_ERASE
                                : cbEntry->tiles[i].GetID();
-                    AddTileToTileGhosting(tileID, tx + x, ty + y);
+                    AddTileToTileGhosting(tileID, tx + x, ty + y, 1);
                 }
             vPort->MarkToRedraw();
         }
@@ -217,7 +217,6 @@ void State::EditingWW::PencilThink(int hx, int hy, int hxUnwrapped, int hyUnwrap
                         hge->Input_GetKeyState(HGEK_LBUTTON)));
     }
 
-    if (hx != iLastBrushPlacedX || hy != iLastBrushPlacedY) {
         vTileGhosting.clear();
 
         if (iTileDrawMode == EWW_DRAW_POINT || iTileDrawMode == EWW_DRAW_SPRAY) {
@@ -252,7 +251,6 @@ void State::EditingWW::PencilThink(int hx, int hy, int hxUnwrapped, int hyUnwrap
         }
         iLastBrushPlacedX = hx;
         iLastBrushPlacedY = hy;
-    }
 
     if (bPlacing) {
         PlacePencilTiles();
@@ -526,12 +524,12 @@ void State::EditingWW::PencilEllipseThink(int hx, int hy) {
     }
 }
 
-void State::EditingWW::AddTileToTileGhosting(int i, int x, int y) {
+void State::EditingWW::AddTileToTileGhosting(int i, int x, int y, bool byID) {
     TileGhost tg;
     tg.pl = GetActivePlane();
     tg.x = tg.pl->ClampX(x);
     tg.y = tg.pl->ClampY(y);
-    if (i >= 0) {
+    if (i >= 0 && !byID) {
         auto *tile = hTileset->GetSet(GetActivePlane()->GetImageSet(0))->GetTileByIterator(i);
         tg.id = tile ? tile->GetID() : EWW_TILE_UNKNOWN;
     } else
