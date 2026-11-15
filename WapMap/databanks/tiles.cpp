@@ -59,7 +59,7 @@ void cBankTile::BatchProcessEnd() {
             continue;
         int tileAttribsCount = hDC->GetTileAttribsCount();
         if (tileAttribsCount <= m_vhSet->m_iTileMaxID)
-            hDC->FixTileProperties(m_vhSet->tileWidth, m_vhSet->tileHeight, m_vhSet->m_iTileMaxID);
+            hDC->FixTileProperties(m_vhSet->m_iTileMaxID);
     }
     if (bReloadBrushes) {
         if (GV->editState->iActiveTool == EWW_TOOL_BRUSH) {

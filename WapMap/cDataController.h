@@ -266,7 +266,7 @@ public:
 
     void FixCustomDir();
 
-    void FixTileProperties(int tileW, int tileH, int maxTileID);
+    void FixTileProperties(int maxTileID);
 
     void OpenCodeEditor(std::string logicName, bool nonExisting = false);
 

@@ -436,7 +436,7 @@ void cDataController::FixCustomDir() {
     hCustom = new cDiscFeed(strCustomPath);
 }
 
-void cDataController::FixTileProperties(int tileW, int tileH, int maxTileID) {
+void cDataController::FixTileProperties(int maxTileID) {
     hParser->SetTileAttribsCount(maxTileID + 1);
 }
 

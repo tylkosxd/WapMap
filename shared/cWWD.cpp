@@ -1547,8 +1547,10 @@ void WWD::Parser::SetTileAttribsCount(int i) {
     if (i > m_hTileAttribs.size()) {
         int num = i - m_hTileAttribs.size();
         for (int x = 0; x < num; x++) {
+            int w = mainPlane? mainPlane->GetTileWidth() : 64,
+                h = mainPlane? mainPlane->GetTileHeight() : 64;
             m_hTileAttribs.push_back(
-                    new WWD::DoubleTileAttrib(mainPlane->GetTileWidth(), mainPlane->GetTileHeight(), WWD::Attrib_Clear));
+                    new WWD::DoubleTileAttrib(w, h, WWD::Attrib_Clear));
         }
     } else {
         int num = m_hTileAttribs.size() - i;
